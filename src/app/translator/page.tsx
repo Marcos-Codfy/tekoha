@@ -1,9 +1,10 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { Home, Trophy, Languages, Settings, ArrowRightLeft, Mic, Volume2, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -33,67 +34,77 @@ export default function TranslatorPage() {
         </defs>
       </svg>
       
-      <main className="flex-1 flex flex-col p-4 md:p-6 space-y-6 pb-24">
-        <header className="flex items-center justify-between">
-          <Link href="/dashboard" passHref>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <ChevronLeft className="h-6 w-6" />
-            </Button>
-          </Link>
-          <h1 className="text-xl font-bold">Tradutor</h1>
-          <Button variant="outline" className="rounded-full" onClick={handleSwapLanguages}>
-            <span>{sourceLang}</span>
-            <ArrowRightLeft className="h-4 w-4 mx-2" />
-            <span>{targetLang}</span>
-          </Button>
-        </header>
-
-        <div className="flex-1 flex flex-col gap-4">
-          <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg flex-1 flex flex-col">
-            <Card className="border-none h-full flex flex-col">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-base font-medium">Texto em {sourceLang}</CardTitle>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Mic className="h-5 w-5" />
-                </Button>
-              </CardHeader>
-              <CardContent className="flex-1 p-4 pt-0">
-                <Textarea placeholder="Digite o texto aqui..." className="h-full resize-none border-none focus-visible:ring-0 bg-transparent text-lg" />
-              </CardContent>
+      <main className="flex-1 p-6 pb-24 space-y-8">
+        <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg">
+            <Card className="border-none">
+                <CardContent className="p-4 flex items-center justify-between">
+                    <Link href="/dashboard" passHref>
+                        <Button variant="ghost" size="icon" className="rounded-full">
+                        <ChevronLeft className="h-6 w-6" />
+                        </Button>
+                    </Link>
+                    <h1 className="text-xl font-bold">Tradutor</h1>
+                    <Button variant="outline" className="rounded-full" onClick={handleSwapLanguages}>
+                        <span>{sourceLang}</span>
+                        <ArrowRightLeft className="h-4 w-4 mx-2" />
+                        <span>{targetLang}</span>
+                    </Button>
+                </CardContent>
             </Card>
-          </div>
-
-          <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg flex-1 flex flex-col">
-            <Card className="border-none h-full flex flex-col">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-base font-medium">Tradução para {targetLang}</CardTitle>
-                 <Button variant="ghost" size="icon" className="rounded-full">
-                  <Volume2 className="h-5 w-5" />
-                </Button>
-              </CardHeader>
-              <CardContent className="flex-1 p-4 pt-0">
-                 <div className="h-full w-full p-2 resize-none border-none text-lg text-muted-foreground">
-                    {translation || "A tradução irá aparecer aqui..."}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
 
-        <Button size="lg" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-lg py-6">
-          <Languages className="mr-2 h-5 w-5" />
-          Traduzir
-        </Button>
+        <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg">
+          <Card className="border-none">
+            <CardContent className="p-6 space-y-4">
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">{sourceLang}</span>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <Mic className="h-5 w-5" />
+                  </Button>
+                </div>
+                <Textarea placeholder="Digite o texto aqui..." className="h-32 resize-none bg-background border border-input focus-visible:ring-1 focus-visible:ring-ring text-base" />
+              </div>
+              
+              <Separator />
 
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">Sugestões:</h3>
-          <div className="flex flex-wrap gap-2">
-            {suggestions.map((suggestion) => (
-              <Badge key={suggestion} variant="secondary" className="cursor-pointer hover:bg-accent/20 px-3 py-1 text-sm">
-                {suggestion}
-              </Badge>
-            ))}
-          </div>
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">{targetLang}</span>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <Volume2 className="h-5 w-5" />
+                  </Button>
+                </div>
+                <div className="h-32 w-full rounded-md border border-input bg-background p-3 text-base text-muted-foreground overflow-auto">
+                    {translation || "A tradução irá aparecer aqui..."}
+                </div>
+              </div>
+
+            </CardContent>
+            <CardFooter className="pt-0">
+                <Button size="lg" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-lg py-6">
+                    <Languages className="mr-2 h-5 w-5" />
+                    Traduzir
+                </Button>
+            </CardFooter>
+          </Card>
+        </div>
+
+        <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg">
+          <Card className="border-none">
+            <CardHeader>
+              <CardTitle>Sugestões</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {suggestions.map((suggestion) => (
+                  <Badge key={suggestion} variant="secondary" className="cursor-pointer hover:bg-accent/20 px-3 py-1 text-sm">
+                    {suggestion}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
 
