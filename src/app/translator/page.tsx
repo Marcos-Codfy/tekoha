@@ -1,12 +1,16 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
-import { Home, Trophy, Languages, Settings } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Home, Trophy, Languages, Settings, ArrowRightLeft, Mic, Volume2, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
 export default function TranslatorPage() {
+  const suggestions = ["kunhã poranga", "nde porã", "xe py'a pe", "paranã", "îaguara", "ara porã", "tetama", "purakĩ"];
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <svg width="0" height="0" className="absolute">
@@ -17,12 +21,69 @@ export default function TranslatorPage() {
           </linearGradient>
         </defs>
       </svg>
-      <main className="flex-1 p-6 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-            <CardHeader>
-                <CardTitle className="text-center">Tradutor</CardTitle>
-            </CardHeader>
-        </Card>
+      
+      <main className="flex-1 flex flex-col p-4 md:p-6 space-y-6 pb-24">
+        <header className="flex items-center justify-between">
+          <Link href="/dashboard" passHref>
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <ChevronLeft className="h-6 w-6" />
+            </Button>
+          </Link>
+          <h1 className="text-xl font-bold">Tradutor</h1>
+          <Button variant="outline" className="rounded-full">
+            <span>Tupi</span>
+            <ArrowRightLeft className="h-4 w-4 mx-2" />
+            <span>Pt</span>
+          </Button>
+        </header>
+
+        <div className="flex-1 flex flex-col gap-4">
+          <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg flex-1 flex flex-col">
+            <Card className="border-none h-full flex flex-col">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-base font-medium">Texto em Tupi</CardTitle>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Mic className="h-5 w-5" />
+                </Button>
+              </CardHeader>
+              <CardContent className="flex-1 p-4 pt-0">
+                <Textarea placeholder="Digite o texto aqui..." className="h-full resize-none border-none focus-visible:ring-0 bg-transparent text-lg" />
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg flex-1 flex flex-col">
+            <Card className="border-none h-full flex flex-col">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-base font-medium">Tradução para Português</CardTitle>
+                 <Button variant="ghost" size="icon" className="rounded-full">
+                  <Volume2 className="h-5 w-5" />
+                </Button>
+              </CardHeader>
+              <CardContent className="flex-1 p-4 pt-0">
+                 <div className="h-full w-full p-2 resize-none border-none text-lg text-muted-foreground">
+                    música, cantar
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <Button size="lg" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-lg py-6">
+          <Languages className="mr-2 h-5 w-5" />
+          Traduzir
+        </Button>
+
+        <div>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Sugestões:</h3>
+          <div className="flex flex-wrap gap-2">
+            {suggestions.map((suggestion) => (
+              <Badge key={suggestion} variant="secondary" className="cursor-pointer hover:bg-accent/20 px-3 py-1 text-sm">
+                {suggestion}
+              </Badge>
+            ))}
+          </div>
+        </div>
       </main>
 
       <footer className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
