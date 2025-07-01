@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Login Portal',
+  title: 'TEKOHÁ',
   description: 'A secure portal for user login.',
 };
 
