@@ -140,8 +140,8 @@ export default function TranslatorPage() {
           <div className="flex justify-around items-center flex-1">
             <Link href="/dashboard" passHref>
               <Button
-                variant="outline"
-                className="group relative flex flex-col h-auto p-3 space-y-1 rounded-xl overflow-hidden bg-card hover:bg-card"
+                variant="ghost"
+                className="group relative flex flex-col h-16 w-16 items-center justify-center space-y-1 rounded-full overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <div className="relative flex flex-col items-center justify-center space-y-1">
@@ -152,7 +152,7 @@ export default function TranslatorPage() {
             </Link>
             <Link href="/translator" passHref>
               <Button
-                className="flex flex-col h-auto p-3 space-y-1 rounded-xl bg-gradient-to-r from-primary to-accent text-primary-foreground"
+                className="flex flex-col h-16 w-16 items-center justify-center space-y-1 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground"
               >
                 <Languages className="h-6 w-6" />
                 <span className="text-xs font-medium">Tradutor</span>
@@ -178,8 +178,8 @@ export default function TranslatorPage() {
           <div className="flex justify-around items-center flex-1">
             <Link href="/achievements" passHref>
               <Button
-                variant="outline"
-                className="group relative flex flex-col h-auto p-3 space-y-1 rounded-xl overflow-hidden bg-card hover:bg-card"
+                variant="ghost"
+                className="group relative flex flex-col h-16 w-16 items-center justify-center space-y-1 rounded-full overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <div className="relative flex flex-col items-center justify-center space-y-1">
@@ -190,8 +190,8 @@ export default function TranslatorPage() {
             </Link>
             <Link href="/settings" passHref>
               <Button
-                variant="outline"
-                className="group relative flex flex-col h-auto p-3 space-y-1 rounded-xl overflow-hidden bg-card hover:bg-card"
+                variant="ghost"
+                className="group relative flex flex-col h-16 w-16 items-center justify-center space-y-1 rounded-full overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <div className="relative flex flex-col items-center justify-center space-y-1">
