@@ -17,9 +17,19 @@ const initialState = {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={pending}>
-      {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-      {pending ? 'Entrando...' : 'Entrar'}
+    <Button
+      type="submit"
+      variant="outline"
+      className="group relative w-full overflow-hidden bg-card p-2 text-center hover:bg-card h-auto"
+      disabled={pending}
+    >
+      <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="relative flex items-center justify-center gap-2">
+        {pending ? <Loader2 className="h-4 w-4 animate-spin text-primary transition-colors duration-300 group-hover:text-primary-foreground" /> : null}
+        <span className="font-semibold text-base text-card-foreground transition-colors duration-300 group-hover:text-primary-foreground">
+          {pending ? 'Entrando...' : 'Entrar'}
+        </span>
+      </div>
     </Button>
   );
 }

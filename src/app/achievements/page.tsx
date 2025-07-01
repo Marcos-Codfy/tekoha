@@ -9,14 +9,6 @@ import Image from 'next/image';
 export default function AchievementsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <svg width="0" height="0" className="absolute">
-        <defs>
-          <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="hsl(var(--primary))" />
-            <stop offset="100%" stopColor="hsl(var(--accent))" />
-          </linearGradient>
-        </defs>
-      </svg>
       <main className="flex-1 p-6 flex items-center justify-center">
         <Card className="w-full max-w-md">
             <CardHeader>
@@ -29,15 +21,27 @@ export default function AchievementsPage() {
         <nav className="container mx-auto h-20 flex justify-between items-center">
           <div className="flex justify-around items-center flex-1">
             <Link href="/dashboard" passHref>
-              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
-                <Home className="h-6 w-6" stroke="url(#icon-gradient)" />
-                <span className="text-xs font-medium text-muted-foreground">Início</span>
+              <Button
+                variant="outline"
+                className="group relative flex flex-col h-auto p-3 space-y-1 rounded-xl overflow-hidden bg-card hover:bg-card"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="relative flex flex-col items-center justify-center space-y-1">
+                  <Home className="h-6 w-6 text-primary transition-colors duration-300 group-hover:text-primary-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground transition-colors duration-300 group-hover:text-primary-foreground">Início</span>
+                </div>
               </Button>
             </Link>
             <Link href="/translator" passHref>
-              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
-                <Languages className="h-6 w-6" stroke="url(#icon-gradient)" />
-                <span className="text-xs font-medium text-muted-foreground">Tradutor</span>
+              <Button
+                variant="outline"
+                className="group relative flex flex-col h-auto p-3 space-y-1 rounded-xl overflow-hidden bg-card hover:bg-card"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="relative flex flex-col items-center justify-center space-y-1">
+                  <Languages className="h-6 w-6 text-primary transition-colors duration-300 group-hover:text-primary-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground transition-colors duration-300 group-hover:text-primary-foreground">Tradutor</span>
+                </div>
               </Button>
             </Link>
           </div>
@@ -59,15 +63,23 @@ export default function AchievementsPage() {
           
           <div className="flex justify-around items-center flex-1">
             <Link href="/achievements" passHref>
-              <Button className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
-                <Trophy className="h-6 w-6" stroke="url(#icon-gradient)" />
+              <Button
+                className="flex flex-col h-auto p-3 space-y-1 rounded-xl bg-gradient-to-r from-primary to-accent text-primary-foreground"
+              >
+                <Trophy className="h-6 w-6" />
                 <span className="text-xs font-medium">Conquistas</span>
               </Button>
             </Link>
             <Link href="/settings" passHref>
-              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
-                <Settings className="h-6 w-6" stroke="url(#icon-gradient)" />
-                <span className="text-xs font-medium text-muted-foreground">Config</span>
+              <Button
+                variant="outline"
+                className="group relative flex flex-col h-auto p-3 space-y-1 rounded-xl overflow-hidden bg-card hover:bg-card"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="relative flex flex-col items-center justify-center space-y-1">
+                  <Settings className="h-6 w-6 text-primary transition-colors duration-300 group-hover:text-primary-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground transition-colors duration-300 group-hover:text-primary-foreground">Config</span>
+                </div>
               </Button>
             </Link>
           </div>

@@ -22,6 +22,10 @@ export default function TranslatorPage() {
     const newTarget = sourceLang;
     setSourceLang(newSource);
     setTargetLang(newTarget);
+    const newSourceText = translation;
+    const newTranslation = sourceText;
+    setSourceText(newSourceText);
+    setTranslation(newTranslation);
   };
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -30,27 +34,24 @@ export default function TranslatorPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <svg width="0" height="0" className="absolute">
-        <defs>
-          <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="hsl(var(--primary))" />
-            <stop offset="100%" stopColor="hsl(var(--accent))" />
-          </linearGradient>
-        </defs>
-      </svg>
-      
       <main className="flex-1 p-6 pb-24 space-y-8">
         <div className="flex items-center justify-between">
             <Link href="/dashboard" passHref>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                <ChevronLeft className="h-6 w-6" />
+                <Button variant="outline" size="icon" className="group relative rounded-full overflow-hidden bg-card hover:bg-card">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <div className="relative flex items-center justify-center">
+                    <ChevronLeft className="h-6 w-6 text-primary transition-colors duration-300 group-hover:text-primary-foreground" />
+                  </div>
                 </Button>
             </Link>
             <h1 className="text-xl font-bold">Tradutor</h1>
-            <Button variant="outline" className="rounded-full" onClick={handleSwapLanguages}>
-                <span>{sourceLang}</span>
-                <ArrowRightLeft className="h-4 w-4 mx-2" />
-                <span>{targetLang}</span>
+            <Button variant="outline" className="group relative rounded-full overflow-hidden bg-card hover:bg-card" onClick={handleSwapLanguages}>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="relative flex items-center justify-center gap-2 px-4 py-2">
+                    <span className="font-medium text-card-foreground transition-colors duration-300 group-hover:text-primary-foreground">{sourceLang}</span>
+                    <ArrowRightLeft className="h-4 w-4 text-primary transition-colors duration-300 group-hover:text-primary-foreground" />
+                    <span className="font-medium text-card-foreground transition-colors duration-300 group-hover:text-primary-foreground">{targetLang}</span>
+                </div>
             </Button>
         </div>
 
@@ -60,8 +61,11 @@ export default function TranslatorPage() {
               <div className="grid gap-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">{sourceLang}</span>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <Mic className="h-5 w-5" />
+                  <Button variant="outline" size="icon" className="group relative rounded-full overflow-hidden bg-card hover:bg-card">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    <div className="relative flex items-center justify-center">
+                      <Mic className="h-5 w-5 text-primary transition-colors duration-300 group-hover:text-primary-foreground" />
+                    </div>
                   </Button>
                 </div>
                 <Textarea 
@@ -77,8 +81,11 @@ export default function TranslatorPage() {
               <div className="grid gap-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">{targetLang}</span>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <Volume2 className="h-5 w-5" />
+                  <Button variant="outline" size="icon" className="group relative rounded-full overflow-hidden bg-card hover:bg-card">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    <div className="relative flex items-center justify-center">
+                      <Volume2 className="h-5 w-5 text-primary transition-colors duration-300 group-hover:text-primary-foreground" />
+                    </div>
                   </Button>
                 </div>
                 <div className="h-32 w-full rounded-md border border-input bg-background p-3 text-base text-muted-foreground overflow-auto">
@@ -88,9 +95,18 @@ export default function TranslatorPage() {
 
             </CardContent>
             <CardFooter className="pt-0">
-                <Button size="lg" className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground transition-opacity hover:opacity-90">
-                    <Languages className="mr-2 h-5 w-5" />
-                    Traduzir
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="group relative w-full overflow-hidden bg-card text-center hover:bg-card"
+                >
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    <div className="relative flex items-center justify-center gap-2">
+                        <Languages className="mr-2 h-5 w-5 text-primary transition-colors duration-300 group-hover:text-primary-foreground" />
+                        <span className="font-semibold text-base text-card-foreground transition-colors duration-300 group-hover:text-primary-foreground">
+                            Traduzir
+                        </span>
+                    </div>
                 </Button>
             </CardFooter>
           </Card>
@@ -123,14 +139,22 @@ export default function TranslatorPage() {
         <nav className="container mx-auto h-20 flex justify-between items-center">
           <div className="flex justify-around items-center flex-1">
             <Link href="/dashboard" passHref>
-              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
-                <Home className="h-6 w-6" stroke="url(#icon-gradient)" />
-                <span className="text-xs font-medium text-muted-foreground">Início</span>
+              <Button
+                variant="outline"
+                className="group relative flex flex-col h-auto p-3 space-y-1 rounded-xl overflow-hidden bg-card hover:bg-card"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="relative flex flex-col items-center justify-center space-y-1">
+                  <Home className="h-6 w-6 text-primary transition-colors duration-300 group-hover:text-primary-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground transition-colors duration-300 group-hover:text-primary-foreground">Início</span>
+                </div>
               </Button>
             </Link>
             <Link href="/translator" passHref>
-              <Button className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
-                <Languages className="h-6 w-6" stroke="url(#icon-gradient)" />
+              <Button
+                className="flex flex-col h-auto p-3 space-y-1 rounded-xl bg-gradient-to-r from-primary to-accent text-primary-foreground"
+              >
+                <Languages className="h-6 w-6" />
                 <span className="text-xs font-medium">Tradutor</span>
               </Button>
             </Link>
@@ -153,15 +177,27 @@ export default function TranslatorPage() {
           
           <div className="flex justify-around items-center flex-1">
             <Link href="/achievements" passHref>
-              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
-                <Trophy className="h-6 w-6" stroke="url(#icon-gradient)" />
-                <span className="text-xs font-medium text-muted-foreground">Conquistas</span>
+              <Button
+                variant="outline"
+                className="group relative flex flex-col h-auto p-3 space-y-1 rounded-xl overflow-hidden bg-card hover:bg-card"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="relative flex flex-col items-center justify-center space-y-1">
+                  <Trophy className="h-6 w-6 text-primary transition-colors duration-300 group-hover:text-primary-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground transition-colors duration-300 group-hover:text-primary-foreground">Conquistas</span>
+                </div>
               </Button>
             </Link>
             <Link href="/settings" passHref>
-              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
-                <Settings className="h-6 w-6" stroke="url(#icon-gradient)" />
-                <span className="text-xs font-medium text-muted-foreground">Config</span>
+              <Button
+                variant="outline"
+                className="group relative flex flex-col h-auto p-3 space-y-1 rounded-xl overflow-hidden bg-card hover:bg-card"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="relative flex flex-col items-center justify-center space-y-1">
+                  <Settings className="h-6 w-6 text-primary transition-colors duration-300 group-hover:text-primary-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground transition-colors duration-300 group-hover:text-primary-foreground">Config</span>
+                </div>
               </Button>
             </Link>
           </div>
