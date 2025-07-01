@@ -19,15 +19,12 @@ export async function loginAction(prevState: any, formData: FormData) {
 
   const { username, password } = parsed.data;
 
-  try {
-    const result = await authenticateUser({ username, password });
-    
-    if (result.success) {
-      redirect(`/dashboard?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
-    } else {
-      return { message: result.message };
-    }
-  } catch (error) {
-    return { message: 'An unexpected error occurred. Please try again.' };
+  const result = await authenticateUser({ username, password });
+  
+  if (result.success) {
+    redirect('/dashboard');
+  } else {
+    return { message: result.message };
   }
 }
+
