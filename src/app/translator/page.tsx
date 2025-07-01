@@ -7,9 +7,20 @@ import { Badge } from '@/components/ui/badge';
 import { Home, Trophy, Languages, Settings, ArrowRightLeft, Mic, Volume2, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState } from 'react';
 
 export default function TranslatorPage() {
   const suggestions = ["kunhã poranga", "nde porã", "xe py'a pe", "paranã", "îaguara", "ara porã", "tetama", "purakĩ"];
+  const [sourceLang, setSourceLang] = useState('Tupi');
+  const [targetLang, setTargetLang] = useState('Pt');
+  const [translation, setTranslation] = useState('');
+
+  const handleSwapLanguages = () => {
+    const newSource = targetLang;
+    const newTarget = sourceLang;
+    setSourceLang(newSource);
+    setTargetLang(newTarget);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -30,10 +41,10 @@ export default function TranslatorPage() {
             </Button>
           </Link>
           <h1 className="text-xl font-bold">Tradutor</h1>
-          <Button variant="outline" className="rounded-full">
-            <span>Tupi</span>
+          <Button variant="outline" className="rounded-full" onClick={handleSwapLanguages}>
+            <span>{sourceLang}</span>
             <ArrowRightLeft className="h-4 w-4 mx-2" />
-            <span>Pt</span>
+            <span>{targetLang}</span>
           </Button>
         </header>
 
@@ -41,7 +52,7 @@ export default function TranslatorPage() {
           <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg flex-1 flex flex-col">
             <Card className="border-none h-full flex flex-col">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-base font-medium">Texto em Tupi</CardTitle>
+                <CardTitle className="text-base font-medium">Texto em {sourceLang}</CardTitle>
                 <Button variant="ghost" size="icon" className="rounded-full">
                   <Mic className="h-5 w-5" />
                 </Button>
@@ -55,14 +66,14 @@ export default function TranslatorPage() {
           <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg flex-1 flex flex-col">
             <Card className="border-none h-full flex flex-col">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-base font-medium">Tradução para Português</CardTitle>
+                <CardTitle className="text-base font-medium">Tradução para {targetLang}</CardTitle>
                  <Button variant="ghost" size="icon" className="rounded-full">
                   <Volume2 className="h-5 w-5" />
                 </Button>
               </CardHeader>
               <CardContent className="flex-1 p-4 pt-0">
                  <div className="h-full w-full p-2 resize-none border-none text-lg text-muted-foreground">
-                    música, cantar
+                    {translation || "A tradução irá aparecer aqui..."}
                 </div>
               </CardContent>
             </Card>
