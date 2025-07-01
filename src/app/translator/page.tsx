@@ -10,12 +10,28 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 
+const ptToTupi: Record<string, string> = {
+  'bom dia': 'ara porã',
+  'água boa': 'y porã',
+  'eu te amo': 'xe ro-payxu',
+  'obrigado': 'aguyjewete',
+  'floresta': 'kaá',
+  'pássaro': 'guyrá',
+  'família': 'tetama',
+  'música': 'purakĩ',
+};
+
+const tupiToPt: Record<string, string> = Object.fromEntries(
+  Object.entries(ptToTupi).map(([k, v]) => [v, k])
+);
+
 export default function TranslatorPage() {
-  const suggestions = ["kunhã poranga", "nde porã", "xe py'a pe", "paranã", "îaguara", "ara porã", "tetama", "purakĩ"];
-  const [sourceLang, setSourceLang] = useState('Tupi');
-  const [targetLang, setTargetLang] = useState('Português');
+  const [sourceLang, setSourceLang] = useState('Português');
+  const [targetLang, setTargetLang] = useState('Tupi');
   const [sourceText, setSourceText] = useState('');
   const [translation, setTranslation] = useState('');
+  
+  const suggestions = sourceLang === 'Tupi' ? Object.keys(tupiToPt) : Object.keys(ptToTupi);
 
   const handleSwapLanguages = () => {
     const newSource = targetLang;
@@ -31,6 +47,24 @@ export default function TranslatorPage() {
   const handleSuggestionClick = (suggestion: string) => {
     setSourceText(suggestion);
   };
+
+  const handleTranslate = () => {
+    const normalizedText = sourceText.toLowerCase().trim();
+    if (!normalizedText) {
+      setTranslation('');
+      return;
+    }
+
+    let result = '';
+    if (sourceLang === 'Português') {
+      result = ptToTupi[normalizedText];
+    } else {
+      result = tupiToPt[normalizedText];
+    }
+
+    setTranslation(result || 'Tradução não encontrada.');
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -99,6 +133,7 @@ export default function TranslatorPage() {
                   size="lg"
                   variant="outline"
                   className="group relative w-full overflow-hidden bg-card text-center hover:bg-card"
+                  onClick={handleTranslate}
                 >
                     <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                     <div className="relative flex items-center justify-center gap-2">
