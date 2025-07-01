@@ -14,6 +14,7 @@ export default function TranslatorPage() {
   const suggestions = ["kunhã poranga", "nde porã", "xe py'a pe", "paranã", "îaguara", "ara porã", "tetama", "purakĩ"];
   const [sourceLang, setSourceLang] = useState('Tupi');
   const [targetLang, setTargetLang] = useState('Pt');
+  const [sourceText, setSourceText] = useState('');
   const [translation, setTranslation] = useState('');
 
   const handleSwapLanguages = () => {
@@ -21,6 +22,10 @@ export default function TranslatorPage() {
     const newTarget = sourceLang;
     setSourceLang(newSource);
     setTargetLang(newTarget);
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setSourceText(suggestion);
   };
 
   return (
@@ -35,22 +40,18 @@ export default function TranslatorPage() {
       </svg>
       
       <main className="flex-1 p-6 pb-24 space-y-8">
-        <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg">
-            <Card className="border-none">
-                <CardContent className="p-4 flex items-center justify-between">
-                    <Link href="/dashboard" passHref>
-                        <Button variant="ghost" size="icon" className="rounded-full">
-                        <ChevronLeft className="h-6 w-6" />
-                        </Button>
-                    </Link>
-                    <h1 className="text-xl font-bold">Tradutor</h1>
-                    <Button variant="outline" className="rounded-full" onClick={handleSwapLanguages}>
-                        <span>{sourceLang}</span>
-                        <ArrowRightLeft className="h-4 w-4 mx-2" />
-                        <span>{targetLang}</span>
-                    </Button>
-                </CardContent>
-            </Card>
+        <div className="flex items-center justify-between">
+            <Link href="/dashboard" passHref>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                <ChevronLeft className="h-6 w-6" />
+                </Button>
+            </Link>
+            <h1 className="text-xl font-bold">Tradutor</h1>
+            <Button variant="outline" className="rounded-full" onClick={handleSwapLanguages}>
+                <span>{sourceLang}</span>
+                <ArrowRightLeft className="h-4 w-4 mx-2" />
+                <span>{targetLang}</span>
+            </Button>
         </div>
 
         <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg">
@@ -63,7 +64,12 @@ export default function TranslatorPage() {
                     <Mic className="h-5 w-5" />
                   </Button>
                 </div>
-                <Textarea placeholder="Digite o texto aqui..." className="h-32 resize-none bg-background border border-input focus-visible:ring-1 focus-visible:ring-ring text-base" />
+                <Textarea 
+                  placeholder="Digite o texto aqui..." 
+                  className="h-32 resize-none bg-background border border-input focus-visible:ring-1 focus-visible:ring-ring text-base"
+                  value={sourceText}
+                  onChange={(e) => setSourceText(e.target.value)}
+                />
               </div>
               
               <Separator />
@@ -95,10 +101,15 @@ export default function TranslatorPage() {
             <CardHeader>
               <CardTitle>Sugestões</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="flex flex-wrap gap-2">
                 {suggestions.map((suggestion) => (
-                  <Badge key={suggestion} variant="secondary" className="cursor-pointer hover:bg-accent/20 px-3 py-1 text-sm">
+                  <Badge 
+                    key={suggestion} 
+                    variant="secondary" 
+                    className="cursor-pointer hover:bg-accent/20 px-3 py-1 text-sm"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
                     {suggestion}
                   </Badge>
                 ))}
