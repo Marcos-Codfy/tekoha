@@ -34,12 +34,12 @@ export default function DashboardPage() {
             <Link href="/dashboard">
               <div className="bg-background rounded-full p-1 shadow-lg">
                 <Image
-                  src="https://placehold.co/64x64.png"
+                  src="https://images.unsplash.com/photo-1543479201-17bcda84d43a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMnx8YXJhcmF8ZW58MHx8fHwxNzUxMzkxOTc2fDA&ixlib=rb-4.1.0&q=80&w=1080"
                   alt="Tekohá Logo"
                   width={64}
                   height={64}
                   data-ai-hint="bird mascot"
-                  className="rounded-full"
+                  className="rounded-full object-cover"
                 />
               </div>
             </Link>
