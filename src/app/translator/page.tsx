@@ -13,7 +13,7 @@ import { useState } from 'react';
 export default function TranslatorPage() {
   const suggestions = ["kunhã poranga", "nde porã", "xe py'a pe", "paranã", "îaguara", "ara porã", "tetama", "purakĩ"];
   const [sourceLang, setSourceLang] = useState('Tupi');
-  const [targetLang, setTargetLang] = useState('Pt');
+  const [targetLang, setTargetLang] = useState('Português');
   const [sourceText, setSourceText] = useState('');
   const [translation, setTranslation] = useState('');
 
