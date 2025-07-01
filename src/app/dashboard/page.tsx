@@ -113,7 +113,7 @@ export default function DashboardPage() {
           <div className="flex justify-around items-center flex-1">
             <Link href="/dashboard" passHref>
               <Button
-                className="flex flex-col h-16 w-16 items-center justify-center space-y-1 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground"
+                className="flex flex-col h-20 w-20 items-center justify-center space-y-1 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground"
               >
                 <Home className="h-6 w-6" />
                 <span className="text-xs font-medium">Início</span>
@@ -122,7 +122,7 @@ export default function DashboardPage() {
             <Link href="/translator" passHref>
               <Button
                 variant="ghost"
-                className="group relative flex flex-col h-16 w-16 items-center justify-center space-y-1 rounded-full overflow-hidden"
+                className="group relative flex flex-col h-20 w-20 items-center justify-center space-y-1 rounded-full overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <div className="relative flex flex-col items-center justify-center space-y-1">
@@ -152,7 +152,7 @@ export default function DashboardPage() {
             <Link href="/achievements" passHref>
               <Button
                 variant="ghost"
-                className="group relative flex flex-col h-16 w-16 items-center justify-center space-y-1 rounded-full overflow-hidden"
+                className="group relative flex flex-col h-20 w-20 items-center justify-center space-y-1 rounded-full overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <div className="relative flex flex-col items-center justify-center space-y-1">
@@ -164,7 +164,7 @@ export default function DashboardPage() {
             <Link href="/settings" passHref>
               <Button
                 variant="ghost"
-                className="group relative flex flex-col h-16 w-16 items-center justify-center space-y-1 rounded-full overflow-hidden"
+                className="group relative flex flex-col h-20 w-20 items-center justify-center space-y-1 rounded-full overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <div className="relative flex flex-col items-center justify-center space-y-1">
