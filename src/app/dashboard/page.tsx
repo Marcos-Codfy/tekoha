@@ -24,8 +24,8 @@ export default function DashboardPage() {
             </Link>
             <Link href="#" passHref>
               <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl text-muted-foreground">
-                <Trophy className="h-6 w-6" />
-                <span className="text-xs font-medium">Conquistas</span>
+                <Languages className="h-6 w-6" />
+                <span className="text-xs font-medium">Tradutor</span>
               </Button>
             </Link>
           </div>
@@ -48,8 +48,8 @@ export default function DashboardPage() {
           <div className="flex justify-around items-center flex-1">
             <Link href="#" passHref>
               <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl text-muted-foreground">
-                <Languages className="h-6 w-6" />
-                <span className="text-xs font-medium">Tradutor</span>
+                <Trophy className="h-6 w-6" />
+                <span className="text-xs font-medium">Conquistas</span>
               </Button>
             </Link>
             <Link href="#" passHref>
