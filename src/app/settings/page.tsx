@@ -9,7 +9,7 @@ import Image from 'next/image';
 export default function SettingsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <main className="flex-1 p-6 flex items-center justify-center">
+      <main className="flex-1 p-6 pb-24 flex items-center justify-center">
         <Card className="w-full max-w-md">
             <CardHeader>
                 <CardTitle className="text-center">Configurações</CardTitle>
