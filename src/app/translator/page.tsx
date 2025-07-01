@@ -88,7 +88,7 @@ export default function TranslatorPage() {
 
             </CardContent>
             <CardFooter className="pt-0">
-                <Button size="lg" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-lg py-6">
+                <Button size="lg" className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground transition-opacity hover:opacity-90">
                     <Languages className="mr-2 h-5 w-5" />
                     Traduzir
                 </Button>
