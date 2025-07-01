@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Home, Trophy, Languages, Settings, User } from 'lucide-react';
+import { Home, Trophy, Languages, Settings, User, Crown, Feather, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -25,12 +25,34 @@ export default function DashboardPage() {
             <CardTitle>Níveis de Aprendizagem</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Button size="lg" className="w-full h-14">Iniciante</Button>
-                <Button size="lg" className="w-full h-14">Intermediário</Button>
-              </div>
-              <Button size="lg" className="w-full h-14">Avançado</Button>
+            <div className="flex flex-col space-y-3">
+              <Button variant="outline" className="h-auto justify-start text-left p-4">
+                <div className="flex items-center gap-4">
+                  <Feather className="h-6 w-6 text-accent" />
+                  <div>
+                    <p className="font-semibold text-base">Iniciante</p>
+                    <p className="text-sm font-normal text-muted-foreground">Comece sua jornada aqui.</p>
+                  </div>
+                </div>
+              </Button>
+              <Button variant="outline" className="h-auto justify-start text-left p-4">
+                <div className="flex items-center gap-4">
+                  <TrendingUp className="h-6 w-6 text-accent" />
+                  <div>
+                    <p className="font-semibold text-base">Intermediário</p>
+                    <p className="text-sm font-normal text-muted-foreground">Aprofunde seus conhecimentos.</p>
+                  </div>
+                </div>
+              </Button>
+              <Button variant="outline" className="h-auto justify-start text-left p-4">
+                <div className="flex items-center gap-4">
+                  <Crown className="h-6 w-6 text-accent" />
+                  <div>
+                    <p className="font-semibold text-base">Avançado</p>
+                    <p className="text-sm font-normal text-muted-foreground">Torne-se um mestre.</p>
+                  </div>
+                </div>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -52,7 +74,7 @@ export default function DashboardPage() {
                   <p className="text-sm text-muted-foreground">Perfil selecionado</p>
                 </div>
               </div>
-              <Button variant="outline">Trocar Perfil</Button>
+              <Button variant="ghost">Trocar Perfil</Button>
             </div>
           </CardContent>
         </Card>
