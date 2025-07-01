@@ -122,7 +122,7 @@ export default function TranslatorPage() {
                     </div>
                   </Button>
                 </div>
-                <div className="h-32 w-full rounded-md border border-input bg-background p-3 text-base text-muted-foreground overflow-auto">
+                <div className="h-32 w-full rounded-md border border-input bg-background p-3 text-base text-foreground overflow-auto">
                     {translation || "A tradução irá aparecer aqui..."}
                 </div>
               </div>
