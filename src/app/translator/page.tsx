@@ -39,7 +39,7 @@ export default function TranslatorPage() {
   useEffect(() => {
     const suggestions = sourceLang === 'Tupi' ? Object.keys(tupiToPt) : Object.keys(ptToTupi);
     const shuffled = [...suggestions].sort(() => Math.random() - 0.5);
-    setShuffledSuggestions(shuffled);
+    setShuffledSuggestions(shuffled.slice(0, 7));
   }, [sourceLang]);
 
 
