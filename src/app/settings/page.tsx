@@ -18,7 +18,7 @@ export default function SettingsPage() {
       </main>
 
       <footer className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
-        <nav className="container mx-auto h-20 flex justify-between items-center">
+        <nav className="container mx-auto h-[90px] flex justify-between items-center">
           <div className="flex justify-around items-center flex-1">
             <Link href="/dashboard" passHref>
               <Button
@@ -46,7 +46,7 @@ export default function SettingsPage() {
             </Link>
           </div>
 
-          <div className="relative -top-6">
+          <div className="relative -top-8">
             <Link href="/dashboard">
               <div className="bg-background rounded-full p-1 shadow-lg">
                 <Image
