@@ -11,9 +11,8 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-1 p-6 pb-24 space-y-8">
-        <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-          <Card className="relative">
+        <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-1 shadow-lg">
+          <Card className="border-none">
             <CardHeader>
               <CardTitle>Bem-vindo(a)!</CardTitle>
               <CardDescription className="text-muted-foreground">
@@ -23,9 +22,8 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-          <Card className="relative">
+        <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-1 shadow-lg">
+          <Card className="border-none">
             <CardHeader>
               <CardTitle>Níveis de Aprendizagem</CardTitle>
             </CardHeader>
@@ -63,9 +61,8 @@ export default function DashboardPage() {
           </Card>
         </div>
         
-        <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-          <Card className="relative">
+        <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-1 shadow-lg">
+          <Card className="border-none">
             <CardHeader>
               <CardTitle>Seu Perfil</CardTitle>
             </CardHeader>
