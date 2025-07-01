@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Home, Trophy, Languages, Settings, ArrowRightLeft, Mic, Volume2, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const ptToTupi: Record<string, string> = {
   'bom dia': 'ara porã',
@@ -19,6 +19,10 @@ const ptToTupi: Record<string, string> = {
   'pássaro': 'guyrá',
   'família': 'tetama',
   'música': 'purakĩ',
+  'mulher bonita': 'kunhã poranga',
+  'você é bonito/bom': 'nde porã',
+  'rio grande, mar': 'paraná',
+  'onça': 'îaguara',
 };
 
 const tupiToPt: Record<string, string> = Object.fromEntries(
@@ -30,8 +34,14 @@ export default function TranslatorPage() {
   const [targetLang, setTargetLang] = useState('Tupi');
   const [sourceText, setSourceText] = useState('');
   const [translation, setTranslation] = useState('');
+  const [shuffledSuggestions, setShuffledSuggestions] = useState<string[]>([]);
   
-  const suggestions = sourceLang === 'Tupi' ? Object.keys(tupiToPt) : Object.keys(ptToTupi);
+  useEffect(() => {
+    const suggestions = sourceLang === 'Tupi' ? Object.keys(tupiToPt) : Object.keys(ptToTupi);
+    const shuffled = [...suggestions].sort(() => Math.random() - 0.5);
+    setShuffledSuggestions(shuffled);
+  }, [sourceLang]);
+
 
   const handleSwapLanguages = () => {
     const newSource = targetLang;
@@ -154,7 +164,7 @@ export default function TranslatorPage() {
             </CardHeader>
             <CardContent className="pt-0">
               <div className="flex flex-wrap gap-2">
-                {suggestions.map((suggestion) => (
+                {shuffledSuggestions.map((suggestion) => (
                   <Badge 
                     key={suggestion} 
                     variant="secondary" 
