@@ -21,7 +21,7 @@ export default function DashboardPage() {
       <main className="flex-1 p-6 pb-24 space-y-8">
         <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg">
           <Card className="border-none">
-            <CardHeader>
+            <CardHeader className="text-center">
               <CardTitle>Bem-vindo(a)!</CardTitle>
               <CardDescription className="text-muted-foreground">
                 Explore as maravilhas da língua Tupi-Guarani. Escolha seu nível e comece a aprender!
@@ -85,7 +85,7 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-4">
                   <Avatar className="h-12 w-12">
                      <AvatarFallback>
-                      <User className="h-6 w-6" />
+                      <User className="h-6 w-6" stroke="url(#icon-gradient)" />
                     </AvatarFallback>
                   </Avatar>
                   <div>
