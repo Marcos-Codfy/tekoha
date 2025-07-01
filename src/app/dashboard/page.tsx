@@ -37,33 +37,39 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col space-y-3">
-                <Button variant="outline" className="h-auto justify-start text-left p-4">
-                  <div className="flex items-center gap-4">
-                    <Feather className="h-6 w-6 text-accent" />
-                    <div>
-                      <p className="font-semibold text-base">Iniciante</p>
-                      <p className="text-sm font-normal text-muted-foreground">Comece sua jornada aqui.</p>
-                    </div>
-                  </div>
-                </Button>
-                <Button variant="outline" className="h-auto justify-start text-left p-4">
-                  <div className="flex items-center gap-4">
-                    <TrendingUp className="h-6 w-6 text-accent" />
-                    <div>
-                      <p className="font-semibold text-base">Intermediário</p>
-                      <p className="text-sm font-normal text-muted-foreground">Aprofunde seus conhecimentos.</p>
-                    </div>
-                  </div>
-                </Button>
-                <Button variant="outline" className="h-auto justify-start text-left p-4">
-                  <div className="flex items-center gap-4">
-                    <Crown className="h-6 w-6 text-accent" />
-                    <div>
-                      <p className="font-semibold text-base">Avançado</p>
-                      <p className="text-sm font-normal text-muted-foreground">Torne-se um mestre.</p>
-                    </div>
-                  </div>
-                </Button>
+                <div className="rounded-md bg-gradient-to-r from-primary to-accent p-[1px]">
+                  <Button variant="outline" className="w-full border-none bg-card hover:bg-accent/10 h-auto justify-start text-left p-4">
+                      <div className="flex items-center gap-4">
+                          <Feather className="h-6 w-6" stroke="url(#icon-gradient)" />
+                          <div>
+                              <p className="font-semibold text-base">Iniciante</p>
+                              <p className="text-sm font-normal text-muted-foreground">Comece sua jornada aqui.</p>
+                          </div>
+                      </div>
+                  </Button>
+                </div>
+                <div className="rounded-md bg-gradient-to-r from-primary to-accent p-[1px]">
+                  <Button variant="outline" className="w-full border-none bg-card hover:bg-accent/10 h-auto justify-start text-left p-4">
+                      <div className="flex items-center gap-4">
+                          <TrendingUp className="h-6 w-6" stroke="url(#icon-gradient)" />
+                          <div>
+                              <p className="font-semibold text-base">Intermediário</p>
+                              <p className="text-sm font-normal text-muted-foreground">Aprofunde seus conhecimentos.</p>
+                          </div>
+                      </div>
+                  </Button>
+                </div>
+                <div className="rounded-md bg-gradient-to-r from-primary to-accent p-[1px]">
+                  <Button variant="outline" className="w-full border-none bg-card hover:bg-accent/10 h-auto justify-start text-left p-4">
+                      <div className="flex items-center gap-4">
+                          <Crown className="h-6 w-6" stroke="url(#icon-gradient)" />
+                          <div>
+                              <p className="font-semibold text-base">Avançado</p>
+                              <p className="text-sm font-normal text-muted-foreground">Torne-se um mestre.</p>
+                          </div>
+                      </div>
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
