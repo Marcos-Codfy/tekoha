@@ -37,39 +37,45 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col space-y-3">
-                <div className="rounded-md bg-gradient-to-r from-primary to-accent p-[1px]">
-                  <Button variant="outline" className="w-full border-none bg-card hover:bg-accent/10 h-auto justify-start text-left p-4">
-                      <div className="flex items-center gap-4">
-                          <Feather className="h-6 w-6" stroke="url(#icon-gradient)" />
-                          <div>
-                              <p className="font-semibold text-base">Iniciante</p>
-                              <p className="text-sm font-normal text-muted-foreground">Comece sua jornada aqui.</p>
-                          </div>
-                      </div>
-                  </Button>
-                </div>
-                <div className="rounded-md bg-gradient-to-r from-primary to-accent p-[1px]">
-                  <Button variant="outline" className="w-full border-none bg-card hover:bg-accent/10 h-auto justify-start text-left p-4">
-                      <div className="flex items-center gap-4">
-                          <TrendingUp className="h-6 w-6" stroke="url(#icon-gradient)" />
-                          <div>
-                              <p className="font-semibold text-base">Intermediário</p>
-                              <p className="text-sm font-normal text-muted-foreground">Aprofunde seus conhecimentos.</p>
-                          </div>
-                      </div>
-                  </Button>
-                </div>
-                <div className="rounded-md bg-gradient-to-r from-primary to-accent p-[1px]">
-                  <Button variant="outline" className="w-full border-none bg-card hover:bg-accent/10 h-auto justify-start text-left p-4">
-                      <div className="flex items-center gap-4">
-                          <Crown className="h-6 w-6" stroke="url(#icon-gradient)" />
-                          <div>
-                              <p className="font-semibold text-base">Avançado</p>
-                              <p className="text-sm font-normal text-muted-foreground">Torne-se um mestre.</p>
-                          </div>
-                      </div>
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  className="group relative h-auto w-full justify-start overflow-hidden bg-card p-4 text-left hover:bg-card"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <div className="relative flex items-center gap-4">
+                    <Feather className="h-6 w-6 text-primary transition-colors duration-300 group-hover:text-primary-foreground" />
+                    <div className="transition-colors duration-300">
+                      <p className="font-semibold text-base text-card-foreground group-hover:text-primary-foreground">Iniciante</p>
+                      <p className="text-sm font-normal text-muted-foreground group-hover:text-primary-foreground/80">Comece sua jornada aqui.</p>
+                    </div>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="group relative h-auto w-full justify-start overflow-hidden bg-card p-4 text-left hover:bg-card"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <div className="relative flex items-center gap-4">
+                    <TrendingUp className="h-6 w-6 text-primary transition-colors duration-300 group-hover:text-primary-foreground" />
+                    <div className="transition-colors duration-300">
+                      <p className="font-semibold text-base text-card-foreground group-hover:text-primary-foreground">Intermediário</p>
+                      <p className="text-sm font-normal text-muted-foreground group-hover:text-primary-foreground/80">Aprofunde seus conhecimentos.</p>
+                    </div>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="group relative h-auto w-full justify-start overflow-hidden bg-card p-4 text-left hover:bg-card"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <div className="relative flex items-center gap-4">
+                    <Crown className="h-6 w-6 text-primary transition-colors duration-300 group-hover:text-primary-foreground" />
+                    <div className="transition-colors duration-300">
+                      <p className="font-semibold text-base text-card-foreground group-hover:text-primary-foreground">Avançado</p>
+                      <p className="text-sm font-normal text-muted-foreground group-hover:text-primary-foreground/80">Torne-se um mestre.</p>
+                    </div>
+                  </div>
+                </Button>
               </div>
             </CardContent>
           </Card>
