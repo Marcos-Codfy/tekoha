@@ -10,8 +10,16 @@ import Image from 'next/image';
 export default function DashboardPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
+      <svg width="0" height="0" className="absolute">
+        <defs>
+          <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="hsl(var(--primary))" />
+            <stop offset="100%" stopColor="hsl(var(--accent))" />
+          </linearGradient>
+        </defs>
+      </svg>
       <main className="flex-1 p-6 pb-24 space-y-8">
-        <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-1 shadow-lg">
+        <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg">
           <Card className="border-none">
             <CardHeader>
               <CardTitle>Bem-vindo(a)!</CardTitle>
@@ -22,7 +30,7 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-1 shadow-lg">
+        <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg">
           <Card className="border-none">
             <CardHeader>
               <CardTitle>Níveis de Aprendizagem</CardTitle>
@@ -61,7 +69,7 @@ export default function DashboardPage() {
           </Card>
         </div>
         
-        <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-1 shadow-lg">
+        <div className="rounded-lg bg-gradient-to-r from-primary to-accent p-[1px] shadow-lg">
           <Card className="border-none">
             <CardHeader>
               <CardTitle>Seu Perfil</CardTitle>
@@ -91,13 +99,13 @@ export default function DashboardPage() {
           <div className="flex justify-around items-center flex-1">
             <Link href="/dashboard" passHref>
               <Button className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
-                <Home className="h-6 w-6" />
+                <Home className="h-6 w-6" stroke="url(#icon-gradient)" />
                 <span className="text-xs font-medium">Início</span>
               </Button>
             </Link>
             <Link href="#" passHref>
-              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl text-muted-foreground">
-                <Languages className="h-6 w-6" />
+              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
+                <Languages className="h-6 w-6" stroke="url(#icon-gradient)" />
                 <span className="text-xs font-medium">Tradutor</span>
               </Button>
             </Link>
@@ -120,14 +128,14 @@ export default function DashboardPage() {
           
           <div className="flex justify-around items-center flex-1">
             <Link href="#" passHref>
-              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl text-muted-foreground">
-                <Trophy className="h-6 w-6" />
+              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
+                <Trophy className="h-6 w-6" stroke="url(#icon-gradient)" />
                 <span className="text-xs font-medium">Conquistas</span>
               </Button>
             </Link>
             <Link href="#" passHref>
-              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl text-muted-foreground">
-                <Settings className="h-6 w-6" />
+              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
+                <Settings className="h-6 w-6" stroke="url(#icon-gradient)" />
                 <span className="text-xs font-medium">Config</span>
               </Button>
             </Link>
