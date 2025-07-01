@@ -34,10 +34,10 @@ export default function AchievementsPage() {
                 <span className="text-xs font-medium text-muted-foreground">Início</span>
               </Button>
             </Link>
-            <Link href="/achievements" passHref>
-              <Button className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
-                <Trophy className="h-6 w-6" stroke="url(#icon-gradient)" />
-                <span className="text-xs font-medium">Conquistas</span>
+            <Link href="/translator" passHref>
+              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
+                <Languages className="h-6 w-6" stroke="url(#icon-gradient)" />
+                <span className="text-xs font-medium text-muted-foreground">Tradutor</span>
               </Button>
             </Link>
           </div>
@@ -58,16 +58,16 @@ export default function AchievementsPage() {
           </div>
           
           <div className="flex justify-around items-center flex-1">
+            <Link href="/achievements" passHref>
+              <Button className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
+                <Trophy className="h-6 w-6" stroke="url(#icon-gradient)" />
+                <span className="text-xs font-medium">Conquistas</span>
+              </Button>
+            </Link>
             <Link href="/settings" passHref>
               <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
                 <Settings className="h-6 w-6" stroke="url(#icon-gradient)" />
                 <span className="text-xs font-medium text-muted-foreground">Config</span>
-              </Button>
-            </Link>
-            <Link href="/translator" passHref>
-              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
-                <Languages className="h-6 w-6" stroke="url(#icon-gradient)" />
-                <span className="text-xs font-medium text-muted-foreground">Tradutor</span>
               </Button>
             </Link>
           </div>

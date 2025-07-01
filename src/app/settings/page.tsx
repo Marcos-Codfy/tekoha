@@ -34,10 +34,10 @@ export default function SettingsPage() {
                 <span className="text-xs font-medium text-muted-foreground">Início</span>
               </Button>
             </Link>
-            <Link href="/achievements" passHref>
+            <Link href="/translator" passHref>
               <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
-                <Trophy className="h-6 w-6" stroke="url(#icon-gradient)" />
-                <span className="text-xs font-medium text-muted-foreground">Conquistas</span>
+                <Languages className="h-6 w-6" stroke="url(#icon-gradient)" />
+                <span className="text-xs font-medium text-muted-foreground">Tradutor</span>
               </Button>
             </Link>
           </div>
@@ -58,16 +58,16 @@ export default function SettingsPage() {
           </div>
           
           <div className="flex justify-around items-center flex-1">
+            <Link href="/achievements" passHref>
+              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
+                <Trophy className="h-6 w-6" stroke="url(#icon-gradient)" />
+                <span className="text-xs font-medium text-muted-foreground">Conquistas</span>
+              </Button>
+            </Link>
             <Link href="/settings" passHref>
               <Button className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
                 <Settings className="h-6 w-6" stroke="url(#icon-gradient)" />
                 <span className="text-xs font-medium">Config</span>
-              </Button>
-            </Link>
-            <Link href="/translator" passHref>
-              <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl">
-                <Languages className="h-6 w-6" stroke="url(#icon-gradient)" />
-                <span className="text-xs font-medium text-muted-foreground">Tradutor</span>
               </Button>
             </Link>
           </div>
