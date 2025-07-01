@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Home, LayoutGrid, User, Settings } from 'lucide-react';
+import { Home, Trophy, Languages, Settings } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -24,8 +24,8 @@ export default function DashboardPage() {
             </Link>
             <Link href="#" passHref>
               <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl text-muted-foreground">
-                <LayoutGrid className="h-6 w-6" />
-                <span className="text-xs font-medium">Projetos</span>
+                <Trophy className="h-6 w-6" />
+                <span className="text-xs font-medium">Conquistas</span>
               </Button>
             </Link>
           </div>
@@ -48,14 +48,14 @@ export default function DashboardPage() {
           <div className="flex justify-around items-center flex-1">
             <Link href="#" passHref>
               <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl text-muted-foreground">
-                <User className="h-6 w-6" />
-                <span className="text-xs font-medium">Perfil</span>
+                <Languages className="h-6 w-6" />
+                <span className="text-xs font-medium">Tradutor</span>
               </Button>
             </Link>
             <Link href="#" passHref>
               <Button variant="ghost" className="flex flex-col h-auto p-3 space-y-1 rounded-xl text-muted-foreground">
                 <Settings className="h-6 w-6" />
-                <span className="text-xs font-medium">Ajustes</span>
+                <span className="text-xs font-medium">Config</span>
               </Button>
             </Link>
           </div>
