@@ -1,0 +1,35 @@
+﻿# ===== FLUTTER / DART =====
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+
+# ===== ANDROID =====
+local.properties
+*.iml
+.gradle
+/android/.gradle
+/android/local.properties
+/android/key.properties
+*.jks
+
+# ===== SEGREDOS E API KEYS â€” NUNCA SUBA ESSES ARQUIVOS! =====
+.env
+.env.local
+.env.production
+google-services.json
+GoogleService-Info.plist
+
+# ===== ANDROID STUDIO =====
+.idea/workspace.xml
+.idea/tasks.xml
+*.iws
+*.ipr
+
+# ===== SISTEMA =====
+.DS_Store
+Thumbs.db
+*.log
