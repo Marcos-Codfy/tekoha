@@ -1,7 +1,6 @@
 ﻿// lib/presentation/providers/auth_provider.dart
-// Gerencia o estado de autenticaÃ§Ã£o globalmente no app
-// ResponsÃ¡vel: Marcos
-// TODO Sprint 2: Implementar com Provider
+// Gerencia o estado de autenticação globalmente no app
+// Responsável: Marcos
 
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -24,6 +23,14 @@ class AuthProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     });
+  }
+
+  /// Limpa a mensagem de erro (chamado ao entrar nas telas de auth)
+  void clearError() {
+    if (_errorMessage != null) {
+      _errorMessage = null;
+      notifyListeners();
+    }
   }
 
   Future<bool> signIn(String email, String password) async {
@@ -63,17 +70,19 @@ class AuthProvider extends ChangeNotifier {
   String _translateError(String code) {
     switch (code) {
       case 'user-not-found':
-        return 'Nenhuma conta encontrada com este email.';
+        return 'Nenhuma conta encontrada com este e-mail.';
       case 'wrong-password':
-        return 'Senha incorreta.';
+        return 'Senha incorreta. Tente novamente.';
       case 'email-already-in-use':
-        return 'Este email já está cadastrado.';
+        return 'Este e-mail já está cadastrado.';
       case 'invalid-email':
-        return 'Email inválido.';
+        return 'E-mail inválido.';
       case 'weak-password':
         return 'Senha fraca. Use pelo menos 6 caracteres.';
       case 'too-many-requests':
         return 'Muitas tentativas. Aguarde alguns minutos.';
+      case 'invalid-credential':
+        return 'E-mail ou senha incorretos.';
       default:
         return 'Erro ao autenticar. Tente novamente.';
     }

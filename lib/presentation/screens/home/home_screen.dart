@@ -1,9 +1,11 @@
-﻿// ResponsÃ¡vel: Jeovanna
-// TODO: implementar a tela Home - Modulos
+﻿// lib/presentation/screens/home/home_screen.dart
 // Responsável: Jeovanna
+// TODO: implementar a tela Home - Módulos
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_routes.dart';
 import '../../providers/auth_provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -11,7 +13,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final email = context.select<AuthProvider, String?>(
+          (a) => a.currentUser?.email,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -23,7 +27,13 @@ class HomeScreen extends StatelessWidget {
             icon: const Icon(Icons.logout),
             tooltip: 'Sair',
             onPressed: () async {
-              await auth.signOut();
+              await context.read<AuthProvider>().signOut();
+              if (context.mounted) {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  AppRoutes.login,
+                      (route) => false,
+                );
+              }
             },
           ),
         ],
@@ -44,7 +54,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              auth.currentUser?.email ?? '',
+              email ?? '',
               style: const TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 14,
