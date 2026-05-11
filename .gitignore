@@ -33,3 +33,20 @@ GoogleService-Info.plist
 .DS_Store
 Thumbs.db
 *.log
+
+
+
+# ===== IDE COMPLETO =====
+# Ignora TUDO da pasta .idea (configuracoes locais do Android Studio)
+.idea/
+
+# ===== INTEGRACOES IA =====
+.claude/
+.cursor/
+.aider*
+
+# ===== OUTROS CACHES =====
+*.swp
+*.swo
+*~
+.history/
