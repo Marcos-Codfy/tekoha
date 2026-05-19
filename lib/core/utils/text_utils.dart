@@ -1,19 +1,36 @@
-﻿// lib/core/utils/text_utils.dart
-// FunÃ§Ãµes para normalizar texto â€” importante para comparar respostas em Nheengatu
-// ResponsÃ¡vel: Marcos
-// Exemplo: "Serui" e "  serui  " devem ser consideradas respostas iguais
+// lib/core/utils/text_utils.dart
+// Camada: Core (utilitarios puros, sem dependencias de Flutter).
+//
+// Funcoes pra normalizar texto antes de comparar respostas em Nheengatu.
+// Sera usado pelo exercicio do tipo Translate (Sprint 4): o usuario
+// digita a resposta livremente, e queremos aceitar pequenas variacoes
+// (maiusculas, espacos a mais, aspas curvas vs retas).
+//
+// Exemplo:
+//   normalize("  Puranga Ara  ") -> "puranga ara"
+//   isCorrect("Puranga Ara", "puranga ara") -> true
 
 class TextUtils {
-  /// Remove espaÃ§os extras e converte para minÃºsculas
+  TextUtils._(); // construtor privado: classe so com metodos estaticos
+
+  /// Devolve [text] em minusculas, sem espacos extras e com aspas
+  /// tipograficas (’ ‘) convertidas em apostrofo simples (').
+  ///
+  /// O foco e tornar a comparacao tolerante a pequenas diferencas
+  /// de digitacao sem alterar o significado da palavra.
   static String normalize(String text) {
     return text
         .trim()
         .toLowerCase()
-        .replaceAll(RegExp(r"['\\u2018\u2019]"), "'") // Normaliza aspas
-        .replaceAll(RegExp(r'\s+'), ' ');               // Remove espaÃ§os duplos
+        // Converte aspas curvas/tipograficas em aspa simples reta.
+        // Usamos os codigos unicode ‘ (‘) e ’ (’) diretamente.
+        .replaceAll(RegExp('[‘’]'), "'")
+        // Multiplos espacos viram um so.
+        .replaceAll(RegExp(r'\s+'), ' ');
   }
 
-  /// Verifica se a resposta do usuÃ¡rio estÃ¡ correta (ignora maiÃºsculas/espaÃ§os)
+  /// Compara duas strings depois de normalizar as duas.
+  /// Retorna `true` se forem equivalentes pra fins de exercicio.
   static bool isCorrect(String userAnswer, String correctAnswer) {
     return normalize(userAnswer) == normalize(correctAnswer);
   }

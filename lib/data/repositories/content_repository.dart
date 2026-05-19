@@ -1,28 +1,43 @@
 // lib/data/repositories/content_repository.dart
-// CONTRATO (interface) que define COMO o app busca conteudo.
-// Responsavel: Marcos
+// Camada: Data (contratos).
 //
-// IMPORTANTE: As telas (Screens) so conhecem ESTE arquivo.
-// Elas nao sabem se os dados vem do Airtable, Firebase ou outro lugar.
-// Isso permite trocar o banco de dados no futuro sem mexer nas telas.
+// CONTRATO (interface) que define COMO o app busca conteudo de aprendizado.
+// Ele NAO sabe de onde os dados vem — pode ser Airtable, Firebase, JSON
+// local, etc. Quem decide isso e a implementacao concreta injetada no
+// ContentProvider la em main.dart.
 //
-// Sprint 3: trocamos `fetchExercisesByLesson` por `fetchWordsByLesson`.
-// Motivo: o que vem do Airtable e PALAVRA. Exercicio (Quiz/Translate) e
-// DERIVADO da palavra dentro do Provider, nao buscado no banco.
-// Isso mantem a regra de negocio (1 palavra = 1 Quiz + 1 Translate) na camada
-// de apresentacao, longe da camada de dados.
+// Esse desacoplamento e o coracao da Clean Architecture aqui:
+//   UI -> Provider -> ContentRepository (este arquivo) -> Service concreto
 
-import '../models/module_model.dart';
 import '../models/lesson_model.dart';
+import '../models/module_model.dart';
 import '../models/word_model.dart';
 
+/// Excecao base da camada de conteudo.
+/// Toda implementacao de [ContentRepository] deve transformar suas falhas
+/// internas (HTTP, parse, timeout) em uma `ContentException` com uma
+/// `userMessage` em portugues que pode ser exibida na UI direto.
+///
+/// O `technicalDetails` e opcional e serve so pra log/debug — NUNCA mostrar
+/// pro usuario final (pode conter detalhes sensiveis tipo nomes de variavel,
+/// status HTTP cru, etc.).
+class ContentException implements Exception {
+  final String userMessage;
+  final String? technicalDetails;
+
+  ContentException(this.userMessage, [this.technicalDetails]);
+
+  @override
+  String toString() => 'ContentException: $userMessage';
+}
+
 abstract class ContentRepository {
-  /// Busca todos os modulos ATIVOS de um idioma, ordenados pelo campo `order`.
+  /// Busca todos os modulos ATIVOS de um idioma, ordenados por `order`.
   Future<List<ModuleModel>> fetchAllModules(String language);
 
-  /// Busca todas as licoes de um modulo, ordenadas pelo campo `order`.
+  /// Busca todas as licoes de um modulo, ordenadas por `order`.
   Future<List<LessonModel>> fetchLessonsByModule(String moduleId);
 
-  /// Busca todas as palavras de uma licao, ordenadas pelo campo `order`.
+  /// Busca todas as palavras de uma licao, ordenadas por `order`.
   Future<List<WordModel>> fetchWordsByLesson(String lessonId);
 }
