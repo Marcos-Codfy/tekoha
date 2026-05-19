@@ -1,7 +1,6 @@
-﻿// lib/data/models/lesson_model.dart
-// Representa uma LiÃ§Ã£o dentro de um mÃ³dulo
-// ResponsÃ¡vel: Marcos
-// Os dados vÃªm do Airtable (tabela Lessons)
+// lib/data/models/lesson_model.dart
+// Representa uma licao dentro de um modulo.
+// Dados vem da tabela Lessons do Airtable.
 
 class LessonModel {
   final String id;
@@ -10,7 +9,7 @@ class LessonModel {
   final int order;
   final int xpReward;
 
-  LessonModel({
+  const LessonModel({
     required this.id,
     required this.title,
     required this.moduleId,
@@ -18,14 +17,16 @@ class LessonModel {
     required this.xpReward,
   });
 
-  /// Cria um LessonModel a partir dos dados do Airtable
   factory LessonModel.fromAirtable(String id, Map<String, dynamic> fields) {
     return LessonModel(
       id: id,
-      title: fields['title'] ?? '',
-      moduleId: fields['module_id'] ?? '',
-      order: (fields['order'] ?? 0).toInt(),
-      xpReward: (fields['xp_reward'] ?? 10).toInt(),
+      title: (fields['title'] ?? '').toString(),
+      // Campo `module` no Airtable e Linked Record -> array de IDs.
+      // Pegamos o primeiro item com null-aware chaining; se vier null ou
+      // lista vazia, fallback pra string vazia.
+      moduleId: (fields['module'] as List<dynamic>?)?.first?.toString() ?? '',
+      order:    (fields['order'] ?? 0).toInt(),
+      xpReward: (fields['xp_reward'] ?? 0).toInt(),
     );
   }
 }
