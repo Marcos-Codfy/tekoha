@@ -1,12 +1,10 @@
 // lib/data/services/airtable_service.dart
-// Implementacao do ContentRepository que conversa com a API REST do Airtable.
-// Responsavel: Marcos (gerado por Claude na Sprint 3)
+// Camada: Data (implementacao concreta de ContentRepository).
 //
-// O que esse arquivo faz:
-// - Le AIRTABLE_API_KEY, AIRTABLE_BASE_ID e nomes das tabelas do .env
-// - Monta requests HTTP GET pra Airtable com filterByFormula + sort
-// - Converte o JSON de resposta nos models (ModuleModel, LessonModel, WordModel)
-// - Trata erros de rede, auth e dados de forma amigavel pro usuario
+// Conversa com a API REST do Airtable pra buscar modulos, licoes e palavras.
+// Toda falha (HTTP, rede, parse) e empacotada como [ContentException] —
+// a unica excecao que sobe pra camada de Provider/UI. Assim a UI nunca
+// precisa saber que Airtable existe (Clean Architecture).
 //
 // REGRA DE SEGURANCA: nunca logar o token e nunca expor o token em
 // mensagem de erro pro usuario final.
@@ -14,36 +12,29 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import '../models/module_model.dart';
+
 import '../models/lesson_model.dart';
+import '../models/module_model.dart';
 import '../models/word_model.dart';
 import '../repositories/content_repository.dart';
 
-/// Excecao customizada do AirtableService.
-/// Carrega uma `userMessage` em portugues que pode ser mostrada na UI direto.
-/// `technicalDetails` e SO pra log/debug, NUNCA mostrar pro usuario final.
-class AirtableException implements Exception {
-  final String userMessage;
-  final String? technicalDetails;
-  AirtableException(this.userMessage, [this.technicalDetails]);
-
-  @override
-  String toString() => 'AirtableException: $userMessage';
-}
-
 class AirtableService implements ContentRepository {
-  // Le as variaveis do .env uma unica vez quando a classe e instanciada.
-  // Se a variavel nao existir no .env, cai pro fallback (string vazia ou nome padrao).
+  // ── Configuracao vinda do .env ──────────────────────────────────────
+  // Le as variaveis uma unica vez quando a classe e instanciada.
+  // Se a variavel nao existir no .env, cai pro fallback (string vazia
+  // ou nome de tabela padrao). Credenciais ausentes sao detectadas em
+  // [_ensureCredentials] antes da primeira chamada HTTP.
   final String _apiKey     = dotenv.env['AIRTABLE_API_KEY']       ?? '';
   final String _baseId     = dotenv.env['AIRTABLE_BASE_ID']       ?? '';
   final String _modulesTab = dotenv.env['AIRTABLE_MODULES_TABLE'] ?? 'Modules';
   final String _lessonsTab = dotenv.env['AIRTABLE_LESSONS_TABLE'] ?? 'Lessons';
   final String _wordsTab   = dotenv.env['AIRTABLE_WORDS_TABLE']   ?? 'Words';
 
-  // Tempo maximo que uma requisicao pode demorar antes de ser cancelada.
-  // 15s e generoso pra rede ruim, mas evita o app travar pra sempre.
+  /// Tempo maximo que uma requisicao pode demorar. 15s e generoso pra
+  /// rede ruim mas evita o app travar pra sempre.
   static const Duration _timeout = Duration(seconds: 15);
 
   /// Header HTTP com Bearer token. Encapsulado num getter pra reaproveitar.
@@ -53,10 +44,10 @@ class AirtableService implements ContentRepository {
       };
 
   /// Valida que temos credenciais antes de tentar bater na API.
-  /// Se faltar API key ou Base ID, da mensagem clara em vez de erro HTTP confuso.
+  /// Da mensagem clara em vez de erro HTTP confuso depois.
   void _ensureCredentials() {
     if (_apiKey.isEmpty || _baseId.isEmpty) {
-      throw AirtableException(
+      throw ContentException(
         'Configuracao do Airtable nao encontrada. Verifique o arquivo .env.',
         'AIRTABLE_API_KEY ou AIRTABLE_BASE_ID ausente no dotenv',
       );
@@ -64,7 +55,7 @@ class AirtableService implements ContentRepository {
   }
 
   /// Faz um GET autenticado no Airtable e devolve a lista de records.
-  /// Concentra HTTP + tratamento de erro + parse de JSON em um lugar so,
+  /// Centraliza HTTP + tratamento de erro + parse de JSON num lugar so,
   /// pra cada metodo publico (fetchAllModules etc) ficar curto e claro.
   Future<List<Map<String, dynamic>>> _get(
     String tableName, {
@@ -85,48 +76,45 @@ class AirtableService implements ContentRepository {
       response = await http.get(uri, headers: _headers).timeout(_timeout);
     } on SocketException {
       // SocketException = sem internet, DNS falhou, host inalcancavel.
-      throw AirtableException(
+      throw ContentException(
         'Sem conexao com a internet. Verifique sua rede e tente de novo.',
       );
     } on TimeoutException {
-      // TimeoutException = requisicao demorou mais que _timeout.
-      throw AirtableException(
+      // TimeoutException = requisicao demorou mais que [_timeout].
+      throw ContentException(
         'A requisicao demorou demais. Tente de novo em alguns segundos.',
       );
     } catch (e) {
       // Qualquer outro erro de rede inesperado.
-      throw AirtableException(
-        'Erro de rede ao buscar conteudo.',
-        e.toString(),
-      );
+      throw ContentException('Erro de rede ao buscar conteudo.', e.toString());
     }
 
-    // Tratamento por status code HTTP. Cada caso devolve mensagem amigavel.
+    // Tratamento por status code HTTP. Cada caso da uma mensagem amigavel.
     switch (response.statusCode) {
       case 200:
-        break; // sucesso, continua o parse abaixo
+        break; // sucesso, continua pro parse abaixo
       case 401:
-        throw AirtableException(
+        throw ContentException(
           'Token do Airtable invalido ou expirado. Avise o desenvolvedor.',
           'HTTP 401 - verifique AIRTABLE_API_KEY no .env',
         );
       case 403:
-        throw AirtableException(
+        throw ContentException(
           'Sem permissao pra acessar essa base no Airtable.',
           'HTTP 403',
         );
       case 404:
-        throw AirtableException(
+        throw ContentException(
           'Base ou tabela "$tableName" nao encontrada.',
           'HTTP 404',
         );
       case 429:
-        throw AirtableException(
+        throw ContentException(
           'Muitas requisicoes em pouco tempo. Aguarde alguns segundos.',
           'HTTP 429 (rate limit)',
         );
       default:
-        throw AirtableException(
+        throw ContentException(
           'Erro ao buscar conteudo (codigo ${response.statusCode}).',
           'HTTP ${response.statusCode}',
         );
@@ -138,26 +126,31 @@ class AirtableService implements ContentRepository {
     try {
       jsonBody = json.decode(response.body) as Map<String, dynamic>;
     } on FormatException {
-      throw AirtableException('Resposta do servidor em formato invalido.');
+      throw ContentException('Resposta do servidor em formato invalido.');
     }
 
     final records = jsonBody['records'];
     if (records is! List) {
-      throw AirtableException('Resposta do servidor sem a chave "records".');
+      throw ContentException('Resposta do servidor sem a chave "records".');
     }
 
     return records.cast<Map<String, dynamic>>();
   }
 
+  // ── Metodos publicos do contrato ContentRepository ────────────────
+
   @override
   Future<List<ModuleModel>> fetchAllModules(String language) async {
     // Filtro: so modulos ATIVOS do idioma pedido.
-    // {is_active} e {language} sao nomes dos campos no Airtable.
+    // {is_active} e {language} sao nomes de campos nao-linkados — funcionam
+    // dentro de uma formula do Airtable sem o problema dos Linked Records
+    // (ver comentario em fetchLessonsByModule).
     final formula = "AND({is_active}=TRUE(), {language}='$language')";
 
     final records = await _get(_modulesTab, queryParams: {
       'filterByFormula': formula,
-      // Sort no servidor garante que vem ordenado 1, 2, 3 sem precisar reordenar no app.
+      // Sort no servidor garante que vem ordenado 1, 2, 3 — nao precisa
+      // reordenar no app.
       'sort[0][field]': 'order',
       'sort[0][direction]': 'asc',
     });
@@ -177,6 +170,7 @@ class AirtableService implements ContentRepository {
     // Quando uma formula do Airtable referencia um Linked Record, o motor de
     // formulas devolve o NOME (primary field) do registro linkado, nao o ID.
     // Entao FIND('recXXX', ARRAYJOIN({module})) sempre da 0 — filtra tudo.
+    //
     // A REST API, porem, devolve o link como ARRAY DE IDS no campo `fields`,
     // entao podemos parsear o moduleId no model e filtrar em Dart. Robusto e
     // suficiente pro MVP (3 licoes total).
