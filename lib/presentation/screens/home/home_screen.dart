@@ -1,75 +1,192 @@
-﻿// lib/presentation/screens/home/home_screen.dart
-// Responsável: Jeovanna
-// TODO: implementar a tela Home - Módulos
+// lib/presentation/screens/home/home_screen.dart
+// Aba "Home" do MainScaffold. Dashboard simples de boas-vindas, com CTA
+// que joga o usuario direto na aba "Pratica".
+// Responsavel: Marcos (Sprint 3, gerado por Claude)
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_routes.dart';
-import '../../providers/auth_provider.dart';
+import '../../../core/constants/app_flags.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  /// Callback pra mandar o usuario direto pra aba "Pratica".
+  /// O MainScaffold (que conhece o indice da aba) injeta esse callback.
+  final VoidCallback? onStartPractice;
+
+  const HomeScreen({super.key, this.onStartPractice});
 
   @override
   Widget build(BuildContext context) {
-    final email = context.select<AuthProvider, String?>(
-          (a) => a.currentUser?.email,
-    );
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Tekoha'),
         automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Sair',
-            onPressed: () async {
-              await context.read<AuthProvider>().signOut();
-              if (context.mounted) {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  AppRoutes.login,
-                      (route) => false,
-                );
-              }
-            },
-          ),
-        ],
       ),
-      body: Center(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.check_circle, color: AppColors.correct, size: 72),
-            const SizedBox(height: 16),
+            // ── Badge "modo de teste" (so se login estiver desativado) ─
+            if (kBypassAuth) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.bug_report_outlined, size: 16, color: AppColors.primary),
+                    SizedBox(width: 6),
+                    Text(
+                      'Modo de teste — login desativado',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+
+            // ── Saudacao em Nheengatu (palavra verificada do banco) ────
             const Text(
-              'Login realizado com sucesso!',
+              'Puranga ara!',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              email ?? '',
-              style: const TextStyle(
+            const Text(
+              'Bem-vindo ao Tekohá',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Aprenda o Nheengatu, uma língua indígena viva falada por '
+              'comunidades do Alto Rio Negro. Cada palavra que você aprende '
+              'ajuda a preservar uma cosmovisão única.',
+              style: TextStyle(
+                fontSize: 15,
                 color: AppColors.textSecondary,
-                fontSize: 14,
+                height: 1.5,
               ),
             ),
             const SizedBox(height: 32),
-            const Text(
-              'Módulos do Nheengatu em breve...',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontStyle: FontStyle.italic,
+
+            // ── CTA principal: leva pra aba Pratica ────────────────────
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onStartPractice,
+                icon: const Icon(Icons.play_arrow),
+                label: const Text('Começar a praticar'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.textOnPrimary,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
               ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // ── Cards de dashboard (placeholders pra Sprint 5) ─────────
+            const Text(
+              'Seu progresso',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const _DashboardCard(
+              icon: Icons.local_fire_department,
+              title: 'Sequência',
+              value: '0 dias',
+              hint: 'Em breve',
+            ),
+            const SizedBox(height: 12),
+            const _DashboardCard(
+              icon: Icons.star,
+              title: 'XP total',
+              value: '0 XP',
+              hint: 'Em breve',
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _DashboardCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String value;
+  final String hint;
+  const _DashboardCard({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.hint,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.primary, size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                ),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            hint,
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppColors.textSecondary,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
       ),
     );
   }

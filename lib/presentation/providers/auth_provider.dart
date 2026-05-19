@@ -1,12 +1,18 @@
-﻿// lib/presentation/providers/auth_provider.dart
-// Gerencia o estado de autenticação globalmente no app
-// Responsável: Marcos
+// lib/presentation/providers/auth_provider.dart
+// Gerencia o estado de autenticacao globalmente no app.
+// Responsavel: Marcos
+//
+// Resiliencia: o construtor envolve o acesso ao FirebaseAuth.instance em
+// try/catch. Se o Firebase nao tiver sido inicializado (ex.: rodando no
+// Chrome sem config web), o provider vira um stub no-op em vez de quebrar
+// o app. signIn/register devolvem erro amigavel nesse caso.
 
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  /// Pode ser null se o Firebase nao foi inicializado neste ambiente.
+  FirebaseAuth? _auth;
 
   User? _user;
   bool _isLoading = true;
@@ -17,15 +23,27 @@ class AuthProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   User? get currentUser => _user;
 
+  /// `true` se o Firebase Auth foi inicializado com sucesso. UI pode usar
+  /// pra esconder/desabilitar login quando o ambiente nao suporta.
+  bool get isAvailable => _auth != null;
+
   AuthProvider() {
-    _auth.authStateChanges().listen((User? user) {
-      _user = user;
+    try {
+      _auth = FirebaseAuth.instance;
+      _auth!.authStateChanges().listen((User? user) {
+        _user = user;
+        _isLoading = false;
+        notifyListeners();
+      });
+    } catch (e) {
+      // Firebase nao inicializado (provavelmente web sem config).
+      // App segue funcionando — so login/registro ficam indisponiveis.
       _isLoading = false;
-      notifyListeners();
-    });
+      debugPrint('[Tekoha] AuthProvider: Firebase indisponivel — $e');
+    }
   }
 
-  /// Limpa a mensagem de erro (chamado ao entrar nas telas de auth)
+  /// Limpa a mensagem de erro (chamado ao entrar nas telas de auth).
   void clearError() {
     if (_errorMessage != null) {
       _errorMessage = null;
@@ -34,9 +52,14 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> signIn(String email, String password) async {
+    if (_auth == null) {
+      _errorMessage = 'Login indisponível neste ambiente.';
+      notifyListeners();
+      return false;
+    }
     try {
       _errorMessage = null;
-      await _auth.signInWithEmailAndPassword(
+      await _auth!.signInWithEmailAndPassword(
         email: email.trim(),
         password: password,
       );
@@ -49,9 +72,14 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> register(String email, String password) async {
+    if (_auth == null) {
+      _errorMessage = 'Cadastro indisponível neste ambiente.';
+      notifyListeners();
+      return false;
+    }
     try {
       _errorMessage = null;
-      await _auth.createUserWithEmailAndPassword(
+      await _auth!.createUserWithEmailAndPassword(
         email: email.trim(),
         password: password,
       );
@@ -64,7 +92,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    await _auth.signOut();
+    if (_auth == null) return;
+    await _auth!.signOut();
   }
 
   String _translateError(String code) {
