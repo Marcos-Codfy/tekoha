@@ -171,41 +171,46 @@ class AirtableService implements ContentRepository {
 
   @override
   Future<List<LessonModel>> fetchLessonsByModule(String moduleId) async {
-    // No Airtable, o campo `module` na tabela Lessons e um LINK pra Modules.
-    // Linked fields no filterByFormula vem como ARRAY de IDs, entao usamos:
-    //   ARRAYJOIN({module}) -> transforma o array em "rec1,rec2,..."
-    //   FIND('moduleId', ...) -> procura o ID dentro daquela string
-    final formula = "FIND('$moduleId', ARRAYJOIN({module}))";
-
+    // Buscamos TODAS as licoes e filtramos no codigo pelo moduleId.
+    //
+    // Por que nao filterByFormula no servidor?
+    // Quando uma formula do Airtable referencia um Linked Record, o motor de
+    // formulas devolve o NOME (primary field) do registro linkado, nao o ID.
+    // Entao FIND('recXXX', ARRAYJOIN({module})) sempre da 0 — filtra tudo.
+    // A REST API, porem, devolve o link como ARRAY DE IDS no campo `fields`,
+    // entao podemos parsear o moduleId no model e filtrar em Dart. Robusto e
+    // suficiente pro MVP (3 licoes total).
     final records = await _get(_lessonsTab, queryParams: {
-      'filterByFormula': formula,
       'sort[0][field]': 'order',
       'sort[0][direction]': 'asc',
     });
 
-    return records.map((record) {
-      final id = (record['id'] ?? '').toString();
-      final fields = (record['fields'] ?? <String, dynamic>{}) as Map<String, dynamic>;
-      return LessonModel.fromAirtable(id, fields);
-    }).toList();
+    return records
+        .map((record) {
+          final id = (record['id'] ?? '').toString();
+          final fields = (record['fields'] ?? <String, dynamic>{}) as Map<String, dynamic>;
+          return LessonModel.fromAirtable(id, fields);
+        })
+        .where((lesson) => lesson.moduleId == moduleId)
+        .toList();
   }
 
   @override
   Future<List<WordModel>> fetchWordsByLesson(String lessonId) async {
-    // Mesma logica de ARRAYJOIN, agora pra Words -> Lessons.
-    // Campo link na tabela Words que aponta pra Lessons se chama `lesson`.
-    final formula = "FIND('$lessonId', ARRAYJOIN({lesson}))";
-
+    // Mesma logica do fetchLessonsByModule: traz todas as palavras e filtra
+    // no codigo pelo lessonId. Com 30 palavras no MVP, o custo e desprezivel.
     final records = await _get(_wordsTab, queryParams: {
-      'filterByFormula': formula,
       'sort[0][field]': 'order',
       'sort[0][direction]': 'asc',
     });
 
-    return records.map((record) {
-      final id = (record['id'] ?? '').toString();
-      final fields = (record['fields'] ?? <String, dynamic>{}) as Map<String, dynamic>;
-      return WordModel.fromAirtable(id, fields);
-    }).toList();
+    return records
+        .map((record) {
+          final id = (record['id'] ?? '').toString();
+          final fields = (record['fields'] ?? <String, dynamic>{}) as Map<String, dynamic>;
+          return WordModel.fromAirtable(id, fields);
+        })
+        .where((word) => word.lessonId == lessonId)
+        .toList();
   }
 }
