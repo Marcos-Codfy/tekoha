@@ -27,6 +27,9 @@ android {
         applicationId = "com.tekoha.tekoha"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
+        //
+        // Fixado em 21 explicitamente porque o pacote `speech_to_text`
+        // (usado nos exercícios de fala) exige Android API 21 ou superior.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
