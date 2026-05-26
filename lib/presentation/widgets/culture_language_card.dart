@@ -86,7 +86,7 @@ class CultureLanguageCard extends StatelessWidget {
                         const SizedBox(height: 6),
                         Text(
                           subtitle!,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             color: subtitleColor,
                             height: 1.4,
