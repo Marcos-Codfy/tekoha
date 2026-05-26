@@ -5,7 +5,7 @@
 
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
-import 'culture/culture_screen.dart';
+import 'culture/cultures_list_screen.dart';
 import 'home/home_screen.dart';
 import 'practice/practice_screen.dart';
 import 'profile/profile_screen.dart';
@@ -32,7 +32,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     final tabs = <Widget>[
       HomeScreen(onStartPractice: () => _selectTab(1)),
       const PracticeScreen(),
-      const CultureScreen(),
+      const CulturesListScreen(),
       const ProfileScreen(),
     ];
 
