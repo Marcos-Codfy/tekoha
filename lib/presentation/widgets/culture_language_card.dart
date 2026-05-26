@@ -36,7 +36,7 @@ class CultureLanguageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final titleColor =
         _enabled ? AppColors.textPrimary : AppColors.textSecondary;
-    final subtitleColor = AppColors.textSecondary;
+    const subtitleColor = AppColors.textSecondary;
 
     return DecoratedBox(
       // Sombra externa so aparece no card ativo. No inativo, fica flat
