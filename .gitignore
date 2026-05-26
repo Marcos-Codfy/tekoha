@@ -33,3 +33,6 @@ GoogleService-Info.plist
 .DS_Store
 Thumbs.db
 *.log
+
+# ===== CLAUDE CODE =====
+.claude/

@@ -1,14 +1,16 @@
-﻿// lib/core/constants/app_routes.dart
-// Nomes das rotas (pÃ¡ginas) de navegaÃ§Ã£o do app
-// ResponsÃ¡vel: Marcos (define) / Jeovanna (usa na navegaÃ§Ã£o)
+// lib/core/constants/app_routes.dart
+// Nomes das rotas de navegacao registradas no MaterialApp.
+//
+// Rotas internas do MainScaffold (Pratica, Cultura, Perfil, LessonScreen)
+// NAO vivem aqui — sao trocas de aba ou Navigator.push diretos.
 
 class AppRoutes {
-  static const String splash     = '/';
-  static const String login      = '/auth/login';
-  static const String register   = '/auth/register';
-  static const String home       = '/home';
-  static const String lessonList = '/module';
-  static const String lesson     = '/lesson';
-  static const String result     = '/result';
-  static const String profile    = '/profile';
+  AppRoutes._();
+
+  static const String splash   = '/';
+  static const String login    = '/auth/login';
+  static const String register = '/auth/register';
+
+  /// Casca principal apos login: MainScaffold com bottom nav de 4 abas.
+  static const String home     = '/home';
 }

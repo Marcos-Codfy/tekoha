@@ -1,34 +1,31 @@
-﻿// lib/data/models/module_model.dart
-// Representa um MÃ³dulo de ensino (ex: Cumprimentos, Natureza, FamÃ­lia)
-// ResponsÃ¡vel: Marcos
-// Os dados vÃªm do Airtable (tabela Modules)
+// lib/data/models/module_model.dart
+// Representa um modulo de ensino (Cumprimentos, Apresentacao, Natureza, etc).
+// Dados vem da tabela Modules do Airtable.
 
 class ModuleModel {
   final String id;
   final String name;
-  final String language;
   final String description;
+  final String language;
   final int order;
-  final String? iconUrl;
 
-  ModuleModel({
+  const ModuleModel({
     required this.id,
     required this.name,
-    required this.language,
     required this.description,
+    required this.language,
     required this.order,
-    this.iconUrl,
   });
 
-  /// Cria um ModuleModel a partir dos dados que chegam do Airtable (JSON)
+  /// Cria um ModuleModel a partir do JSON do Airtable.
+  /// [id] vem do nivel raiz do record; [fields] vem do objeto `fields`.
   factory ModuleModel.fromAirtable(String id, Map<String, dynamic> fields) {
     return ModuleModel(
       id: id,
-      name: fields['name'] ?? '',
-      language: fields['language'] ?? '',
-      description: fields['description'] ?? '',
-      order: (fields['order'] ?? 0).toInt(),
-      iconUrl: fields['icon_url'],
+      name:        (fields['name']        ?? '').toString(),
+      description: (fields['description'] ?? '').toString(),
+      language:    (fields['language']    ?? '').toString(),
+      order:       (fields['order'] ?? 0).toInt(),
     );
   }
 }
