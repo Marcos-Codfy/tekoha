@@ -29,7 +29,18 @@ const List<_CultureCategory> _categories = [
 ];
 
 class CultureScreen extends StatefulWidget {
-  const CultureScreen({super.key});
+  /// Chave do idioma no Airtable (ex.: 'nheengatu'). Default mantem
+  /// compatibilidade caso a tela seja usada sem parametros.
+  final String language;
+
+  /// Texto exibido no AppBar (ex.: 'Nheengatu').
+  final String languageLabel;
+
+  const CultureScreen({
+    super.key,
+    this.language = 'nheengatu',
+    this.languageLabel = 'Nheengatu',
+  });
 
   @override
   State<CultureScreen> createState() => _CultureScreenState();
@@ -45,23 +56,26 @@ class _CultureScreenState extends State<CultureScreen> {
     // "setState/notifyListeners called during build". Mesmo padrao da
     // PracticeScreen.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context
-          .read<ContentProvider>()
-          .loadCultureContent(_categories[_selectedIndex].key);
+      context.read<ContentProvider>().loadCultureContent(
+            _categories[_selectedIndex].key,
+            language: widget.language,
+          );
     });
   }
 
   void _selectCategory(int index) {
     if (index == _selectedIndex) return;
     setState(() => _selectedIndex = index);
-    context
-        .read<ContentProvider>()
-        .loadCultureContent(_categories[index].key);
+    context.read<ContentProvider>().loadCultureContent(
+          _categories[index].key,
+          language: widget.language,
+        );
   }
 
   Future<void> _refresh() {
     return context.read<ContentProvider>().loadCultureContent(
           _categories[_selectedIndex].key,
+          language: widget.language,
           forceRefresh: true,
         );
   }
@@ -71,8 +85,7 @@ class _CultureScreenState extends State<CultureScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Cultura'),
-        automaticallyImplyLeading: false,
+        title: Text(widget.languageLabel),
       ),
       body: Column(
         children: [
