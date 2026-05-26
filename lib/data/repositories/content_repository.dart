@@ -9,6 +9,7 @@
 // Esse desacoplamento e o coracao da Clean Architecture aqui:
 //   UI -> Provider -> ContentRepository (este arquivo) -> Service concreto
 
+import '../models/culture_content_model.dart';
 import '../models/lesson_model.dart';
 import '../models/module_model.dart';
 import '../models/word_model.dart';
@@ -40,4 +41,11 @@ abstract class ContentRepository {
 
   /// Busca todas as palavras de uma licao, ordenadas por `order`.
   Future<List<WordModel>> fetchWordsByLesson(String lessonId);
+
+  /// Busca os cards da aba Cultura filtrados por idioma e categoria.
+  /// Retorna apenas registros com is_active = true, ordenados por `order`.
+  Future<List<CultureContentModel>> fetchCultureContent(
+    String language,
+    String category,
+  );
 }

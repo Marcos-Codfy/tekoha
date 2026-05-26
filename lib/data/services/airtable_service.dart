@@ -16,6 +16,7 @@ import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
+import '../models/culture_content_model.dart';
 import '../models/lesson_model.dart';
 import '../models/module_model.dart';
 import '../models/word_model.dart';
@@ -32,6 +33,7 @@ class AirtableService implements ContentRepository {
   final String _modulesTab = dotenv.env['AIRTABLE_MODULES_TABLE'] ?? 'Modules';
   final String _lessonsTab = dotenv.env['AIRTABLE_LESSONS_TABLE'] ?? 'Lessons';
   final String _wordsTab   = dotenv.env['AIRTABLE_WORDS_TABLE']   ?? 'Words';
+  final String _cultureTab = dotenv.env['AIRTABLE_CULTURE_TABLE'] ?? 'CultureContent';
 
   /// Tempo maximo que uma requisicao pode demorar. 15s e generoso pra
   /// rede ruim mas evita o app travar pra sempre.
@@ -206,5 +208,29 @@ class AirtableService implements ContentRepository {
         })
         .where((word) => word.lessonId == lessonId)
         .toList();
+  }
+
+  @override
+  Future<List<CultureContentModel>> fetchCultureContent(
+    String language,
+    String category,
+  ) async {
+    // Filtro: idioma + categoria + apenas ativos.
+    // Diferente da Lessons/Words: aqui language e category sao campos diretos
+    // (nao Linked Records), entao a formula funciona no servidor sem problema.
+    final formula =
+        "AND({is_active}=TRUE(), {language}='$language', {category}='$category')";
+
+    final records = await _get(_cultureTab, queryParams: {
+      'filterByFormula': formula,
+      'sort[0][field]': 'order',
+      'sort[0][direction]': 'asc',
+    });
+
+    return records.map((record) {
+      final id = (record['id'] ?? '').toString();
+      final fields = (record['fields'] ?? <String, dynamic>{}) as Map<String, dynamic>;
+      return CultureContentModel.fromAirtable(id, fields);
+    }).toList();
   }
 }
