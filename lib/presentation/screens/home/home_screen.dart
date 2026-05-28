@@ -8,11 +8,19 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_flags.dart';
 
 class HomeScreen extends StatelessWidget {
-  /// Callback pra mandar o usuario direto pra aba "Pratica".
+  /// Callback pra mandar o usuario direto pra aba "Aprenda".
   /// O MainScaffold (que conhece o indice da aba) injeta esse callback.
   final VoidCallback? onStartPractice;
 
-  const HomeScreen({super.key, this.onStartPractice});
+  /// Callback pra mandar o usuario direto pra aba "Cultura".
+  /// Mesma logica do [onStartPractice] — injetado pelo MainScaffold.
+  final VoidCallback? onOpenCulture;
+
+  const HomeScreen({
+    super.key,
+    this.onStartPractice,
+    this.onOpenCulture,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +94,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // ── CTA principal: leva pra aba Pratica ────────────────────
+            // ── CTA principal: leva pra aba "Aprenda" ──────────────────
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -99,6 +107,21 @@ class HomeScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // ── CTA secundario: leva pra aba "Cultura" ─────────────────
+            // Estilo outline pra nao competir com o CTA primario, mas
+            // ainda convidativo. Icone bate com o do bottom nav da Cultura
+            // (auto_stories) — o usuario associa visualmente.
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: onOpenCulture,
+                icon: const Icon(Icons.auto_stories_outlined),
+                label: const Text('Conheça mais sobre o Nheengatu'),
               ),
             ),
 
