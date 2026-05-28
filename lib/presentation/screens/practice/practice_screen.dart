@@ -45,7 +45,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Prática'),
+        title: const Text('Aprenda'),
         automaticallyImplyLeading: false,
       ),
       body: Consumer<ContentProvider>(
