@@ -30,7 +30,10 @@ class _MainScaffoldState extends State<MainScaffold> {
     // Vantagem: trocar de aba e instantaneo e preserva scroll/estado.
     // Desvantagem: usa um pouco mais de RAM (irrelevante com 4 telas leves).
     final tabs = <Widget>[
-      HomeScreen(onStartPractice: () => _selectTab(1)),
+      HomeScreen(
+        onStartPractice: () => _selectTab(1),
+        onOpenCulture: () => _selectTab(2),
+      ),
       const PracticeScreen(),
       const CulturesListScreen(),
       const ProfileScreen(),
