@@ -61,7 +61,7 @@ class _MainScaffoldState extends State<MainScaffold> {
           BottomNavigationBarItem(
             icon: Icon(Icons.menu_book_outlined),
             activeIcon: Icon(Icons.menu_book),
-            label: 'Prática',
+            label: 'Aprenda',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.auto_stories_outlined),
