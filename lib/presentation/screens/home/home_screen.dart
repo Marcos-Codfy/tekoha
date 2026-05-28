@@ -64,8 +64,10 @@ class HomeScreen extends StatelessWidget {
             ],
 
             // ── Saudacao em Nheengatu (palavra verificada do banco) ────
+            // "Puranga pituna" = "Boa noite". A apresentacao da demo e a
+            // noite — saudacao casa com o horario do publico.
             const Text(
-              'Puranga ara!',
+              'Puranga pituna!',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
