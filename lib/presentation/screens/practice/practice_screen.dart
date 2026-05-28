@@ -85,14 +85,32 @@ class _PracticeScreenState extends State<PracticeScreen> {
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final module = content.modules[index];
-                // Regra MVP: Modulos 1 e 2 abertos; Modulo 3 trancado.
-                // Sprint 5 vai trocar essa regra hardcoded por logica
-                // baseada no progresso real do usuario.
-                final isLocked = module.order >= 3;
+                // Regra de demo: so o Modulo 1 (Saudacoes, com audio) abre.
+                // Modulo 2 "Em ajustes" e Modulo 3 "Em construcao" — copia
+                // mais humana que "Complete o Modulo X". Sprint futura troca
+                // essa regra hardcoded por progresso real do usuario.
+                final bool isLocked;
+                final String lockedMessage;
+                final IconData lockedIcon;
+                if (module.order == 1) {
+                  isLocked = false;
+                  lockedMessage = '';
+                  lockedIcon = Icons.lock_outline;
+                } else if (module.order == 2) {
+                  isLocked = true;
+                  lockedMessage = 'Em ajustes';
+                  lockedIcon = Icons.tune;
+                } else {
+                  isLocked = true;
+                  lockedMessage = 'Em construção';
+                  lockedIcon = Icons.construction;
+                }
 
                 return ModuleCard(
                   module: module,
                   isLocked: isLocked,
+                  lockedMessage: lockedMessage,
+                  lockedIcon: lockedIcon,
                   onTap: isLocked
                       ? null
                       : () => _openModule(context, module.id, module.name),
