@@ -15,17 +15,27 @@ import '../../widgets/error_view.dart';
 /// Categorias disponiveis na aba Cultura.
 /// O `key` e o valor armazenado no Airtable (ingles, minusculo).
 /// O `label` e o texto exibido na UI em PT-BR.
+/// [available] = false renderiza o chip em cinza, sem ripple e sem callback.
 class _CultureCategory {
   final String key;
   final String label;
-  const _CultureCategory(this.key, this.label);
+  final bool available;
+  const _CultureCategory(
+    this.key,
+    this.label, {
+    this.available = true,
+  });
 }
 
+/// Ordem da demo: Curiosidades primeiro (mais leve/divertido), depois
+/// História e Hábitos. Cosmologia fica por ultimo e DESABILITADA enquanto
+/// o texto nao passa pela validacao juridica/compliance — quando for
+/// liberada, basta remover `available: false`.
 const List<_CultureCategory> _categories = [
-  _CultureCategory('history',     'História'),
-  _CultureCategory('cosmology',   'Cosmologia'),
-  _CultureCategory('habits',      'Hábitos'),
   _CultureCategory('curiosities', 'Curiosidades'),
+  _CultureCategory('history',     'História'),
+  _CultureCategory('habits',      'Hábitos'),
+  _CultureCategory('cosmology',   'Cosmologia', available: false),
 ];
 
 class CultureScreen extends StatefulWidget {
@@ -106,22 +116,46 @@ class _CultureScreenState extends State<CultureScreen> {
         itemCount: _categories.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
+          final category = _categories[index];
           final selected = index == _selectedIndex;
+          final disabled = !category.available;
+
+          // Cores derivadas: quando desabilitado, usa cinza claro neutro
+          // tanto no fundo quanto no texto, mesmo padrao do
+          // CultureLanguageCard inativo da tela de selecao de lingua.
+          final Color background;
+          final Color labelColor;
+          final Color borderColor;
+          if (disabled) {
+            background = const Color(0xFFF5F5F5);
+            labelColor = AppColors.textSecondary;
+            borderColor = AppColors.border;
+          } else if (selected) {
+            background = AppColors.primary;
+            labelColor = AppColors.textOnPrimary;
+            borderColor = AppColors.primary;
+          } else {
+            background = AppColors.surface;
+            labelColor = AppColors.textPrimary;
+            borderColor = AppColors.border;
+          }
+
           return ChoiceChip(
-            label: Text(_categories[index].label),
+            label: Text(category.label),
             selected: selected,
-            onSelected: (_) => _selectCategory(index),
+            // `null` desliga o toque e a animacao de ripple do ChoiceChip,
+            // alem de impedir que o `_selectCategory` rode pra esse chip.
+            onSelected: disabled ? null : (_) => _selectCategory(index),
             selectedColor: AppColors.primary,
-            backgroundColor: AppColors.surface,
+            backgroundColor: background,
+            disabledColor: background,
             labelStyle: TextStyle(
-              color: selected ? AppColors.textOnPrimary : AppColors.textPrimary,
+              color: labelColor,
               fontWeight: FontWeight.w600,
             ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
-              side: BorderSide(
-                color: selected ? AppColors.primary : AppColors.border,
-              ),
+              side: BorderSide(color: borderColor),
             ),
           );
         },

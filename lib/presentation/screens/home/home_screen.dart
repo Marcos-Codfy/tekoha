@@ -8,11 +8,19 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_flags.dart';
 
 class HomeScreen extends StatelessWidget {
-  /// Callback pra mandar o usuario direto pra aba "Pratica".
+  /// Callback pra mandar o usuario direto pra aba "Aprenda".
   /// O MainScaffold (que conhece o indice da aba) injeta esse callback.
   final VoidCallback? onStartPractice;
 
-  const HomeScreen({super.key, this.onStartPractice});
+  /// Callback pra mandar o usuario direto pra aba "Cultura".
+  /// Mesma logica do [onStartPractice] — injetado pelo MainScaffold.
+  final VoidCallback? onOpenCulture;
+
+  const HomeScreen({
+    super.key,
+    this.onStartPractice,
+    this.onOpenCulture,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +64,10 @@ class HomeScreen extends StatelessWidget {
             ],
 
             // ── Saudacao em Nheengatu (palavra verificada do banco) ────
+            // "Puranga pituna" = "Boa noite". A apresentacao da demo e a
+            // noite — saudacao casa com o horario do publico.
             const Text(
-              'Puranga ara!',
+              'Puranga pituna!',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -86,7 +96,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // ── CTA principal: leva pra aba Pratica ────────────────────
+            // ── CTA principal: leva pra aba "Aprenda" ──────────────────
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -99,6 +109,21 @@ class HomeScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // ── CTA secundario: leva pra aba "Cultura" ─────────────────
+            // Estilo outline pra nao competir com o CTA primario, mas
+            // ainda convidativo. Icone bate com o do bottom nav da Cultura
+            // (diversity_3 — povo/comunidade) — o usuario associa visualmente.
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: onOpenCulture,
+                icon: const Icon(Icons.diversity_3_outlined),
+                label: const Text('Conheça mais sobre o Nheengatu'),
               ),
             ),
 
@@ -118,14 +143,14 @@ class HomeScreen extends StatelessWidget {
               icon: Icons.local_fire_department,
               title: 'Sequência',
               value: '0 dias',
-              hint: 'Em breve',
+              isLocked: true,
             ),
             const SizedBox(height: 12),
             const _DashboardCard(
               icon: Icons.star,
               title: 'XP total',
               value: '0 XP',
-              hint: 'Em breve',
+              isLocked: true,
             ),
           ],
         ),
@@ -138,17 +163,23 @@ class _DashboardCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String value;
-  final String hint;
+
+  /// Quando `true`, sobrepoe um overlay translucido + "Em breve" centralizado,
+  /// no mesmo padrao visual dos ModuleCards bloqueados da aba Aprenda.
+  /// Sprint que ligar o Firestore basta passar `false` aqui pros valores
+  /// reais aparecerem.
+  final bool isLocked;
+
   const _DashboardCard({
     required this.icon,
     required this.title,
     required this.value,
-    required this.hint,
+    this.isLocked = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final cardContent = Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.background,
@@ -165,7 +196,10 @@ class _DashboardCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 Text(
                   value,
@@ -178,16 +212,46 @@ class _DashboardCard extends StatelessWidget {
               ],
             ),
           ),
-          Text(
-            hint,
-            style: const TextStyle(
-              fontSize: 11,
-              color: AppColors.textSecondary,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
         ],
       ),
+    );
+
+    if (!isLocked) return cardContent;
+
+    // Overlay no mesmo padrao do ModuleCard bloqueado: camada clara semi
+    // transparente cobrindo o conteudo + icone e texto centralizados.
+    return Stack(
+      children: [
+        cardContent,
+        Positioned.fill(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              color: const Color(0xE6F5F5F5),
+              alignment: Alignment.center,
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.schedule,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    'Em breve',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
