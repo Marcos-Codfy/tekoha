@@ -22,6 +22,17 @@ class SpeechService {
   bool get isAvailable => _available;
   bool get isListening => _speech.isListening;
 
+  /// Callback opcional pra status do motor de voz.
+  /// Valores conhecidos vindos do `speech_to_text`:
+  ///   'listening'    -> comecou a capturar audio
+  ///   'notListening' -> parou de capturar (pauseFor disparou ou stop manual)
+  ///   'done'         -> sessao finalizada; resultado final ja entregue
+  ///
+  /// Defina ANTES de chamar [listen] pra reagir a esses eventos sem precisar
+  /// de delay fixo. Sempre limpe (`= null`) no dispose pra nao vazar callback
+  /// pra widgets ja desmontados.
+  void Function(String status)? onStatus;
+
   /// Pede permissao de microfone e inicializa o motor.
   /// Retorna true se esta tudo pronto pra ouvir.
   Future<bool> init() async {
@@ -32,7 +43,7 @@ class SpeechService {
     }
     _available = await _speech.initialize(
       onError: (_) {},
-      onStatus: (_) {},
+      onStatus: (s) => onStatus?.call(s),
     );
     return _available;
   }

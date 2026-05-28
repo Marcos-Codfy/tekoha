@@ -127,9 +127,28 @@ class _LessonScreenState extends State<LessonScreen> {
 
   @override
   void dispose() {
+    // Limpa o callback de status antes de qualquer outra coisa, senao o
+    // motor pode disparar um evento depois do widget ja desmontado.
+    _speech.onStatus = null;
     _player.stop();
     _speech.stop();
     super.dispose();
+  }
+
+  /// Callback do SpeechService disparado quando o motor muda de status.
+  /// E o que torna a UI responsiva:
+  /// - `notListening`: motor parou de capturar audio. Devolvemos o botao
+  ///   ao estado normal IMEDIATAMENTE pra o usuario ver que a gravacao
+  ///   acabou (o sistema operacional ja tocou o som de fim).
+  /// - `done`: sessao terminou de verdade — o resultado final ja chegou
+  ///   via onResult. So agora avaliamos pra ter o texto completo.
+  void _onSpeechStatus(String status) {
+    if (!mounted) return;
+    if (status == 'notListening' && _listening) {
+      setState(() => _listening = false);
+    } else if (status == 'done' && !_answered && !_listening) {
+      _evaluateSpeech();
+    }
   }
 
   // ── Carga inicial: decide modo, baixa audios, monta sequencia ───────
@@ -164,6 +183,12 @@ class _LessonScreenState extends State<LessonScreen> {
         // Pre-baixa os MP3 e pede permissao de microfone.
         await _player.preload(audioWords.map((w) => w.audioUrl).toList());
         _speechAvailable = await _speech.init();
+        if (_speechAvailable) {
+          // Conecta o callback de status: e quem decide quando o botao
+          // do mic volta ao normal (notListening) e quando a avaliacao
+          // roda (done).
+          _speech.onStatus = _onSpeechStatus;
+        }
 
         // Gera 3 exercicios de audio por palavra (escolha trad, escolha
         // palavra, repetir) — total 3 * N.
@@ -335,8 +360,10 @@ class _LessonScreenState extends State<LessonScreen> {
       if (!mounted) return;
       setState(() => _spokenText = text);
     });
-    // Apos o tempo maximo de listen do SpeechService (6s + buffer), avalia.
-    Future.delayed(const Duration(milliseconds: 6500), _evaluateSpeech);
+    // A avaliacao agora e disparada pelo callback de status do motor de
+    // voz (_onSpeechStatus), nao por um delay fixo. Isso deixa o botao
+    // responsivo: vira "mic" assim que o motor para de capturar
+    // (notListening) e a avaliacao roda quando a sessao termina (done).
   }
 
   void _evaluateSpeech() {
