@@ -67,8 +67,11 @@ class _MainScaffoldState extends State<MainScaffold> {
             label: 'Aprenda',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.auto_stories_outlined),
-            activeIcon: Icon(Icons.auto_stories),
+            // diversity_3 simboliza povo / comunidade — mais semântico pra
+            // 'Cultura' que o auto_stories (livro), que confundia visualmente
+            // com o menu_book da aba Aprenda.
+            icon: Icon(Icons.diversity_3_outlined),
+            activeIcon: Icon(Icons.diversity_3),
             label: 'Cultura',
           ),
           BottomNavigationBarItem(

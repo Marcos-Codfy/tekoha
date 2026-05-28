@@ -117,12 +117,12 @@ class HomeScreen extends StatelessWidget {
             // ── CTA secundario: leva pra aba "Cultura" ─────────────────
             // Estilo outline pra nao competir com o CTA primario, mas
             // ainda convidativo. Icone bate com o do bottom nav da Cultura
-            // (auto_stories) — o usuario associa visualmente.
+            // (diversity_3 — povo/comunidade) — o usuario associa visualmente.
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: onOpenCulture,
-                icon: const Icon(Icons.auto_stories_outlined),
+                icon: const Icon(Icons.diversity_3_outlined),
                 label: const Text('Conheça mais sobre o Nheengatu'),
               ),
             ),
