@@ -620,12 +620,12 @@ class _LessonScreenState extends State<LessonScreen> {
           ),
         ),
         const SizedBox(height: 16),
+        // Nao expomos a transcricao porque o motor de voz nunca acerta 100%
+        // o Nheengatu (usa locale pt_BR como aproximacao). Ver a transcricao
+        // crua deixa o usuario ansioso pra refazer ate ficar "fiel", o que
+        // nao e o ponto do exercicio. Mantemos so o estado da escuta.
         Text(
-          _listening
-              ? 'Ouvindo... fale agora'
-              : (_spokenText.isEmpty
-                  ? 'Toque no microfone e repita'
-                  : 'Voce disse: "$_spokenText"'),
+          _listening ? 'Ouvindo... fale agora' : 'Toque no microfone e repita',
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: AppColors.textSecondary,
