@@ -12,11 +12,23 @@ class ModuleCard extends StatelessWidget {
   final bool isLocked;
   final VoidCallback? onTap;
 
+  /// Texto exibido no overlay quando [isLocked] = true.
+  /// Default: "Em breve". A PracticeScreen passa mensagens contextuais
+  /// como "Em ajustes" e "Em construção".
+  final String lockedMessage;
+
+  /// Icone exibido no overlay quando [isLocked] = true.
+  /// Default: cadeado. PracticeScreen pode trocar por icones contextuais
+  /// (`tune` pra ajustes, `construction` pra obra).
+  final IconData lockedIcon;
+
   const ModuleCard({
     super.key,
     required this.module,
     this.isLocked = false,
     this.onTap,
+    this.lockedMessage = 'Em breve',
+    this.lockedIcon = Icons.lock_outline,
   });
 
   @override
@@ -117,15 +129,15 @@ class ModuleCard extends StatelessWidget {
               color: lockedOverlay,
               alignment: Alignment.center,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: const Column(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.lock_outline, size: 32, color: AppColors.primary),
-                  SizedBox(height: 4),
+                  Icon(lockedIcon, size: 32, color: AppColors.primary),
+                  const SizedBox(height: 4),
                   Text(
-                    'Complete o Modulo 2 para desbloquear',
+                    lockedMessage,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,

@@ -30,7 +30,10 @@ class _MainScaffoldState extends State<MainScaffold> {
     // Vantagem: trocar de aba e instantaneo e preserva scroll/estado.
     // Desvantagem: usa um pouco mais de RAM (irrelevante com 4 telas leves).
     final tabs = <Widget>[
-      HomeScreen(onStartPractice: () => _selectTab(1)),
+      HomeScreen(
+        onStartPractice: () => _selectTab(1),
+        onOpenCulture: () => _selectTab(2),
+      ),
       const PracticeScreen(),
       const CulturesListScreen(),
       const ProfileScreen(),
@@ -61,11 +64,14 @@ class _MainScaffoldState extends State<MainScaffold> {
           BottomNavigationBarItem(
             icon: Icon(Icons.menu_book_outlined),
             activeIcon: Icon(Icons.menu_book),
-            label: 'Prática',
+            label: 'Aprenda',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.auto_stories_outlined),
-            activeIcon: Icon(Icons.auto_stories),
+            // diversity_3 simboliza povo / comunidade — mais semântico pra
+            // 'Cultura' que o auto_stories (livro), que confundia visualmente
+            // com o menu_book da aba Aprenda.
+            icon: Icon(Icons.diversity_3_outlined),
+            activeIcon: Icon(Icons.diversity_3),
             label: 'Cultura',
           ),
           BottomNavigationBarItem(
