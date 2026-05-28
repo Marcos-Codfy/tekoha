@@ -143,14 +143,14 @@ class HomeScreen extends StatelessWidget {
               icon: Icons.local_fire_department,
               title: 'Sequência',
               value: '0 dias',
-              hint: 'Em breve',
+              isLocked: true,
             ),
             const SizedBox(height: 12),
             const _DashboardCard(
               icon: Icons.star,
               title: 'XP total',
               value: '0 XP',
-              hint: 'Em breve',
+              isLocked: true,
             ),
           ],
         ),
@@ -163,17 +163,23 @@ class _DashboardCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String value;
-  final String hint;
+
+  /// Quando `true`, sobrepoe um overlay translucido + "Em breve" centralizado,
+  /// no mesmo padrao visual dos ModuleCards bloqueados da aba Aprenda.
+  /// Sprint que ligar o Firestore basta passar `false` aqui pros valores
+  /// reais aparecerem.
+  final bool isLocked;
+
   const _DashboardCard({
     required this.icon,
     required this.title,
     required this.value,
-    required this.hint,
+    this.isLocked = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final cardContent = Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.background,
@@ -190,7 +196,10 @@ class _DashboardCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 Text(
                   value,
@@ -203,16 +212,46 @@ class _DashboardCard extends StatelessWidget {
               ],
             ),
           ),
-          Text(
-            hint,
-            style: const TextStyle(
-              fontSize: 11,
-              color: AppColors.textSecondary,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
         ],
       ),
+    );
+
+    if (!isLocked) return cardContent;
+
+    // Overlay no mesmo padrao do ModuleCard bloqueado: camada clara semi
+    // transparente cobrindo o conteudo + icone e texto centralizados.
+    return Stack(
+      children: [
+        cardContent,
+        Positioned.fill(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              color: const Color(0xE6F5F5F5),
+              alignment: Alignment.center,
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.schedule,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    'Em breve',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
