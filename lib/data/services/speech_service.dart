@@ -38,14 +38,19 @@ class SpeechService {
   }
 
   /// Comeca a ouvir. [onResult] recebe a transcricao (parcial e final).
-  /// Para sozinho apos [pauseFor] de silencio ou [listenFor] total.
+  /// Para sozinho apos 3s de silencio ou 6s totais.
   Future<void> listen({
     required void Function(String transcript) onResult,
   }) async {
     if (!_available) return;
     await _speech.listen(
-      localeId: 'pt_BR', // mais proximo foneticamente do Nheengatu
+      // `pt_BR` e o locale mais proximo foneticamente do Nheengatu —
+      // o motor do Android nao suporta a lingua direto.
+      // ignore: deprecated_member_use
+      localeId: 'pt_BR',
+      // ignore: deprecated_member_use
       listenFor: const Duration(seconds: 6),
+      // ignore: deprecated_member_use
       pauseFor: const Duration(seconds: 3),
       onResult: (result) => onResult(result.recognizedWords),
     );
