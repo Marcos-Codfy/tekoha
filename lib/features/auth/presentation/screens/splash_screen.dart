@@ -1,12 +1,12 @@
-// lib/presentation/screens/splash/splash_screen.dart
-// Splash com mascote animado. Logo aparece só aqui.
-// Responsável: Jeovanna (design) / Marcos (integração)
+// lib/features/auth/presentation/screens/splash_screen.dart
+// Splash inicial. So aparece quando kBypassAuth = false (login ativo).
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../providers/auth_provider.dart';
-import '../../../core/constants/app_routes.dart';
+
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_routes.dart';
+import '../providers/auth_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -54,7 +54,6 @@ class _SplashScreenState extends State<SplashScreen>
 
     _ctrl.forward();
 
-    // Aguarda auth e navega
     Future.delayed(const Duration(milliseconds: 2800), _navigate);
   }
 
@@ -82,7 +81,6 @@ class _SplashScreenState extends State<SplashScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Mascote animado
             FadeTransition(
               opacity: _fade,
               child: ScaleTransition(
@@ -99,10 +97,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
             ),
-
             const SizedBox(height: 28),
-
-            // Nome do app
             FadeTransition(
               opacity: _textFade,
               child: const Text(
@@ -115,9 +110,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
             ),
-
             const SizedBox(height: 6),
-
             FadeTransition(
               opacity: _textFade,
               child: const Text(
@@ -130,10 +123,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
             ),
-
             const SizedBox(height: 56),
-
-            // Loader discreto
             FadeTransition(
               opacity: _textFade,
               child: const SizedBox(

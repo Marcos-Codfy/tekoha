@@ -1,14 +1,16 @@
-﻿// lib/presentation/screens/auth/register_screen.dart
-// Cadastro — e-mail, senha e confirmação apenas.
-// Barra de força da senha = gamificação + prevenção de erros.
-// Responsável: Jeovanna (design) / Marcos (lógica)
+// lib/features/auth/presentation/screens/register_screen.dart
+// Cadastro com barra de forca de senha (gamificacao + prevencao de erros).
+//
+// NOTA: tela DESATIVADA via kBypassAuth. Codigo preservado pra reativacao.
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_routes.dart';
-import '../../../core/utils/validators.dart';
-import '../../providers/auth_provider.dart';
+
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/validators.dart';
+import '../providers/auth_provider.dart';
+import '../widgets/auth_button_loader.dart';
+import '../widgets/auth_error_banner.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -27,9 +29,8 @@ class _RegisterScreenState extends State<RegisterScreen>
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
-  int _passwordStrength = 0; // 0–4
+  int _passwordStrength = 0;
 
-  // Animação de entrada
   late AnimationController _animCtrl;
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
@@ -57,7 +58,6 @@ class _RegisterScreenState extends State<RegisterScreen>
     _passwordController.addListener(_evaluatePasswordStrength);
   }
 
-  // Gamificação: barra de força da senha (gatilho de progresso)
   void _evaluatePasswordStrength() {
     final p = _passwordController.text;
     int strength = 0;
@@ -117,7 +117,6 @@ class _RegisterScreenState extends State<RegisterScreen>
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        // Heurística: localização — usuário sabe onde está
         title: const Text(
           'Criar conta',
           style: TextStyle(
@@ -141,8 +140,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 32),
-
-                    // ── Header ───────────────────────────────────────────────
                     const Text(
                       'Comece sua\njornada agora.',
                       style: TextStyle(
@@ -154,19 +151,15 @@ class _RegisterScreenState extends State<RegisterScreen>
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // Gatilho: especificidade da proposta de valor
                     const Text(
-                      'Aprenda línguas indígenas de forma simples e gratuita.',
+                      'Aprenda linguas indigenas de forma simples e gratuita.',
                       style: TextStyle(
                         fontSize: 14,
                         color: AppColors.textSecondary,
                         height: 1.5,
                       ),
                     ),
-
                     const SizedBox(height: 36),
-
-                    // ── E-mail ───────────────────────────────────────────────
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -178,10 +171,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                       ),
                       validator: Validators.email,
                     ),
-
                     const SizedBox(height: 16),
-
-                    // ── Senha ────────────────────────────────────────────────
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
@@ -189,7 +179,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                       decoration: InputDecoration(
                         labelText: 'Senha',
                         prefixIcon:
-                        const Icon(Icons.lock_outline, size: 20),
+                            const Icon(Icons.lock_outline, size: 20),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword
@@ -199,21 +189,16 @@ class _RegisterScreenState extends State<RegisterScreen>
                             color: AppColors.textSecondary,
                           ),
                           onPressed: () => setState(
-                                  () => _obscurePassword = !_obscurePassword),
+                              () => _obscurePassword = !_obscurePassword),
                         ),
                       ),
                       validator: Validators.password,
                     ),
-
-                    // Barra de força — gamificação / prevenção de erros
                     if (_passwordController.text.isNotEmpty) ...[
                       const SizedBox(height: 10),
                       _PasswordStrengthBar(strength: _passwordStrength),
                     ],
-
                     const SizedBox(height: 16),
-
-                    // ── Confirmar senha ──────────────────────────────────────
                     TextFormField(
                       controller: _confirmController,
                       obscureText: _obscureConfirm,
@@ -222,7 +207,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                       decoration: InputDecoration(
                         labelText: 'Confirmar senha',
                         prefixIcon:
-                        const Icon(Icons.lock_outline, size: 20),
+                            const Icon(Icons.lock_outline, size: 20),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscureConfirm
@@ -232,7 +217,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                             color: AppColors.textSecondary,
                           ),
                           onPressed: () => setState(
-                                  () => _obscureConfirm = !_obscureConfirm),
+                              () => _obscureConfirm = !_obscureConfirm),
                         ),
                       ),
                       validator: (value) {
@@ -240,36 +225,27 @@ class _RegisterScreenState extends State<RegisterScreen>
                           return 'Confirme sua senha';
                         }
                         if (value != _passwordController.text) {
-                          return 'As senhas não coincidem';
+                          return 'As senhas nao coincidem';
                         }
                         return null;
                       },
                     ),
-
                     const SizedBox(height: 10),
-
-                    // ── Erro Firebase ────────────────────────────────────────
                     if (auth.errorMessage != null)
-                      _ErrorBanner(message: auth.errorMessage!),
-
+                      AuthErrorBanner(message: auth.errorMessage!),
                     const SizedBox(height: 32),
-
-                    // ── Botão Criar conta ────────────────────────────────────
                     ElevatedButton(
                       onPressed: _isLoading ? null : _handleRegister,
                       child: _isLoading
-                          ? const _LoadingIndicator()
+                          ? const AuthButtonLoader()
                           : const Text('Criar conta'),
                     ),
-
                     const SizedBox(height: 24),
-
-                    // ── Link login ───────────────────────────────────────────
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text(
-                          'Já tem conta? ',
+                          'Ja tem conta? ',
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 14,
@@ -288,11 +264,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                         ),
                       ],
                     ),
-
-                    // Texto legal discreto (boa prática de UX / trust)
                     const SizedBox(height: 20),
                     const Text(
-                      'Ao criar sua conta você concorda com nossos\nTermos de Uso e Política de Privacidade.',
+                      'Ao criar sua conta voce concorda com nossos\nTermos de Uso e Politica de Privacidade.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 11,
@@ -300,7 +274,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                         height: 1.5,
                       ),
                     ),
-
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -313,9 +286,8 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 }
 
-// ─── Barra de força da senha ──────────────────────────────────────────────────
 class _PasswordStrengthBar extends StatelessWidget {
-  final int strength; // 0–4
+  final int strength;
 
   const _PasswordStrengthBar({required this.strength});
 
@@ -339,7 +311,7 @@ class _PasswordStrengthBar extends StatelessWidget {
       case 1:
         return 'Fraca';
       case 2:
-        return 'Razoável';
+        return 'Razoavel';
       case 3:
         return 'Boa';
       case 4:
@@ -354,7 +326,6 @@ class _PasswordStrengthBar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Barra segmentada
         Row(
           children: List.generate(4, (i) {
             return Expanded(
@@ -389,7 +360,6 @@ class _PasswordStrengthBar extends StatelessWidget {
   }
 }
 
-// ─── Dialog de Sucesso ────────────────────────────────────────────────────────
 class _SuccessDialog extends StatelessWidget {
   const _SuccessDialog();
 
@@ -403,7 +373,6 @@ class _SuccessDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Ícone de check
             Container(
               width: 80,
               height: 80,
@@ -411,12 +380,13 @@ class _SuccessDialog extends StatelessWidget {
                 color: AppColors.correct,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check_rounded,
-                  color: Colors.white, size: 44),
+              child: const Icon(
+                Icons.check_rounded,
+                color: Colors.white,
+                size: 44,
+              ),
             ),
-
             const SizedBox(height: 24),
-
             const Text(
               'Conta criada!',
               style: TextStyle(
@@ -426,11 +396,9 @@ class _SuccessDialog extends StatelessWidget {
                 letterSpacing: -0.3,
               ),
             ),
-
             const SizedBox(height: 8),
-
             const Text(
-              'Sua jornada pelas línguas indígenas começa agora. Bem-vindo ao Tekoha!',
+              'Sua jornada pelas linguas indigenas comeca agora. Bem-vindo ao Tekoha!',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -438,68 +406,17 @@ class _SuccessDialog extends StatelessWidget {
                 height: 1.5,
               ),
             ),
-
             const SizedBox(height: 28),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Começar agora'),
+                child: const Text('Comecar agora'),
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-// ─── Widgets reutilizados ─────────────────────────────────────────────────────
-
-class _ErrorBanner extends StatelessWidget {
-  final String message;
-  const _ErrorBanner({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.wrong.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.wrong.withOpacity(0.3)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.error_outline, color: AppColors.wrong, size: 18),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: AppColors.wrong,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LoadingIndicator extends StatelessWidget {
-  const _LoadingIndicator();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 22,
-      width: 22,
-      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
     );
   }
 }

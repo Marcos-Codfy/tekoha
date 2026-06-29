@@ -1,19 +1,18 @@
-// lib/presentation/screens/home/home_screen.dart
-// Aba "Home" do MainScaffold. Dashboard simples de boas-vindas, com CTA
-// que joga o usuario direto na aba "Pratica".
-// Responsavel: Marcos (Sprint 3, gerado por Claude)
+// lib/features/home/presentation/screens/home_screen.dart
+//
+// Aba "Home" do MainScaffold. Dashboard de boas-vindas com CTAs pra
+// Pratica e Cultura.
 
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_flags.dart';
+
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_flags.dart';
 
 class HomeScreen extends StatelessWidget {
-  /// Callback pra mandar o usuario direto pra aba "Aprenda".
-  /// O MainScaffold (que conhece o indice da aba) injeta esse callback.
+  /// Callback pra ir direto pra aba "Aprenda". MainScaffold injeta.
   final VoidCallback? onStartPractice;
 
-  /// Callback pra mandar o usuario direto pra aba "Cultura".
-  /// Mesma logica do [onStartPractice] — injetado pelo MainScaffold.
+  /// Callback pra ir direto pra aba "Cultura". MainScaffold injeta.
   final VoidCallback? onOpenCulture;
 
   const HomeScreen({
@@ -35,19 +34,25 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Badge "modo de teste" (so se login estiver desativado) ─
             if (kBypassAuth) ...[
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.bug_report_outlined, size: 16, color: AppColors.primary),
+                    Icon(
+                      Icons.bug_report_outlined,
+                      size: 16,
+                      color: AppColors.primary,
+                    ),
                     SizedBox(width: 6),
                     Text(
                       'Modo de teste — login desativado',
@@ -62,10 +67,6 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
             ],
-
-            // ── Saudacao em Nheengatu (palavra verificada do banco) ────
-            // "Puranga pituna" = "Boa noite". A apresentacao da demo e a
-            // noite — saudacao casa com o horario do publico.
             const Text(
               'Puranga pituna!',
               style: TextStyle(
@@ -76,7 +77,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Bem-vindo ao Tekohá',
+              'Bem-vindo ao Tekoha',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
@@ -85,9 +86,9 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             const Text(
-              'Aprenda o Nheengatu, uma língua indígena viva falada por '
-              'comunidades do Alto Rio Negro. Cada palavra que você aprende '
-              'ajuda a preservar uma cosmovisão única.',
+              'Aprenda o Nheengatu, uma lingua indigena viva falada por '
+              'comunidades do Alto Rio Negro. Cada palavra que voce aprende '
+              'ajuda a preservar uma cosmovisao unica.',
               style: TextStyle(
                 fontSize: 15,
                 color: AppColors.textSecondary,
@@ -95,41 +96,33 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
-
-            // ── CTA principal: leva pra aba "Aprenda" ──────────────────
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: onStartPractice,
                 icon: const Icon(Icons.play_arrow),
-                label: const Text('Começar a praticar'),
+                label: const Text('Comecar a praticar'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.textOnPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
-
             const SizedBox(height: 12),
-
-            // ── CTA secundario: leva pra aba "Cultura" ─────────────────
-            // Estilo outline pra nao competir com o CTA primario, mas
-            // ainda convidativo. Icone bate com o do bottom nav da Cultura
-            // (diversity_3 — povo/comunidade) — o usuario associa visualmente.
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: onOpenCulture,
                 icon: const Icon(Icons.diversity_3_outlined),
-                label: const Text('Conheça mais sobre o Nheengatu'),
+                label: const Text('Conheca mais sobre o Nheengatu'),
               ),
             ),
-
             const SizedBox(height: 32),
-
-            // ── Cards de dashboard (placeholders pra Sprint 5) ─────────
             const Text(
               'Seu progresso',
               style: TextStyle(
@@ -141,7 +134,7 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 8),
             const _DashboardCard(
               icon: Icons.local_fire_department,
-              title: 'Sequência',
+              title: 'Sequencia',
               value: '0 dias',
               isLocked: true,
             ),
@@ -164,10 +157,9 @@ class _DashboardCard extends StatelessWidget {
   final String title;
   final String value;
 
-  /// Quando `true`, sobrepoe um overlay translucido + "Em breve" centralizado,
-  /// no mesmo padrao visual dos ModuleCards bloqueados da aba Aprenda.
-  /// Sprint que ligar o Firestore basta passar `false` aqui pros valores
-  /// reais aparecerem.
+  /// Quando `true`, sobrepoe overlay com "Em breve". Mesmo padrao visual
+  /// dos ModuleCards bloqueados da aba Aprenda. Sprint futura: passar
+  /// `false` e ligar nos valores reais do Firestore.
   final bool isLocked;
 
   const _DashboardCard({
@@ -218,8 +210,6 @@ class _DashboardCard extends StatelessWidget {
 
     if (!isLocked) return cardContent;
 
-    // Overlay no mesmo padrao do ModuleCard bloqueado: camada clara semi
-    // transparente cobrindo o conteudo + icone e texto centralizados.
     return Stack(
       children: [
         cardContent,

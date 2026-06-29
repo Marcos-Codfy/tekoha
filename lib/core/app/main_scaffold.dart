@@ -1,14 +1,19 @@
-// lib/presentation/screens/main_scaffold.dart
-// Container com bottom navigation bar de 4 abas (Home, Pratica, Cultura, Perfil).
-// E a "casca" que aparece depois do login (ou direto, se kBypassAuth = true).
-// Responsavel: Marcos (Sprint 3, gerado por Claude)
+// lib/core/app/main_scaffold.dart
+// Camada: App shell.
+//
+// Container com bottom navigation bar de 4 abas (Home, Aprenda, Cultura,
+// Perfil). E a "casca" exibida apos login (ou direto, se kBypassAuth).
+//
+// IndexedStack preserva o estado de cada aba — trocar abas e instantaneo
+// e nao reseta scroll.
 
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
+
 import '../../features/culture/presentation/screens/cultures_list_screen.dart';
+import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/practice/presentation/screens/practice_screen.dart';
-import 'home/home_screen.dart';
-import 'profile/profile_screen.dart';
+import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../constants/app_colors.dart';
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key});
@@ -26,9 +31,6 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    // IndexedStack mantem as 4 telas vivas em memoria simultaneamente.
-    // Vantagem: trocar de aba e instantaneo e preserva scroll/estado.
-    // Desvantagem: usa um pouco mais de RAM (irrelevante com 4 telas leves).
     final tabs = <Widget>[
       HomeScreen(
         onStartPractice: () => _selectTab(1),
@@ -48,7 +50,6 @@ class _MainScaffoldState extends State<MainScaffold> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _selectTab,
-        // `fixed` garante que os 4 labels sempre aparecem (em vez de so o ativo).
         type: BottomNavigationBarType.fixed,
         backgroundColor: AppColors.background,
         selectedItemColor: AppColors.primary,
@@ -67,9 +68,8 @@ class _MainScaffoldState extends State<MainScaffold> {
             label: 'Aprenda',
           ),
           BottomNavigationBarItem(
-            // diversity_3 simboliza povo / comunidade — mais semântico pra
-            // 'Cultura' que o auto_stories (livro), que confundia visualmente
-            // com o menu_book da aba Aprenda.
+            // diversity_3 simboliza povo/comunidade — mais semantico pra
+            // "Cultura" que o auto_stories (livro).
             icon: Icon(Icons.diversity_3_outlined),
             activeIcon: Icon(Icons.diversity_3),
             label: 'Cultura',

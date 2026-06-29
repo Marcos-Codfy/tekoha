@@ -28,6 +28,12 @@ import 'package:http/http.dart' as http;
 import '../core/network/airtable_client.dart';
 import '../core/services/audio_player_service.dart';
 import '../core/services/speech_service.dart';
+import '../features/auth/data/datasources/firebase_auth_datasource.dart';
+import '../features/auth/data/repositories/auth_repository_impl.dart';
+import '../features/auth/domain/repositories/auth_repository.dart';
+import '../features/auth/domain/usecases/register.dart';
+import '../features/auth/domain/usecases/sign_in.dart';
+import '../features/auth/domain/usecases/sign_out.dart';
 import '../features/culture/data/datasources/culture_remote_datasource.dart';
 import '../features/culture/data/repositories/culture_repository_impl.dart';
 import '../features/culture/domain/repositories/culture_repository.dart';
@@ -54,8 +60,7 @@ Future<void> setupDependencies() async {
   _registerPractice();
   _registerLesson();
   _registerCulture();
-  // Vai sendo descomentado conforme as features sao migradas.
-  // _registerAuth();
+  _registerAuth();
 }
 
 // ── Feature: Practice ─────────────────────────────────────────────────
@@ -110,6 +115,30 @@ void _registerCulture() {
 
   sl.registerLazySingleton<GetCultureContentUseCase>(
     () => GetCultureContentUseCase(sl<CultureRepository>()),
+  );
+}
+
+// ── Feature: Auth ─────────────────────────────────────────────────────
+
+void _registerAuth() {
+  sl.registerLazySingleton<FirebaseAuthDataSource>(
+    () => FirebaseAuthDataSourceImpl(),
+  );
+
+  sl.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(sl<FirebaseAuthDataSource>()),
+  );
+
+  sl.registerLazySingleton<SignInUseCase>(
+    () => SignInUseCase(sl<AuthRepository>()),
+  );
+
+  sl.registerLazySingleton<RegisterUseCase>(
+    () => RegisterUseCase(sl<AuthRepository>()),
+  );
+
+  sl.registerLazySingleton<SignOutUseCase>(
+    () => SignOutUseCase(sl<AuthRepository>()),
   );
 }
 

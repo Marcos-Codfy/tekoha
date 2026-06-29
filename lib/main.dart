@@ -38,15 +38,19 @@ import 'core/constants/app_flags.dart';
 import 'core/constants/app_routes.dart';
 import 'core/theme/app_theme.dart';
 import 'di/injection.dart';
+import 'features/auth/domain/repositories/auth_repository.dart';
+import 'features/auth/domain/usecases/register.dart';
+import 'features/auth/domain/usecases/sign_in.dart';
+import 'features/auth/domain/usecases/sign_out.dart';
+import 'features/auth/presentation/providers/auth_provider.dart';
+import 'features/auth/presentation/screens/login_screen.dart';
+import 'features/auth/presentation/screens/register_screen.dart';
+import 'features/auth/presentation/screens/splash_screen.dart';
 import 'features/culture/domain/usecases/get_culture_content.dart';
 import 'features/culture/presentation/providers/culture_provider.dart';
+import 'core/app/main_scaffold.dart';
 import 'features/practice/domain/usecases/get_modules.dart';
 import 'features/practice/presentation/providers/modules_provider.dart';
-import 'presentation/providers/auth_provider.dart';
-import 'presentation/screens/auth/login_screen.dart';
-import 'presentation/screens/auth/register_screen.dart';
-import 'presentation/screens/main_scaffold.dart';
-import 'presentation/screens/splash/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -96,12 +100,20 @@ class TekohaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Todos os providers agora resolvem dependencias via get_it (sl<>).
+    // Todos os providers resolvem dependencias via get_it (sl<>).
     // Trocar uma fonte = trocar o registro em di/injection.dart.
     return MultiProvider(
       providers: [
-        // AuthProvider escuta o estado de login do Firebase Auth.
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        // AuthProvider — feature Auth (Clean Architecture).
+        // Consome UseCases ao inves de FirebaseAuth direto.
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(
+            repository: sl<AuthRepository>(),
+            signIn: sl<SignInUseCase>(),
+            register: sl<RegisterUseCase>(),
+            signOut: sl<SignOutUseCase>(),
+          ),
+        ),
         // ModulesProvider — feature Practice.
         ChangeNotifierProvider(
           create: (_) => ModulesProvider(sl<GetModulesUseCase>()),

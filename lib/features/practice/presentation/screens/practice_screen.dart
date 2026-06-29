@@ -15,8 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/error_view.dart';
 import '../../../../features/lesson/presentation/screens/lesson_screen.dart';
-import '../../../../presentation/widgets/error_view.dart';
 import '../providers/modules_provider.dart';
 import '../widgets/module_card.dart';
 
