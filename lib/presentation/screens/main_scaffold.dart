@@ -5,8 +5,8 @@
 
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../features/culture/presentation/screens/cultures_list_screen.dart';
 import '../../features/practice/presentation/screens/practice_screen.dart';
-import 'culture/cultures_list_screen.dart';
 import 'home/home_screen.dart';
 import 'profile/profile_screen.dart';
 

@@ -26,8 +26,12 @@ import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 
 import '../core/network/airtable_client.dart';
-import '../data/services/audio_player_service.dart';
-import '../data/services/speech_service.dart';
+import '../core/services/audio_player_service.dart';
+import '../core/services/speech_service.dart';
+import '../features/culture/data/datasources/culture_remote_datasource.dart';
+import '../features/culture/data/repositories/culture_repository_impl.dart';
+import '../features/culture/domain/repositories/culture_repository.dart';
+import '../features/culture/domain/usecases/get_culture_content.dart';
 import '../features/lesson/data/datasources/lesson_remote_datasource.dart';
 import '../features/lesson/data/repositories/lesson_repository_impl.dart';
 import '../features/lesson/domain/repositories/lesson_repository.dart';
@@ -49,8 +53,8 @@ Future<void> setupDependencies() async {
   _registerAudioAndSpeech();
   _registerPractice();
   _registerLesson();
+  _registerCulture();
   // Vai sendo descomentado conforme as features sao migradas.
-  // _registerCulture();
   // _registerAuth();
 }
 
@@ -90,6 +94,22 @@ void _registerLesson() {
 
   sl.registerLazySingleton<GetWordsByLessonUseCase>(
     () => GetWordsByLessonUseCase(sl<LessonRepository>()),
+  );
+}
+
+// ── Feature: Culture ──────────────────────────────────────────────────
+
+void _registerCulture() {
+  sl.registerLazySingleton<CultureRemoteDataSource>(
+    () => CultureRemoteDataSourceImpl(sl<AirtableClient>()),
+  );
+
+  sl.registerLazySingleton<CultureRepository>(
+    () => CultureRepositoryImpl(sl<CultureRemoteDataSource>()),
+  );
+
+  sl.registerLazySingleton<GetCultureContentUseCase>(
+    () => GetCultureContentUseCase(sl<CultureRepository>()),
   );
 }
 

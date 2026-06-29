@@ -37,13 +37,12 @@ import 'firebase_options.dart';
 import 'core/constants/app_flags.dart';
 import 'core/constants/app_routes.dart';
 import 'core/theme/app_theme.dart';
-import 'data/repositories/content_repository.dart';
-import 'data/services/airtable_service.dart';
 import 'di/injection.dart';
+import 'features/culture/domain/usecases/get_culture_content.dart';
+import 'features/culture/presentation/providers/culture_provider.dart';
 import 'features/practice/domain/usecases/get_modules.dart';
 import 'features/practice/presentation/providers/modules_provider.dart';
 import 'presentation/providers/auth_provider.dart';
-import 'presentation/providers/content_provider.dart';
 import 'presentation/screens/auth/login_screen.dart';
 import 'presentation/screens/auth/register_screen.dart';
 import 'presentation/screens/main_scaffold.dart';
@@ -97,23 +96,19 @@ class TekohaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Instancia o servico que conversa com o Airtable.
-    // Criado UMA UNICA VEZ aqui no topo e injetado no ContentProvider —
-    // essa e a "injecao de dependencia" manual. Pra trocar Airtable por
-    // outra fonte (Firebase, mock), so trocar a classe aqui.
-    final ContentRepository contentRepository = AirtableService();
-
+    // Todos os providers agora resolvem dependencias via get_it (sl<>).
+    // Trocar uma fonte = trocar o registro em di/injection.dart.
     return MultiProvider(
       providers: [
         // AuthProvider escuta o estado de login do Firebase Auth.
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        // ContentProvider (LEGADO) — ainda usado por Lesson e Culture
-        // ate as features serem migradas. Sera removido no commit final.
-        ChangeNotifierProvider(create: (_) => ContentProvider(contentRepository)),
-        // ModulesProvider — feature Practice (Clean Architecture).
-        // Resolve dependencias via get_it (sl<GetModulesUseCase>()).
+        // ModulesProvider — feature Practice.
         ChangeNotifierProvider(
           create: (_) => ModulesProvider(sl<GetModulesUseCase>()),
+        ),
+        // CultureProvider — feature Culture.
+        ChangeNotifierProvider(
+          create: (_) => CultureProvider(sl<GetCultureContentUseCase>()),
         ),
       ],
       child: MaterialApp(

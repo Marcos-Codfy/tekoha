@@ -27,8 +27,8 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/errors/failures.dart';
-import '../../../../data/services/audio_player_service.dart';
-import '../../../../data/services/speech_service.dart';
+import '../../../../core/services/audio_player_service.dart';
+import '../../../../core/services/speech_service.dart';
 import '../../domain/builders/audio_exercise_builder.dart';
 import '../../domain/builders/quiz_builder.dart';
 import '../../domain/entities/audio_exercise.dart';

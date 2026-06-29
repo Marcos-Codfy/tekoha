@@ -14,10 +14,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/services/audio_player_service.dart';
+import '../../../../core/services/speech_service.dart';
 import '../../../../di/injection.dart';
 import '../../../../presentation/widgets/error_view.dart';
-import '../../../../data/services/audio_player_service.dart';
-import '../../../../data/services/speech_service.dart';
 import '../../domain/entities/audio_exercise.dart';
 import '../../domain/usecases/get_lessons_by_module.dart';
 import '../../domain/usecases/get_words_by_lesson.dart';

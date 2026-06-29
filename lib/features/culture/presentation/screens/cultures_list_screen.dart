@@ -1,15 +1,13 @@
-// lib/presentation/screens/culture/cultures_list_screen.dart
-// Tela de entrada da aba Cultura: lista as linguas/povos disponiveis em
-// cards grandes. Tocar num card ATIVO empurra a CultureScreen com os
-// chips de categoria daquela lingua via Navigator.push (mesmo padrao da
-// PracticeScreen -> LessonScreen).
-// Responsavel: Marcos (gerado por Claude)
+// lib/features/culture/presentation/screens/cultures_list_screen.dart
+//
+// Tela de entrada da aba Cultura: lista linguas/povos disponiveis.
+// Tocar num card ATIVO abre CultureScreen daquela lingua.
 
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/cultures.dart';
-import '../../widgets/culture_language_card.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/cultures.dart';
+import '../widgets/culture_language_card.dart';
 import 'culture_screen.dart';
 
 class CulturesListScreen extends StatelessWidget {
@@ -32,7 +30,6 @@ class CulturesListScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Cultura'),
-        // Aba do MainScaffold — sem botao voltar.
         automaticallyImplyLeading: false,
       ),
       body: ListView.separated(

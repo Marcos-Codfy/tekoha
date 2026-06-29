@@ -1,26 +1,19 @@
-// lib/presentation/widgets/culture_language_card.dart
-// Card grande usado na CulturesListScreen pra escolher um povo/lingua.
-//
-// Tem dois estados:
-//   - ATIVO    -> [onTap] != null. Fundo branco, sombra sutil, chevron
-//                 Urucum, ripple no toque.
-//   - INATIVO  -> [onTap] == null. Fundo cinza claro, sem sombra, sem
-//                 chevron, sem ripple. Usado pros placeholders "Em breve".
+// lib/features/culture/presentation/widgets/culture_language_card.dart
+// Card grande de selecao de lingua/povo na CulturesListScreen.
+// Dois estados:
+//   - ATIVO  -> onTap != null. Fundo branco, sombra sutil, chevron, ripple.
+//   - INATIVO -> onTap == null. Cinza claro, sem sombra/chevron/ripple.
 
 import 'package:flutter/material.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_colors.dart';
 
-/// Fundo neutro pros placeholders desativados. Mais claro que `border`
-/// pra não competir visualmente com a borda do card.
+/// Fundo neutro pros placeholders desativados.
 const Color _disabledBackground = Color(0xFFF5F5F5);
 
 class CultureLanguageCard extends StatelessWidget {
   final String title;
   final String? subtitle;
-
-  /// Quando `null`, o card vai pro estado INATIVO (cinza, sem ripple).
-  /// Quando setado, dispara ao toque.
   final VoidCallback? onTap;
 
   const CultureLanguageCard({
@@ -39,14 +32,12 @@ class CultureLanguageCard extends StatelessWidget {
     const subtitleColor = AppColors.textSecondary;
 
     return DecoratedBox(
-      // Sombra externa so aparece no card ativo. No inativo, fica flat
-      // pra reforcar a sensacao de "indisponivel".
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         boxShadow: _enabled
             ? const [
                 BoxShadow(
-                  color: Color(0x14000000), // preto 8% — sombra muito sutil
+                  color: Color(0x14000000),
                   blurRadius: 8,
                   offset: Offset(0, 2),
                 ),
@@ -54,15 +45,15 @@ class CultureLanguageCard extends StatelessWidget {
             : null,
       ),
       child: Material(
-        // Material desenha o fundo e recebe o ripple do InkWell por cima.
         color: _enabled ? AppColors.surface : _disabledBackground,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          onTap: onTap, // null = sem ripple e sem callback
+          onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.border, width: 1),
@@ -96,7 +87,6 @@ class CultureLanguageCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Chevron so aparece no card ativo — sinaliza "navegavel".
                 if (_enabled)
                   const Padding(
                     padding: EdgeInsets.only(left: 12),
