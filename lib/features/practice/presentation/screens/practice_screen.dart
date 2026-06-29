@@ -1,15 +1,24 @@
-// lib/presentation/screens/practice/practice_screen.dart
-// Aba "Pratica" do MainScaffold. Mostra os modulos do Nheengatu como
-// trilha de aprendizado. Tap num modulo aberto navega pra LessonScreen.
+// lib/features/practice/presentation/screens/practice_screen.dart
+// Camada: Presentation (Practice).
+//
+// Aba "Aprenda" do MainScaffold. Lista os modulos vindos do Airtable
+// como trilha de aprendizado. Tap num modulo aberto navega para a
+// LessonScreen.
+//
+// Diferenca pro legado:
+//   - Consome ModulesProvider (so modulos), nao o ContentProvider
+//     monolitico.
+//   - Acesso a Failure tipada via `provider.failure` permite UI
+//     diferenciar tipo de erro (rede vs config vs auth).
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/constants/app_colors.dart';
-import '../../providers/content_provider.dart';
-import '../../widgets/error_view.dart';
-import '../../widgets/module_card.dart';
-import '../lesson/lesson_screen.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../presentation/screens/lesson/lesson_screen.dart' as legacy;
+import '../../../../presentation/widgets/error_view.dart';
+import '../providers/modules_provider.dart';
+import '../widgets/module_card.dart';
 
 class PracticeScreen extends StatefulWidget {
   const PracticeScreen({super.key});
@@ -22,17 +31,17 @@ class _PracticeScreenState extends State<PracticeScreen> {
   @override
   void initState() {
     super.initState();
-    // Dispara o load DEPOIS do primeiro frame pra evitar
-    // "setState/notifyListeners called during build".
+    // Carga apos primeiro frame pra nao bater no notifyListeners durante
+    // o build inicial.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ContentProvider>().loadModules();
+      context.read<ModulesProvider>().load();
     });
   }
 
   void _openModule(BuildContext context, String moduleId, String moduleName) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => LessonScreen(
+        builder: (_) => legacy.LessonScreen(
           moduleId: moduleId,
           moduleName: moduleName,
         ),
@@ -48,29 +57,33 @@ class _PracticeScreenState extends State<PracticeScreen> {
         title: const Text('Aprenda'),
         automaticallyImplyLeading: false,
       ),
-      body: Consumer<ContentProvider>(
-        builder: (context, content, _) {
-          if (content.isLoading) {
+      body: Consumer<ModulesProvider>(
+        builder: (context, provider, _) {
+          if (provider.isLoading) {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             );
           }
 
-          if (content.hasError) {
+          if (provider.hasError) {
             return ErrorView(
-              message: content.errorMessage ?? 'Erro ao carregar módulos.',
-              onRetry: () => content.loadModules(forceRefresh: true),
+              message:
+                  provider.errorMessage ?? 'Erro ao carregar os modulos.',
+              onRetry: () => provider.load(forceRefresh: true),
             );
           }
 
-          if (content.modules.isEmpty) {
+          if (provider.modules.isEmpty) {
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
                 child: Text(
-                  'Nenhum conteúdo disponível.',
+                  'Nenhum conteudo disponivel.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             );
@@ -78,17 +91,17 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
           return RefreshIndicator(
             color: AppColors.primary,
-            onRefresh: () => content.loadModules(forceRefresh: true),
+            onRefresh: () => provider.load(forceRefresh: true),
             child: ListView.separated(
               padding: const EdgeInsets.all(16),
-              itemCount: content.modules.length,
+              itemCount: provider.modules.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                final module = content.modules[index];
+                final module = provider.modules[index];
+
                 // Regra de demo: so o Modulo 1 (Saudacoes, com audio) abre.
-                // Modulo 2 "Em ajustes" e Modulo 3 "Em construcao" — copia
-                // mais humana que "Complete o Modulo X". Sprint futura troca
-                // essa regra hardcoded por progresso real do usuario.
+                // Modulo 2 = "Em ajustes", Modulo 3+ = "Em construcao".
+                // Sprint futura troca isso por progresso real do usuario.
                 final bool isLocked;
                 final String lockedMessage;
                 final IconData lockedIcon;
@@ -102,7 +115,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   lockedIcon = Icons.tune;
                 } else {
                   isLocked = true;
-                  lockedMessage = 'Em construção';
+                  lockedMessage = 'Em construcao';
                   lockedIcon = Icons.construction;
                 }
 

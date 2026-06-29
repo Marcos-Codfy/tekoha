@@ -1,25 +1,26 @@
-// lib/presentation/widgets/module_card.dart
-// Card visual de um modulo na HomeScreen.
-// Mostra nome + descricao; se trancado, sobrepoe icone de cadeado e mensagem.
-// Responsavel: Marcos (Sprint 3, gerado por Claude)
+// lib/features/practice/presentation/widgets/module_card.dart
+// Camada: Presentation (Practice).
+//
+// Card visual de um modulo na PracticeScreen. Mostra nome + descricao;
+// se trancado, sobrepoe overlay com icone e mensagem ("Em ajustes",
+// "Em construcao", etc).
+//
+// Recebe entidade [Module] (dominio puro), NAO o DTO do Airtable.
 
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
-import '../../data/models/module_model.dart';
+
+import '../../../../core/constants/app_colors.dart';
+import '../../domain/entities/module.dart';
 
 class ModuleCard extends StatelessWidget {
-  final ModuleModel module;
+  final Module module;
   final bool isLocked;
   final VoidCallback? onTap;
 
-  /// Texto exibido no overlay quando [isLocked] = true.
-  /// Default: "Em breve". A PracticeScreen passa mensagens contextuais
-  /// como "Em ajustes" e "Em construção".
+  /// Texto no overlay quando [isLocked] = true.
   final String lockedMessage;
 
-  /// Icone exibido no overlay quando [isLocked] = true.
-  /// Default: cadeado. PracticeScreen pode trocar por icones contextuais
-  /// (`tune` pra ajustes, `construction` pra obra).
+  /// Icone no overlay quando [isLocked] = true.
   final IconData lockedIcon;
 
   const ModuleCard({
@@ -33,12 +34,9 @@ class ModuleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Cor de fundo do card: Urucum cheio (marca do app).
-    // Overlay quando trancado: branco semitransparente pra "apagar" o card.
     const cardBackground = AppColors.primary;
-    const lockedOverlay  = Color(0xCCFFFFFF);
+    const lockedOverlay = Color(0xCCFFFFFF);
 
-    // Conteudo principal do card (mesmo layout pra trancado e aberto).
     final cardContent = Container(
       decoration: BoxDecoration(
         color: cardBackground,
@@ -54,7 +52,6 @@ class ModuleCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       child: Row(
         children: [
-          // Numero do modulo num circulo branco.
           CircleAvatar(
             radius: 24,
             backgroundColor: AppColors.background,
@@ -68,7 +65,6 @@ class ModuleCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          // Coluna com nome + descricao do modulo.
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,7 +92,6 @@ class ModuleCard extends StatelessWidget {
               ],
             ),
           ),
-          // Seta de "entrar no modulo" na direita.
           const Icon(
             Icons.chevron_right,
             color: AppColors.textOnPrimary,
@@ -105,8 +100,6 @@ class ModuleCard extends StatelessWidget {
       ),
     );
 
-    // InkWell pra dar feedback visual de toque (ripple).
-    // Material + InkWell ja resolvem o ripple respeitando o borderRadius.
     final tappableCard = Material(
       color: Colors.transparent,
       child: InkWell(
@@ -118,7 +111,6 @@ class ModuleCard extends StatelessWidget {
 
     if (!isLocked) return tappableCard;
 
-    // Versao trancada: empilha overlay branco + cadeado + mensagem por cima.
     return Stack(
       children: [
         tappableCard,

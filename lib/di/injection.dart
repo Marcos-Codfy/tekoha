@@ -28,6 +28,10 @@ import 'package:http/http.dart' as http;
 import '../core/network/airtable_client.dart';
 import '../data/services/audio_player_service.dart';
 import '../data/services/speech_service.dart';
+import '../features/practice/data/datasources/practice_remote_datasource.dart';
+import '../features/practice/data/repositories/practice_repository_impl.dart';
+import '../features/practice/domain/repositories/practice_repository.dart';
+import '../features/practice/domain/usecases/get_modules.dart';
 
 /// Apelido global pra encurtar `GetIt.instance.<X>()` em `sl<X>()`.
 /// "sl" = "service locator".
@@ -38,12 +42,30 @@ final GetIt sl = GetIt.instance;
 Future<void> setupDependencies() async {
   _registerCore();
   _registerAudioAndSpeech();
-  // Cada feature registra a partir do PR que migra ela.
+  _registerPractice();
   // Vai sendo descomentado conforme as features sao migradas.
-  // _registerPractice();
   // _registerLesson();
   // _registerCulture();
   // _registerAuth();
+}
+
+// ── Feature: Practice ─────────────────────────────────────────────────
+
+void _registerPractice() {
+  // DataSource (mais baixo): conhece o AirtableClient.
+  sl.registerLazySingleton<PracticeRemoteDataSource>(
+    () => PracticeRemoteDataSourceImpl(sl<AirtableClient>()),
+  );
+
+  // Repository (contrato + impl): conhece o DataSource.
+  sl.registerLazySingleton<PracticeRepository>(
+    () => PracticeRepositoryImpl(sl<PracticeRemoteDataSource>()),
+  );
+
+  // UseCase: conhece o Repository.
+  sl.registerLazySingleton<GetModulesUseCase>(
+    () => GetModulesUseCase(sl<PracticeRepository>()),
+  );
 }
 
 // ── Core ──────────────────────────────────────────────────────────────

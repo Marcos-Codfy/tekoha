@@ -40,6 +40,8 @@ import 'core/theme/app_theme.dart';
 import 'data/repositories/content_repository.dart';
 import 'data/services/airtable_service.dart';
 import 'di/injection.dart';
+import 'features/practice/domain/usecases/get_modules.dart';
+import 'features/practice/presentation/providers/modules_provider.dart';
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/providers/content_provider.dart';
 import 'presentation/screens/auth/login_screen.dart';
@@ -105,8 +107,14 @@ class TekohaApp extends StatelessWidget {
       providers: [
         // AuthProvider escuta o estado de login do Firebase Auth.
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        // ContentProvider gerencia modulos, licoes e palavras (cache em memoria).
+        // ContentProvider (LEGADO) — ainda usado por Lesson e Culture
+        // ate as features serem migradas. Sera removido no commit final.
         ChangeNotifierProvider(create: (_) => ContentProvider(contentRepository)),
+        // ModulesProvider — feature Practice (Clean Architecture).
+        // Resolve dependencias via get_it (sl<GetModulesUseCase>()).
+        ChangeNotifierProvider(
+          create: (_) => ModulesProvider(sl<GetModulesUseCase>()),
+        ),
       ],
       child: MaterialApp(
         title: 'Tekoha',
