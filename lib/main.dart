@@ -39,6 +39,7 @@ import 'core/constants/app_routes.dart';
 import 'core/theme/app_theme.dart';
 import 'data/repositories/content_repository.dart';
 import 'data/services/airtable_service.dart';
+import 'di/injection.dart';
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/providers/content_provider.dart';
 import 'presentation/screens/auth/login_screen.dart';
@@ -80,6 +81,11 @@ Future<void> main() async {
       debugPrint('[Tekoha] Erro ao inicializar Firebase: $e');
     }
   }
+
+  // ── Inicializa container de DI (get_it) ─────────────────────────────
+  // Registra HTTP client, AirtableClient e os servicos de audio/voz.
+  // Cada feature migrada adiciona seus registros aqui em injection.dart.
+  await setupDependencies();
 
   runApp(const TekohaApp());
 }
