@@ -27,8 +27,12 @@ class AirtableModuleDto {
   /// Airtable. Fallbacks defensivos: campo ausente vira string vazia ou 0.
   factory AirtableModuleDto.fromAirtable(Map<String, dynamic> record) {
     final id = (record['id'] ?? '').toString();
-    final fields =
-        (record['fields'] ?? <String, dynamic>{}) as Map<String, dynamic>;
+    // Map<String, dynamic>.from absorve `Map<dynamic, dynamic>` (que aparece
+    // em literais Dart fora de json.decode) sem explodir o cast.
+    final fieldsRaw = record['fields'];
+    final fields = fieldsRaw is Map
+        ? Map<String, dynamic>.from(fieldsRaw)
+        : <String, dynamic>{};
     return AirtableModuleDto(
       id: id,
       name: (fields['name'] ?? '').toString(),

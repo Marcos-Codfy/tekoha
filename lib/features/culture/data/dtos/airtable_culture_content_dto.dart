@@ -21,8 +21,10 @@ class AirtableCultureContentDto {
 
   factory AirtableCultureContentDto.fromAirtable(Map<String, dynamic> record) {
     final id = (record['id'] ?? '').toString();
-    final fields =
-        (record['fields'] ?? <String, dynamic>{}) as Map<String, dynamic>;
+    final fieldsRaw = record['fields'];
+    final fields = fieldsRaw is Map
+        ? Map<String, dynamic>.from(fieldsRaw)
+        : <String, dynamic>{};
 
     return AirtableCultureContentDto(
       id: id,
