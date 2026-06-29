@@ -28,6 +28,11 @@ import 'package:http/http.dart' as http;
 import '../core/network/airtable_client.dart';
 import '../data/services/audio_player_service.dart';
 import '../data/services/speech_service.dart';
+import '../features/lesson/data/datasources/lesson_remote_datasource.dart';
+import '../features/lesson/data/repositories/lesson_repository_impl.dart';
+import '../features/lesson/domain/repositories/lesson_repository.dart';
+import '../features/lesson/domain/usecases/get_lessons_by_module.dart';
+import '../features/lesson/domain/usecases/get_words_by_lesson.dart';
 import '../features/practice/data/datasources/practice_remote_datasource.dart';
 import '../features/practice/data/repositories/practice_repository_impl.dart';
 import '../features/practice/domain/repositories/practice_repository.dart';
@@ -43,8 +48,8 @@ Future<void> setupDependencies() async {
   _registerCore();
   _registerAudioAndSpeech();
   _registerPractice();
+  _registerLesson();
   // Vai sendo descomentado conforme as features sao migradas.
-  // _registerLesson();
   // _registerCulture();
   // _registerAuth();
 }
@@ -65,6 +70,26 @@ void _registerPractice() {
   // UseCase: conhece o Repository.
   sl.registerLazySingleton<GetModulesUseCase>(
     () => GetModulesUseCase(sl<PracticeRepository>()),
+  );
+}
+
+// ── Feature: Lesson ───────────────────────────────────────────────────
+
+void _registerLesson() {
+  sl.registerLazySingleton<LessonRemoteDataSource>(
+    () => LessonRemoteDataSourceImpl(sl<AirtableClient>()),
+  );
+
+  sl.registerLazySingleton<LessonRepository>(
+    () => LessonRepositoryImpl(sl<LessonRemoteDataSource>()),
+  );
+
+  sl.registerLazySingleton<GetLessonsByModuleUseCase>(
+    () => GetLessonsByModuleUseCase(sl<LessonRepository>()),
+  );
+
+  sl.registerLazySingleton<GetWordsByLessonUseCase>(
+    () => GetWordsByLessonUseCase(sl<LessonRepository>()),
   );
 }
 

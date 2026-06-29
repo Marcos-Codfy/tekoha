@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../presentation/screens/lesson/lesson_screen.dart' as legacy;
+import '../../../../features/lesson/presentation/screens/lesson_screen.dart';
 import '../../../../presentation/widgets/error_view.dart';
 import '../providers/modules_provider.dart';
 import '../widgets/module_card.dart';
@@ -41,7 +41,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
   void _openModule(BuildContext context, String moduleId, String moduleName) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => legacy.LessonScreen(
+        builder: (_) => LessonScreen(
           moduleId: moduleId,
           moduleName: moduleName,
         ),
