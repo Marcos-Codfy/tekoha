@@ -59,7 +59,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Center(
               child: Text(
-                email ?? (kBypassAuth ? 'Modo de teste' : 'Visitante'),
+                email ?? (kBypassAuth ? 'Modo de demonstração' : 'Visitante'),
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -81,22 +81,38 @@ class ProfileScreen extends StatelessWidget {
             const Divider(height: 1, color: AppColors.border),
             const _StatRow(
               icon: Icons.local_fire_department,
-              label: 'Sequencia',
+              label: 'Sequência',
               value: '0 dias',
             ),
             const Divider(height: 1, color: AppColors.border),
             const _StatRow(
               icon: Icons.menu_book,
-              label: 'Licoes concluidas',
+              label: 'Lições concluídas',
               value: '0 / 3',
             ),
             const SizedBox(height: 8),
             const Text(
-              'Estatisticas reais entram numa sprint futura.',
+              'Seu histórico será salvo em breve.',
               style: TextStyle(
                 fontSize: 12,
                 color: AppColors.textSecondary,
                 fontStyle: FontStyle.italic,
+              ),
+            ),
+            const SizedBox(height: 24),
+            // SDT-Relacionamento (Deci & Ryan, 2000): cada palavra praticada
+            // ganha sentido como contribuicao real a revitalizacao da lingua.
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                'Cada palavra praticada apoia a revitalização do Nheengatu.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  fontStyle: FontStyle.italic,
+                  height: 1.5,
+                ),
               ),
             ),
             const SizedBox(height: 40),
@@ -117,9 +133,8 @@ class ProfileScreen extends StatelessWidget {
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'O login esta desativado (modo de teste). '
-                        'Pra reativar, mude kBypassAuth pra false em '
-                        'lib/core/constants/app_flags.dart.',
+                        'Login desativado neste modo de demonstração. '
+                        'A versão final terá conta com progresso salvo.',
                         style:
                             TextStyle(fontSize: 13, color: AppColors.primary),
                       ),

@@ -29,8 +29,8 @@ class _CultureCategory {
 /// nao passa pela validacao juridica.
 const List<_CultureCategory> _categories = [
   _CultureCategory('curiosities', 'Curiosidades'),
-  _CultureCategory('history', 'Historia'),
-  _CultureCategory('habits', 'Habitos'),
+  _CultureCategory('history', 'História'),
+  _CultureCategory('habits', 'Hábitos'),
   _CultureCategory('cosmology', 'Cosmologia', available: false),
 ];
 
@@ -118,9 +118,12 @@ class _CultureScreenState extends State<CultureScreen> {
             labelColor = AppColors.textSecondary;
             borderColor = AppColors.border;
           } else if (selected) {
-            background = AppColors.primary;
+            // Floresta (verde-mata profundo) diferencia visualmente a aba
+            // Cultura da aba Pratica (urucum). Reforca o frame "natureza
+            // amazonica" pro conteudo cultural.
+            background = AppColors.floresta;
             labelColor = AppColors.textOnPrimary;
-            borderColor = AppColors.primary;
+            borderColor = AppColors.floresta;
           } else {
             background = AppColors.surface;
             labelColor = AppColors.textPrimary;
@@ -131,7 +134,7 @@ class _CultureScreenState extends State<CultureScreen> {
             label: Text(category.label),
             selected: selected,
             onSelected: disabled ? null : (_) => _selectCategory(index),
-            selectedColor: AppColors.primary,
+            selectedColor: AppColors.floresta,
             backgroundColor: background,
             disabledColor: background,
             labelStyle: TextStyle(
@@ -160,7 +163,7 @@ class _CultureScreenState extends State<CultureScreen> {
         if (provider.hasError) {
           return ErrorView(
             message: provider.errorMessage ??
-                'Erro ao carregar o conteudo cultural.',
+                'Erro ao carregar o conteúdo cultural.',
             onRetry: _refresh,
           );
         }
@@ -171,7 +174,7 @@ class _CultureScreenState extends State<CultureScreen> {
             child: Padding(
               padding: EdgeInsets.all(24),
               child: Text(
-                'Nenhum conteudo disponivel nessa categoria.',
+                'Nenhum conteúdo nessa categoria ainda.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColors.textSecondary,

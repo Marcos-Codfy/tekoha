@@ -24,6 +24,8 @@
 // XP NAO PERSISTE — vive nesta sessao. Sprint futura: salvar no
 // Firestore via novo UseCase SaveXpUseCase.
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/errors/failures.dart';
@@ -36,8 +38,18 @@ import '../../domain/usecases/get_lessons_by_module.dart';
 import '../../domain/usecases/get_words_by_lesson.dart';
 import 'lesson_step.dart';
 
-/// XP ganho por exercicio correto.
+/// XP "central" exibido em mensagens e calculo de XP maximo possivel.
+/// Os valores reais sao sorteados de [kXpRewardOptions] (Variable Reward).
 const int kXpPerCorrect = 10;
+
+/// Opcoes possiveis de XP por acerto. Sorteadas com [kXpRewardWeights].
+/// Fundamentacao: Skinner (1953) — Variable Reward Schedules. Variancia
+/// baixa em torno de 10 mantem antecipacao sem virar caca-niquel.
+const List<int> kXpRewardOptions = [8, 10, 12];
+
+/// Pesos da escolha de [kXpRewardOptions] (devem somar 100). 8 e 12 sao
+/// menos frequentes que 10 — distribuicao centrada na media.
+const List<int> kXpRewardWeights = [25, 50, 25];
 
 /// Maximo de tentativas em exercicios de audio antes de avancar sem XP.
 const int kMaxAudioAttempts = 2;
@@ -56,15 +68,21 @@ class LessonRunner extends ChangeNotifier {
   final AudioPlayerService _player;
   final SpeechService _speech;
 
+  /// Fonte de aleatoriedade — em testes, passe `Random(seed)` pra obter
+  /// XP variavel deterministico.
+  final Random _random;
+
   LessonRunner({
     required GetLessonsByModuleUseCase getLessons,
     required GetWordsByLessonUseCase getWords,
     required AudioPlayerService player,
     required SpeechService speech,
+    Random? random,
   })  : _getLessons = getLessons,
         _getWords = getWords,
         _player = player,
-        _speech = speech;
+        _speech = speech,
+        _random = random ?? Random();
 
   // ── Estado geral ────────────────────────────────────────────────────
   LessonRunnerStatus _status = LessonRunnerStatus.idle;
@@ -76,6 +94,22 @@ class LessonRunner extends ChangeNotifier {
   /// IDs de palavras cuja curiosidade JA FOI exibida nesta sessao.
   /// Mantemos imutavel pra UI — exposto so como `View` interna.
   final Set<String> _shownCuriosities = {};
+
+  /// IDs de palavras "dominadas" na sessao — acertou na 1a tentativa
+  /// SEM nenhum erro previo (audio_attempts == 0 e _selectedOption nunca
+  /// foi marcado como errado neste passo).
+  ///
+  /// Fundamentacao: SDT-Competencia (Deci & Ryan, 2000). Visivel no
+  /// XpBadge da UI como "Y dominadas".
+  final Set<String> _masteredInSession = {};
+
+  /// Flag interna: o usuario ja errou alguma opcao neste exercicio?
+  /// Reseta a cada `next()`. Usado pra determinar "dominou".
+  bool _hadErrorInCurrentStep = false;
+
+  /// XP ganho NO ULTIMO ACERTO (8, 10 ou 12). Reseta a cada `next()`.
+  /// A UI usa pra mostrar "Boa! +N XP" com o valor real, nao o central.
+  int _lastXpGained = 0;
 
   // ── Estado do exercicio atual ───────────────────────────────────────
   int? _selectedOption;
@@ -100,7 +134,17 @@ class LessonRunner extends ChangeNotifier {
   int get currentIndex => _index;
   int get xpEarned => _xpEarned;
 
-  /// XP total possivel = numero de passos x xpPerCorrect.
+  /// Quantas palavras o usuario "dominou" nesta sessao (acertou na 1a
+  /// tentativa, sem nenhum erro). Visivel no XpBadge.
+  int get masteredWordsCount => _masteredInSession.length;
+
+  /// XP ganho no ULTIMO acerto (sorteado entre 8/10/12). 0 quando ainda
+  /// nao houve acerto ou o passo foi resetado por `next()`.
+  int get lastXpGained => _lastXpGained;
+
+  /// XP "central" maximo possivel (numero de passos x [kXpPerCorrect]).
+  /// Note que o XP REAL pode ser maior ou menor por causa do sorteio
+  /// (kXpRewardOptions). E uma aproximacao pra exibir "de ate XX XP".
   int get totalPossibleXp => _steps.length * kXpPerCorrect;
 
   LessonStep get current => _steps[_index];
@@ -152,6 +196,28 @@ class LessonRunner extends ChangeNotifier {
       return step.target.nheengatu;
     }
     return null;
+  }
+
+  /// Sorteia o XP de um acerto entre [kXpRewardOptions] usando os pesos
+  /// [kXpRewardWeights] (25/50/25). Variancia controlada (Variable Reward,
+  /// Skinner 1953 / Eyal 2014) sustenta antecipacao sem virar caca-niquel.
+  int _drawXpReward() {
+    final roll = _random.nextInt(100); // 0..99
+    var cumulative = 0;
+    for (var i = 0; i < kXpRewardOptions.length; i++) {
+      cumulative += kXpRewardWeights[i];
+      if (roll < cumulative) return kXpRewardOptions[i];
+    }
+    // Fallback (nunca atinge se pesos somam 100).
+    return kXpPerCorrect;
+  }
+
+  /// Marca a palavra atual como "dominada" se nao houve nenhum erro
+  /// neste exercicio. SDT-Competencia.
+  void _maybeMarkMastered() {
+    if (!_hadErrorInCurrentStep) {
+      _masteredInSession.add(current.target.id);
+    }
   }
 
   // ── Acoes ───────────────────────────────────────────────────────────
@@ -286,14 +352,17 @@ class LessonRunner extends ChangeNotifier {
     final q = step.data;
     if (index == q.correctIndex) {
       _selectedOption = index;
-      _xpEarned += kXpPerCorrect;
+      _lastXpGained = _drawXpReward();
+      _xpEarned += _lastXpGained;
+      _maybeMarkMastered();
       _answered = true;
       _wasCorrect = true;
       _feedbackMessage = '';
       notifyListeners();
     } else {
       _selectedOption = index;
-      _feedbackMessage = 'Quase. Tenta outra — voce consegue.';
+      _hadErrorInCurrentStep = true;
+      _feedbackMessage = 'Quase! Tenta outra — você consegue.';
       notifyListeners();
 
       // A UI faz o "desmarcar apos 900ms" via Future.delayed — preferi
@@ -323,7 +392,9 @@ class LessonRunner extends ChangeNotifier {
 
     if (index == ex.correctIndex) {
       _selectedOption = index;
-      _xpEarned += kXpPerCorrect;
+      _lastXpGained = _drawXpReward();
+      _xpEarned += _lastXpGained;
+      _maybeMarkMastered();
       _answered = true;
       _wasCorrect = true;
       _feedbackMessage = '';
@@ -332,14 +403,15 @@ class LessonRunner extends ChangeNotifier {
     }
 
     _audioAttempts++;
+    _hadErrorInCurrentStep = true;
     if (_audioAttempts >= kMaxAudioAttempts) {
       _selectedOption = index;
       _answered = true;
       _wasCorrect = false;
-      _feedbackMessage = 'Boa tentativa! A resposta era:';
+      _feedbackMessage = 'Quase lá! A resposta certa é:';
     } else {
       _selectedOption = index;
-      _feedbackMessage = 'Quase. Ouve mais uma vez e tenta de novo.';
+      _feedbackMessage = 'Quase! Ouve mais uma vez e tenta de novo.';
     }
     notifyListeners();
   }
@@ -365,7 +437,7 @@ class LessonRunner extends ChangeNotifier {
       _wasCorrect = false;
       _spokenText = '';
       _feedbackMessage =
-          'Microfone indisponivel neste aparelho. Vamos seguindo.';
+          'Microfone indisponível neste aparelho. Vamos seguir.';
       notifyListeners();
       return;
     }
@@ -394,7 +466,7 @@ class LessonRunner extends ChangeNotifier {
     _answered = true;
     _wasCorrect = false;
     _spokenText = '';
-    _feedbackMessage = 'Vamos seguindo. Era:';
+    _feedbackMessage = 'A resposta era:';
     notifyListeners();
   }
 
@@ -420,7 +492,9 @@ class LessonRunner extends ChangeNotifier {
     );
 
     if (ok) {
-      _xpEarned += kXpPerCorrect;
+      _lastXpGained = _drawXpReward();
+      _xpEarned += _lastXpGained;
+      _maybeMarkMastered();
       _answered = true;
       _wasCorrect = true;
       _feedbackMessage = '';
@@ -429,12 +503,13 @@ class LessonRunner extends ChangeNotifier {
     }
 
     _audioAttempts++;
+    _hadErrorInCurrentStep = true;
     if (_audioAttempts >= kMaxAudioAttempts) {
       _answered = true;
       _wasCorrect = false;
-      _feedbackMessage = 'Boa tentativa! Era:';
+      _feedbackMessage = 'Quase lá! A resposta certa é:';
     } else {
-      _feedbackMessage = 'Quase. Ouve de novo e tenta mais uma vez.';
+      _feedbackMessage = 'Quase! Ouve de novo e tenta mais uma vez.';
     }
     notifyListeners();
   }
@@ -454,6 +529,8 @@ class LessonRunner extends ChangeNotifier {
     _wasCorrect = false;
     _feedbackMessage = '';
     _audioAttempts = 0;
+    _hadErrorInCurrentStep = false;
+    _lastXpGained = 0;
     _spokenText = '';
     _listening = false;
     notifyListeners();

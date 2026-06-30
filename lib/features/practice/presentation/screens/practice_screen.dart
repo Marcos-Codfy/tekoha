@@ -68,7 +68,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
           if (provider.hasError) {
             return ErrorView(
               message:
-                  provider.errorMessage ?? 'Erro ao carregar os modulos.',
+                  provider.errorMessage ?? 'Erro ao carregar os módulos.',
               onRetry: () => provider.load(forceRefresh: true),
             );
           }
@@ -78,7 +78,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
               child: Padding(
                 padding: EdgeInsets.all(24),
                 child: Text(
-                  'Nenhum conteudo disponivel.',
+                  'Nenhum módulo disponível ainda. Verifique sua conexão.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: AppColors.textSecondary,
@@ -115,7 +115,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   lockedIcon = Icons.tune;
                 } else {
                   isLocked = true;
-                  lockedMessage = 'Em construcao';
+                  lockedMessage = 'Em construção';
                   lockedIcon = Icons.construction;
                 }
 

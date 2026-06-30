@@ -63,7 +63,11 @@ class _LessonScreenBody extends StatelessWidget {
       appBar: AppBar(
         title: Text(moduleName),
         actions: [
-          if (runner.isExercising) _XpBadge(xp: runner.xpEarned),
+          if (runner.isExercising)
+            _XpBadge(
+              xp: runner.xpEarned,
+              mastered: runner.masteredWordsCount,
+            ),
         ],
       ),
       body: () {
@@ -97,7 +101,9 @@ class _LessonScreenBody extends StatelessWidget {
 
 class _XpBadge extends StatelessWidget {
   final int xp;
-  const _XpBadge({required this.xp});
+  final int mastered;
+
+  const _XpBadge({required this.xp, required this.mastered});
 
   @override
   Widget build(BuildContext context) {
@@ -110,13 +116,31 @@ class _XpBadge extends StatelessWidget {
             color: AppColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Text(
-            '+$xp XP',
-            style: const TextStyle(
-              color: AppColors.primary,
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '+$xp XP',
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  height: 1.1,
+                ),
+              ),
+              // SDT-Competencia: visivel so quando o usuario realmente
+              // dominou alguma palavra (acertou na 1a tentativa).
+              if (mastered > 0)
+                Text(
+                  '$mastered ${mastered == 1 ? "dominada" : "dominadas"}',
+                  style: TextStyle(
+                    color: AppColors.primary.withValues(alpha: 0.8),
+                    fontSize: 10,
+                    height: 1.1,
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -135,6 +159,15 @@ class _ExerciseScaffold extends StatefulWidget {
 }
 
 class _ExerciseScaffoldState extends State<_ExerciseScaffold> {
+  /// Label do progresso da licao com efeito Goal-Gradient (Kivetz et al.,
+  /// 2006): textos diferentes perto do fim mantem motivacao acelerada.
+  String _progressLabel(LessonRunner r) {
+    final remaining = r.steps.length - r.currentIndex - 1;
+    if (remaining == 0) return 'Último exercício!';
+    if (remaining <= 2) return 'Faltam $remaining — você está quase lá!';
+    return 'Exercício ${r.currentIndex + 1} de ${r.steps.length}';
+  }
+
   /// Apos 900ms desmarcamos a opcao errada e liberamos nova tentativa.
   /// Mantemos isso na Screen (timing visual) em vez do Runner.
   void _scheduleClearWrongSelection({required bool isAudio}) {
@@ -153,13 +186,19 @@ class _ExerciseScaffoldState extends State<_ExerciseScaffold> {
     final runner = widget.runner;
     final step = runner.current;
 
+    // Endowed Progress Effect (Nunes & Drèze, 2006): a barra comeca em
+    // ~5% no primeiro exercicio em vez de 0. Sinal visual de "voce ja
+    // comecou". So muda a REPRESENTACAO — o dominio (XP, contagem) nao
+    // e afetado.
+    final endowedProgress = 0.05 + (runner.progress * 0.95);
+
     return SafeArea(
       child: Column(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.zero,
             child: LinearProgressIndicator(
-              value: runner.progress,
+              value: endowedProgress,
               minHeight: 6,
               backgroundColor: AppColors.border,
               valueColor:
@@ -171,7 +210,7 @@ class _ExerciseScaffoldState extends State<_ExerciseScaffold> {
             child: Row(
               children: [
                 Text(
-                  'Exercicio ${runner.currentIndex + 1} de ${runner.steps.length}',
+                  _progressLabel(runner),
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.textSecondary,
@@ -260,11 +299,11 @@ class _AudioStepView extends StatelessWidget {
   String _instructionFor(AudioExerciseType type) {
     switch (type) {
       case AudioExerciseType.listenChooseTranslation:
-        return 'Ouca e escolha a traducao';
+        return 'Ouça e escolha a tradução';
       case AudioExerciseType.listenChooseWord:
-        return 'Ouca e escolha a palavra que voce ouviu';
+        return 'Ouça e escolha a palavra que você ouviu';
       case AudioExerciseType.listenAndRepeat:
-        return 'Ouca e repita em voz alta';
+        return 'Ouça e repita em voz alta';
     }
   }
 }
@@ -383,7 +422,7 @@ class _SpeechBody extends StatelessWidget {
         if (!runner.answered)
           TextButton(
             onPressed: runner.skipSpeech,
-            child: const Text('Nao consegui / Pular'),
+            child: const Text('Não consegui / Pular'),
           ),
       ],
     );
@@ -516,10 +555,10 @@ class _FeedbackBar extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 runner.wasCorrect
-                    ? 'Boa! +$kXpPerCorrect XP'
+                    ? 'Boa! +${runner.lastXpGained} XP'
                     : (runner.feedbackMessage.isNotEmpty
                         ? runner.feedbackMessage
-                        : 'Vamos seguindo.'),
+                        : 'Vamos seguir.'),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
@@ -544,7 +583,7 @@ class _FeedbackBar extends StatelessWidget {
           if (runner.wasCorrect && word.pronunciation.isNotEmpty) ...[
             const SizedBox(height: 6),
             Text(
-              'Pronuncia: ${word.pronunciation}',
+              'Pronúncia: ${word.pronunciation}',
               style: const TextStyle(
                 fontSize: 13,
                 color: AppColors.textSecondary,
@@ -578,10 +617,13 @@ class _CuriosityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Caulim (branco-osso terroso) diferencia visualmente o card de
+    // conteudo cultural do fluxo normal de exercicio. Reforca o frame
+    // "saber tradicional" sem competir com a paleta urucum.
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.caulim,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.border),
       ),
@@ -625,6 +667,9 @@ class _DoneView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Peak-End Rule (Kahneman et al., 1993): essa tela e o "end" que o
+    // usuario lembra da sessao. Investimos em mensagem positiva e propo-
+    // sito, removemos qualquer aviso tecnico (CLT — Sweller, 1988).
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -635,11 +680,13 @@ class _DoneView extends StatelessWidget {
                 size: 96, color: AppColors.primary),
             const SizedBox(height: 16),
             const Text(
-              'Licao concluida!',
+              'Você praticou Nheengatu hoje.',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 26,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
+                height: 1.2,
               ),
             ),
             const SizedBox(height: 12),
@@ -652,21 +699,24 @@ class _DoneView extends StatelessWidget {
               ),
             ),
             Text(
-              'de $totalPossible XP possiveis',
+              'de até $totalPossible XP',
               style: const TextStyle(
                 fontSize: 13,
                 color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 32),
+            // SDT-Relacionamento (Deci & Ryan, 2000): cada palavra
+            // praticada vira contribuicao concreta a revitalizacao da
+            // lingua. Substitui o aviso tecnico anterior.
             const Text(
-              'XP ainda nao e salvo no servidor.\n'
-              'Persistencia entra numa sprint futura.',
+              'Cada palavra que continua sendo falada\né uma palavra que não se perde.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
+                fontSize: 14,
                 color: AppColors.textSecondary,
+                height: 1.6,
+                fontStyle: FontStyle.italic,
               ),
             ),
             const SizedBox(height: 24),
@@ -675,7 +725,7 @@ class _DoneView extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: onBack,
                 icon: const Icon(Icons.arrow_back),
-                label: const Text('Voltar para a Pratica'),
+                label: const Text('Voltar pra trilha'),
               ),
             ),
           ],
@@ -803,6 +853,8 @@ class _PlayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Cor "rio" (azul Amazonas) — reforca semioticamente que audio e
+    // "fluxo" / som, diferenciando do urucum (acao/CTA da marca).
     return Center(
       child: GestureDetector(
         onTap: onTap,
@@ -811,7 +863,7 @@ class _PlayButton extends StatelessWidget {
           height: 88,
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
-            color: AppColors.primary,
+            color: AppColors.rio,
             boxShadow: [
               BoxShadow(
                 color: Color(0x33000000),

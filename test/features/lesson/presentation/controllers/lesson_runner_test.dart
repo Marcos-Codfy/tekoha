@@ -316,13 +316,17 @@ void main() {
       return r;
     }
 
-    test('acerto da +10 XP e marca answered/wasCorrect', () async {
+    test('acerto da XP variavel (8/10/12) e marca answered/wasCorrect',
+        () async {
       final r = await loadedQuizPureRunner();
       final q = (r.current as QuizStep).data;
 
       r.onQuizOptionTap(q.correctIndex);
 
-      expect(r.xpEarned, 10);
+      // XP variavel (Variable Reward) — sorteia 8, 10 ou 12.
+      expect(r.xpEarned, inInclusiveRange(8, 12));
+      expect(r.lastXpGained, inInclusiveRange(8, 12));
+      expect(r.lastXpGained, r.xpEarned); // 1 acerto = lastXpGained == total
       expect(r.answered, true);
       expect(r.wasCorrect, true);
       expect(r.selectedOption, q.correctIndex);
@@ -442,12 +446,13 @@ void main() {
       return r;
     }
 
-    test('acerto na 1a tentativa: +10 XP, wasCorrect', () async {
+    test('acerto na 1a tentativa: +XP variavel, wasCorrect', () async {
       final r = await loadedAudioRunner();
       final ex = (r.current as AudioStep).data;
       r.onAudioOptionTap(ex.correctIndex);
-      expect(r.xpEarned, 10);
+      expect(r.xpEarned, inInclusiveRange(8, 12));
       expect(r.wasCorrect, true);
+      expect(r.masteredWordsCount, 1); // 1a tentativa sem erro = dominou
     });
 
     test('errada 1a -> encoraja, NAO answered', () async {
@@ -471,7 +476,7 @@ void main() {
       expect(r.answered, true);
       expect(r.wasCorrect, false);
       expect(r.xpEarned, 0);
-      expect(r.feedbackMessage, contains('Boa tentativa'));
+      expect(r.feedbackMessage, contains('Quase lá'));
       expect(r.correctAnswerText, isNotNull);
     });
   });
@@ -507,7 +512,7 @@ void main() {
 
       expect(r.answered, true);
       expect(r.wasCorrect, false);
-      expect(r.feedbackMessage, contains('indisponivel'));
+      expect(r.feedbackMessage, contains('indisponível'));
     });
 
     test('skipSpeech avanca sem XP, sem acusar erro', () async {
@@ -534,7 +539,8 @@ void main() {
 
       expect(r.answered, true);
       expect(r.wasCorrect, false);
-      expect(r.xpEarned, 20); // 2 acertos anteriores
+      // 2 acertos anteriores; cada um entre 8 e 12 → soma entre 16 e 24
+      expect(r.xpEarned, inInclusiveRange(16, 24));
     });
   });
 
@@ -567,7 +573,9 @@ void main() {
       }
 
       expect(r.status, LessonRunnerStatus.done);
-      expect(r.xpEarned, 40);
+      // 4 acertos x [8..12] = entre 32 e 48
+      expect(r.xpEarned, inInclusiveRange(32, 48));
+      expect(r.masteredWordsCount, 4);
     });
 
     test('progress aumenta proporcionalmente', () async {

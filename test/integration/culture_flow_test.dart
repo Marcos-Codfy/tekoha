@@ -83,7 +83,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Nenhum conteudo disponivel nessa categoria.'),
+      find.text('Nenhum conteúdo nessa categoria ainda.'),
       findsOneWidget,
     );
   });
@@ -98,7 +98,7 @@ void main() {
     await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Historia'));
+    await tester.tap(find.text('História'));
     await tester.pumpAndSettle();
 
     verify(() => mockUseCase(

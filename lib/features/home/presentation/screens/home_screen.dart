@@ -55,7 +55,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     SizedBox(width: 6),
                     Text(
-                      'Modo de teste — login desativado',
+                      'Modo de demonstração',
                       style: TextStyle(
                         color: AppColors.primary,
                         fontSize: 12,
@@ -77,7 +77,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Bem-vindo ao Tekoha',
+              'Bem-vindo ao Tekohá',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
@@ -86,9 +86,9 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             const Text(
-              'Aprenda o Nheengatu, uma lingua indigena viva falada por '
-              'comunidades do Alto Rio Negro. Cada palavra que voce aprende '
-              'ajuda a preservar uma cosmovisao unica.',
+              'Aprenda o Nheengatu, uma língua indígena viva falada por '
+              'comunidades do Alto Rio Negro. Cada palavra que você '
+              'pratica é uma palavra que continua viva.',
               style: TextStyle(
                 fontSize: 15,
                 color: AppColors.textSecondary,
@@ -101,7 +101,7 @@ class HomeScreen extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: onStartPractice,
                 icon: const Icon(Icons.play_arrow),
-                label: const Text('Comecar a praticar'),
+                label: const Text('Praticar Nheengatu'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.textOnPrimary,
@@ -119,7 +119,7 @@ class HomeScreen extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: onOpenCulture,
                 icon: const Icon(Icons.diversity_3_outlined),
-                label: const Text('Conheca mais sobre o Nheengatu'),
+                label: const Text('Explorar a cultura indígena'),
               ),
             ),
             const SizedBox(height: 32),

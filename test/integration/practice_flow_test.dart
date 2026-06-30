@@ -80,7 +80,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Sem conexao'), findsOneWidget);
-    expect(find.text('Tentar de novo'), findsOneWidget);
+    expect(find.text('Tentar novamente'), findsOneWidget);
   });
 
   testWidgets('estado vazio mostra mensagem "Nenhum conteudo disponivel"',
@@ -93,10 +93,13 @@ void main() {
     await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
 
-    expect(find.text('Nenhum conteudo disponivel.'), findsOneWidget);
+    expect(
+      find.textContaining('Nenhum módulo disponível'),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('botao Tentar de novo chama useCase de novo com forceRefresh',
+  testWidgets('botao Tentar novamente chama useCase de novo com forceRefresh',
       (tester) async {
     when(() => mockUseCase(
             language: any(named: 'language'),
@@ -106,7 +109,7 @@ void main() {
     await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Tentar de novo'));
+    await tester.tap(find.text('Tentar novamente'));
     await tester.pumpAndSettle();
 
     // Carga inicial + retry = 2 chamadas

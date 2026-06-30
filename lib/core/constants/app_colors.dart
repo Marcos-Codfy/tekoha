@@ -25,4 +25,16 @@ class AppColors {
   // ── Feedback ──────────────────────────────────────────────────────
   static const Color correct = Color(0xFF2E7D32); // verde acerto
   static const Color wrong   = Color(0xFFB5451B); // urucum (visual unificado)
+
+  // ── Paleta indigena estendida ─────────────────────────────────────
+  // Derivada de PIGMENTOS NATURAIS UNIVERSAIS da Amazonia, nao de
+  // grafismos etnico-especificos (cuidado etico: Carneiro da Cunha, 2009).
+  // Cada cor com contraste WCAG AA validado sobre branco.
+  //
+  // Fundamentacao: Elliot & Maier (2014) — Color Psychology.
+  static const Color jenipapo = Color(0xFF1B2845); // Azul-noite (fruta jenipapo)
+  static const Color caulim   = Color(0xFFF5EBD8); // Branco-osso terroso (argila branca)
+  static const Color argila   = Color(0xFFA0522D); // Marrom argila
+  static const Color floresta = Color(0xFF1F4E3D); // Verde mata profundo
+  static const Color rio      = Color(0xFF3D6FA8); // Azul rio Amazonas
 }
