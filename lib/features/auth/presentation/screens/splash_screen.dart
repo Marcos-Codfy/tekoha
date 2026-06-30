@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_flags.dart';
 import '../../../../core/constants/app_routes.dart';
 import '../providers/auth_provider.dart';
 
@@ -59,6 +60,16 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _navigate() {
     if (!mounted) return;
+
+    // Defesa em profundidade: se kBypassAuth estiver ON, a Splash NUNCA
+    // navega pra login. Vai direto pra Home, independente do estado do
+    // AuthProvider. Evita race conditions em builds antigas no cache do
+    // device ou caminhos de navegacao residuais.
+    if (kBypassAuth) {
+      Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+      return;
+    }
+
     final auth = context.read<AuthProvider>();
     if (auth.isLoggedIn) {
       Navigator.of(context).pushReplacementNamed(AppRoutes.home);
