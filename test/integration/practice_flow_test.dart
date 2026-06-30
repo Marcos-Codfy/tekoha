@@ -29,7 +29,7 @@ void main() {
     mockUseCase = _MockGetModules();
   });
 
-  Widget _harness() {
+  Widget harness() {
     return MaterialApp(
       home: ChangeNotifierProvider(
         create: (_) => ModulesProvider(mockUseCase),
@@ -60,7 +60,7 @@ void main() {
               ),
             ]));
 
-    await tester.pumpWidget(_harness());
+    await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
 
     expect(find.text('Saudacoes'), findsOneWidget);
@@ -76,7 +76,7 @@ void main() {
             forceRefresh: any(named: 'forceRefresh')))
         .thenAnswer((_) async => const FailureResult(NetworkFailure()));
 
-    await tester.pumpWidget(_harness());
+    await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Sem conexao'), findsOneWidget);
@@ -90,7 +90,7 @@ void main() {
             forceRefresh: any(named: 'forceRefresh')))
         .thenAnswer((_) async => const Success<List<Module>, Failure>([]));
 
-    await tester.pumpWidget(_harness());
+    await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
 
     expect(find.text('Nenhum conteudo disponivel.'), findsOneWidget);
@@ -103,7 +103,7 @@ void main() {
             forceRefresh: any(named: 'forceRefresh')))
         .thenAnswer((_) async => const FailureResult(NetworkFailure()));
 
-    await tester.pumpWidget(_harness());
+    await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Tentar de novo'));

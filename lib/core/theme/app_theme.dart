@@ -17,7 +17,6 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         surface: AppColors.surface,
-        background: AppColors.background,
         onPrimary: AppColors.textOnPrimary,
         onSurface: AppColors.textPrimary,
         error: AppColors.wrong,
@@ -40,7 +39,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.textOnPrimary,
-          disabledBackgroundColor: Color(0xFFD4886A),
+          disabledBackgroundColor: const Color(0xFFD4886A),
           disabledForegroundColor: Colors.white,
           minimumSize: const Size.fromHeight(54),
           shape: RoundedRectangleBorder(

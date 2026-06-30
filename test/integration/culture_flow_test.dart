@@ -24,7 +24,7 @@ void main() {
     mockUseCase = _MockUseCase();
   });
 
-  Widget _harness() {
+  Widget harness() {
     return MaterialApp(
       home: ChangeNotifierProvider(
         create: (_) => CultureProvider(mockUseCase),
@@ -51,7 +51,7 @@ void main() {
               ),
             ]));
 
-    await tester.pumpWidget(_harness());
+    await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
 
     expect(find.text('Sobre a lingua'), findsOneWidget);
@@ -65,7 +65,7 @@ void main() {
             forceRefresh: any(named: 'forceRefresh')))
         .thenAnswer((_) async => const FailureResult(TimeoutFailure()));
 
-    await tester.pumpWidget(_harness());
+    await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
 
     expect(find.textContaining('demorou'), findsOneWidget);
@@ -79,7 +79,7 @@ void main() {
         .thenAnswer(
             (_) async => const Success<List<CultureContent>, Failure>([]));
 
-    await tester.pumpWidget(_harness());
+    await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
 
     expect(
@@ -95,7 +95,7 @@ void main() {
             forceRefresh: any(named: 'forceRefresh')))
         .thenAnswer((_) async => const Success<List<CultureContent>, Failure>([]));
 
-    await tester.pumpWidget(_harness());
+    await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Historia'));
@@ -119,7 +119,7 @@ void main() {
             forceRefresh: any(named: 'forceRefresh')))
         .thenAnswer((_) async => const Success<List<CultureContent>, Failure>([]));
 
-    await tester.pumpWidget(_harness());
+    await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
 
     // Pode existir o texto "Cosmologia" mas o tap nao deve disparar.

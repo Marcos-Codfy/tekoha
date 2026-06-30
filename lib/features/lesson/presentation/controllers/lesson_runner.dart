@@ -32,7 +32,6 @@ import '../../../../core/services/speech_service.dart';
 import '../../domain/builders/audio_exercise_builder.dart';
 import '../../domain/builders/quiz_builder.dart';
 import '../../domain/entities/audio_exercise.dart';
-import '../../domain/entities/word.dart';
 import '../../domain/usecases/get_lessons_by_module.dart';
 import '../../domain/usecases/get_words_by_lesson.dart';
 import 'lesson_step.dart';

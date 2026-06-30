@@ -25,7 +25,6 @@ import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 import 'package:tekoha/core/errors/failures.dart';
 import 'package:tekoha/core/network/airtable_client.dart';
-import 'package:tekoha/core/result/result.dart';
 
 class _MockHttpClient extends Mock implements http.Client {}
 
@@ -48,7 +47,7 @@ void main() {
     );
   });
 
-  http.Response _ok(List<Map<String, dynamic>> records) {
+  http.Response ok(List<Map<String, dynamic>> records) {
     return http.Response(
       json.encode({'records': records}),
       200,
@@ -58,7 +57,7 @@ void main() {
   group('getRecords - sucesso', () {
     test('200 com records retorna Success com a lista', () async {
       when(() => httpClient.get(any(), headers: any(named: 'headers')))
-          .thenAnswer((_) async => _ok([
+          .thenAnswer((_) async => ok([
                 {'id': 'r1', 'fields': {'name': 'A'}},
                 {'id': 'r2', 'fields': {'name': 'B'}},
               ]));
@@ -73,7 +72,7 @@ void main() {
 
     test('200 com lista vazia tambem e sucesso', () async {
       when(() => httpClient.get(any(), headers: any(named: 'headers')))
-          .thenAnswer((_) async => _ok([]));
+          .thenAnswer((_) async => ok([]));
 
       final result = await airtable.getRecords('Modules');
 
@@ -83,7 +82,7 @@ void main() {
   });
 
   group('getRecords - erros HTTP', () {
-    Future<Failure> _runWithStatus(int status, [String body = '{}']) async {
+    Future<Failure> runWithStatus(int status, [String body = '{}']) async {
       when(() => httpClient.get(any(), headers: any(named: 'headers')))
           .thenAnswer((_) async => http.Response(body, status));
       final result = await airtable.getRecords('Modules');
@@ -92,35 +91,35 @@ void main() {
     }
 
     test('401 -> AuthApiFailure', () async {
-      final f = await _runWithStatus(401);
+      final f = await runWithStatus(401);
       expect(f, isA<AuthApiFailure>());
       expect(f.userMessage, contains('Token'));
     });
 
     test('403 -> AuthApiFailure com mensagem de permissao', () async {
-      final f = await _runWithStatus(403);
+      final f = await runWithStatus(403);
       expect(f, isA<AuthApiFailure>());
       expect(f.userMessage, contains('permissao'));
     });
 
     test('404 -> NotFoundFailure com nome da tabela', () async {
-      final f = await _runWithStatus(404);
+      final f = await runWithStatus(404);
       expect(f, isA<NotFoundFailure>());
       expect(f.userMessage, contains('Modules'));
     });
 
     test('429 -> RateLimitFailure', () async {
-      final f = await _runWithStatus(429);
+      final f = await runWithStatus(429);
       expect(f, isA<RateLimitFailure>());
     });
 
     test('500 -> ServerFailure', () async {
-      final f = await _runWithStatus(500);
+      final f = await runWithStatus(500);
       expect(f, isA<ServerFailure>());
     });
 
     test('418 (codigo qualquer) -> ServerFailure', () async {
-      final f = await _runWithStatus(418);
+      final f = await runWithStatus(418);
       expect(f, isA<ServerFailure>());
     });
   });

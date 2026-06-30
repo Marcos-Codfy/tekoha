@@ -296,7 +296,7 @@ void main() {
   // ── Quiz tradicional ──────────────────────────────────────────────────
 
   group('quiz tradicional', () {
-    Future<LessonRunner> _loadedQuizPureRunner() async {
+    Future<LessonRunner> loadedQuizPureRunner() async {
       when(() => getLessons('M2'))
           .thenAnswer((_) async => Success([_lesson()]));
       when(() => getWords('L1')).thenAnswer((_) async => Success([
@@ -317,7 +317,7 @@ void main() {
     }
 
     test('acerto da +10 XP e marca answered/wasCorrect', () async {
-      final r = await _loadedQuizPureRunner();
+      final r = await loadedQuizPureRunner();
       final q = (r.current as QuizStep).data;
 
       r.onQuizOptionTap(q.correctIndex);
@@ -330,7 +330,7 @@ void main() {
 
     test('1a errada NAO marca answered e libera com clearWrongQuizSelection',
         () async {
-      final r = await _loadedQuizPureRunner();
+      final r = await loadedQuizPureRunner();
       final q = (r.current as QuizStep).data;
       final wrongIndex = q.correctIndex == 0 ? 1 : 0;
 
@@ -346,7 +346,7 @@ void main() {
     });
 
     test('apos tap em qualquer opcao quando ja answered, ignora', () async {
-      final r = await _loadedQuizPureRunner();
+      final r = await loadedQuizPureRunner();
       final q = (r.current as QuizStep).data;
 
       r.onQuizOptionTap(q.correctIndex);
@@ -423,7 +423,7 @@ void main() {
   // ── Audio escolha (tentativas) ────────────────────────────────────────
 
   group('audio - tentativas', () {
-    Future<LessonRunner> _loadedAudioRunner() async {
+    Future<LessonRunner> loadedAudioRunner() async {
       when(() => getLessons('M1'))
           .thenAnswer((_) async => Success([_lesson()]));
       when(() => getWords('L1')).thenAnswer((_) async => Success([
@@ -443,7 +443,7 @@ void main() {
     }
 
     test('acerto na 1a tentativa: +10 XP, wasCorrect', () async {
-      final r = await _loadedAudioRunner();
+      final r = await loadedAudioRunner();
       final ex = (r.current as AudioStep).data;
       r.onAudioOptionTap(ex.correctIndex);
       expect(r.xpEarned, 10);
@@ -451,7 +451,7 @@ void main() {
     });
 
     test('errada 1a -> encoraja, NAO answered', () async {
-      final r = await _loadedAudioRunner();
+      final r = await loadedAudioRunner();
       final ex = (r.current as AudioStep).data;
       final wrong = ex.correctIndex == 0 ? 1 : 0;
       r.onAudioOptionTap(wrong);
@@ -462,7 +462,7 @@ void main() {
     });
 
     test('errada 2x consecutivas: avanca sem XP, mostra resposta', () async {
-      final r = await _loadedAudioRunner();
+      final r = await loadedAudioRunner();
       final ex = (r.current as AudioStep).data;
       final wrong = ex.correctIndex == 0 ? 1 : 0;
       r.onAudioOptionTap(wrong);
