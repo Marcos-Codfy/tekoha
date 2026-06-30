@@ -16,16 +16,16 @@ local.properties
 /android/key.properties
 *.jks
 
-# ===== SEGREDOS E API KEYS â€” NUNCA SUBA ESSES ARQUIVOS! =====
+# ===== SEGREDOS E API KEYS - NUNCA SUBA ESSES ARQUIVOS =====
 .env
 .env.local
 .env.production
 google-services.json
 GoogleService-Info.plist
+lib/firebase_options.dart
 
-# ===== ANDROID STUDIO =====
-.idea/workspace.xml
-.idea/tasks.xml
+# ===== ANDROID STUDIO / JETBRAINS =====
+.idea/
 *.iws
 *.ipr
 
@@ -33,6 +33,10 @@ GoogleService-Info.plist
 .DS_Store
 Thumbs.db
 *.log
+
+# ===== COVERAGE / FVM =====
+coverage/
+.fvm/
 
 # ===== CLAUDE CODE =====
 .claude/
