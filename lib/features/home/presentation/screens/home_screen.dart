@@ -5,6 +5,10 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/components/badges/tekoha_status_pill.dart';
+import '../../../../core/components/buttons/tekoha_primary_button.dart';
+import '../../../../core/components/buttons/tekoha_secondary_button.dart';
+import '../../../../core/components/texts/tekoha_section_label.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_flags.dart';
 
@@ -35,35 +39,9 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (kBypassAuth) ...[
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.bug_report_outlined,
-                      size: 16,
-                      color: AppColors.primary,
-                    ),
-                    SizedBox(width: 6),
-                    Text(
-                      'Modo de demonstração',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
+              const TekohaStatusPill(
+                icon: Icons.bug_report_outlined,
+                label: 'Modo de demonstração',
               ),
               const SizedBox(height: 24),
             ],
@@ -96,41 +74,19 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: onStartPractice,
-                icon: const Icon(Icons.play_arrow),
-                label: const Text('Praticar Nheengatu'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.textOnPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+            TekohaPrimaryButton(
+              label: 'Praticar Nheengatu',
+              icon: Icons.play_arrow,
+              onPressed: onStartPractice,
             ),
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: onOpenCulture,
-                icon: const Icon(Icons.diversity_3_outlined),
-                label: const Text('Explorar a cultura indígena'),
-              ),
+            TekohaSecondaryButton(
+              label: 'Explorar a cultura indígena',
+              icon: Icons.diversity_3_outlined,
+              onPressed: onOpenCulture,
             ),
             const SizedBox(height: 32),
-            const Text(
-              'Seu progresso',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
+            const TekohaSectionLabel('Seu progresso'),
             const SizedBox(height: 8),
             const _DashboardCard(
               icon: Icons.local_fire_department,

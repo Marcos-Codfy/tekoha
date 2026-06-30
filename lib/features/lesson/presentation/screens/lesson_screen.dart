@@ -13,6 +13,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/components/badges/tekoha_xp_badge.dart';
+import '../../../../core/components/buttons/tekoha_primary_button.dart';
+import '../../../../core/components/loaders/tekoha_loader.dart';
+import '../../../../core/components/texts/tekoha_encouragement_text.dart';
+import '../../../../core/components/texts/tekoha_purpose_text.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/services/audio_player_service.dart';
 import '../../../../core/services/speech_service.dart';
@@ -64,7 +69,7 @@ class _LessonScreenBody extends StatelessWidget {
         title: Text(moduleName),
         actions: [
           if (runner.isExercising)
-            _XpBadge(
+            TekohaXpBadge(
               xp: runner.xpEarned,
               mastered: runner.masteredWordsCount,
             ),
@@ -72,9 +77,7 @@ class _LessonScreenBody extends StatelessWidget {
       ),
       body: () {
         if (runner.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          );
+          return const TekohaLoader();
         }
         if (runner.hasError) {
           return ErrorView(
@@ -93,57 +96,6 @@ class _LessonScreenBody extends StatelessWidget {
         }
         return _ExerciseScaffold(runner: runner);
       }(),
-    );
-  }
-}
-
-// ── XP badge no AppBar ──────────────────────────────────────────────────
-
-class _XpBadge extends StatelessWidget {
-  final int xp;
-  final int mastered;
-
-  const _XpBadge({required this.xp, required this.mastered});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '+$xp XP',
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                  height: 1.1,
-                ),
-              ),
-              // SDT-Competencia: visivel so quando o usuario realmente
-              // dominou alguma palavra (acertou na 1a tentativa).
-              if (mastered > 0)
-                Text(
-                  '$mastered ${mastered == 1 ? "dominada" : "dominadas"}',
-                  style: TextStyle(
-                    color: AppColors.primary.withValues(alpha: 0.8),
-                    fontSize: 10,
-                    height: 1.1,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
@@ -290,7 +242,7 @@ class _AudioStepView extends StatelessWidget {
           ),
         if (runner.feedbackMessage.isNotEmpty && !runner.answered) ...[
           const SizedBox(height: 16),
-          _EncouragementText(text: runner.feedbackMessage),
+          TekohaEncouragementText(runner.feedbackMessage),
         ],
       ],
     );
@@ -487,7 +439,7 @@ class _QuizStepView extends StatelessWidget {
         ],
         if (runner.feedbackMessage.isNotEmpty && !runner.answered) ...[
           const SizedBox(height: 4),
-          _EncouragementText(text: runner.feedbackMessage),
+          TekohaEncouragementText(runner.feedbackMessage),
         ],
       ],
     );
@@ -596,14 +548,9 @@ class _FeedbackBar extends StatelessWidget {
             _CuriosityCard(text: word.culturalNote),
           ],
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: runner.next,
-              child: Text(
-                runner.isLastStep ? 'Ver resultado' : 'Continuar',
-              ),
-            ),
+          TekohaPrimaryButton(
+            label: runner.isLastStep ? 'Ver resultado' : 'Continuar',
+            onPressed: runner.next,
           ),
         ],
       ),
@@ -709,24 +656,15 @@ class _DoneView extends StatelessWidget {
             // SDT-Relacionamento (Deci & Ryan, 2000): cada palavra
             // praticada vira contribuicao concreta a revitalizacao da
             // lingua. Substitui o aviso tecnico anterior.
-            const Text(
-              'Cada palavra que continua sendo falada\né uma palavra que não se perde.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-                height: 1.6,
-                fontStyle: FontStyle.italic,
-              ),
+            const TekohaPurposeText(
+              text:
+                  'Cada palavra que continua sendo falada\né uma palavra que não se perde.',
             ),
             const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: onBack,
-                icon: const Icon(Icons.arrow_back),
-                label: const Text('Voltar pra trilha'),
-              ),
+            TekohaPrimaryButton(
+              label: 'Voltar pra trilha',
+              icon: Icons.arrow_back,
+              onPressed: onBack,
             ),
           ],
         ),
@@ -883,22 +821,3 @@ class _PlayButton extends StatelessWidget {
   }
 }
 
-class _EncouragementText extends StatelessWidget {
-  final String text;
-  const _EncouragementText({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: AppColors.primary,
-          fontWeight: FontWeight.w600,
-          fontSize: 14,
-        ),
-      ),
-    );
-  }
-}

@@ -6,11 +6,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/components/banners/tekoha_error_banner.dart';
+import '../../../../core/components/buttons/tekoha_primary_button.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/validators.dart';
 import '../providers/auth_provider.dart';
-import '../widgets/auth_button_loader.dart';
-import '../widgets/auth_error_banner.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -232,13 +232,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                     ),
                     const SizedBox(height: 10),
                     if (auth.errorMessage != null)
-                      AuthErrorBanner(message: auth.errorMessage!),
+                      TekohaErrorBanner(message: auth.errorMessage!),
                     const SizedBox(height: 32),
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _handleRegister,
-                      child: _isLoading
-                          ? const AuthButtonLoader()
-                          : const Text('Criar conta'),
+                    TekohaPrimaryButton(
+                      label: 'Criar conta',
+                      isLoading: _isLoading,
+                      onPressed: _handleRegister,
                     ),
                     const SizedBox(height: 24),
                     Row(
@@ -407,12 +406,9 @@ class _SuccessDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Comecar agora'),
-              ),
+            TekohaPrimaryButton(
+              label: 'Começar agora',
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ],
         ),

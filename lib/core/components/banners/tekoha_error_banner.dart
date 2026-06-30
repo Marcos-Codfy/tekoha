@@ -1,19 +1,31 @@
-// lib/features/auth/presentation/widgets/auth_error_banner.dart
-// Banner reutilizado nas telas de login e cadastro.
+// lib/core/components/banners/tekoha_error_banner.dart
+//
+// Banner inline de erro. Usado em forms (auth) ou em qualquer tela que
+// precise comunicar erro sem ocupar espaco com ErrorView.
+//
+// Substitui o antigo AuthErrorBanner — generalizado pra uso em qualquer
+// feature.
 
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../constants/app_colors.dart';
 
-class AuthErrorBanner extends StatelessWidget {
+class TekohaErrorBanner extends StatelessWidget {
   final String message;
 
-  const AuthErrorBanner({super.key, required this.message});
+  /// Quando true, adiciona uma margem superior pequena (padrao em forms).
+  final bool withTopMargin;
+
+  const TekohaErrorBanner({
+    super.key,
+    required this.message,
+    this.withTopMargin = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 4),
+      margin: withTopMargin ? const EdgeInsets.only(top: 4) : EdgeInsets.zero,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.wrong.withValues(alpha: 0.08),

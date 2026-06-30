@@ -9,6 +9,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/components/buttons/tekoha_secondary_button.dart';
+import '../../../../core/components/texts/tekoha_purpose_text.dart';
+import '../../../../core/components/texts/tekoha_section_label.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_flags.dart';
 import '../../../../core/constants/app_routes.dart';
@@ -68,14 +71,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
-            const Text(
-              'Seu progresso',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
+            const TekohaSectionLabel('Seu progresso'),
             const SizedBox(height: 8),
             const _StatRow(icon: Icons.star, label: 'XP total', value: '0 XP'),
             const Divider(height: 1, color: AppColors.border),
@@ -100,19 +96,11 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            // SDT-Relacionamento (Deci & Ryan, 2000): cada palavra praticada
-            // ganha sentido como contribuicao real a revitalizacao da lingua.
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                'Cada palavra praticada apoia a revitalização do Nheengatu.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
-                  fontStyle: FontStyle.italic,
-                  height: 1.5,
-                ),
+              child: TekohaPurposeText(
+                text:
+                    'Cada palavra praticada apoia a revitalização do Nheengatu.',
               ),
             ),
             const SizedBox(height: 40),
@@ -143,15 +131,10 @@ class ProfileScreen extends StatelessWidget {
                 ),
               )
             else
-              OutlinedButton.icon(
+              TekohaSecondaryButton(
+                label: 'Sair da conta',
+                icon: Icons.logout,
                 onPressed: () => _logout(context),
-                icon: const Icon(Icons.logout),
-                label: const Text('Sair da conta'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
               ),
           ],
         ),

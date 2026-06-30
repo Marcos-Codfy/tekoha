@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/components/chips/tekoha_category_chip.dart';
+import '../../../../core/components/loaders/tekoha_loader.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../providers/culture_provider.dart';
@@ -107,44 +109,11 @@ class _CultureScreenState extends State<CultureScreen> {
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final category = _categories[index];
-          final selected = index == _selectedIndex;
-          final disabled = !category.available;
-
-          final Color background;
-          final Color labelColor;
-          final Color borderColor;
-          if (disabled) {
-            background = const Color(0xFFF5F5F5);
-            labelColor = AppColors.textSecondary;
-            borderColor = AppColors.border;
-          } else if (selected) {
-            // Floresta (verde-mata profundo) diferencia visualmente a aba
-            // Cultura da aba Pratica (urucum). Reforca o frame "natureza
-            // amazonica" pro conteudo cultural.
-            background = AppColors.floresta;
-            labelColor = AppColors.textOnPrimary;
-            borderColor = AppColors.floresta;
-          } else {
-            background = AppColors.surface;
-            labelColor = AppColors.textPrimary;
-            borderColor = AppColors.border;
-          }
-
-          return ChoiceChip(
-            label: Text(category.label),
-            selected: selected,
-            onSelected: disabled ? null : (_) => _selectCategory(index),
-            selectedColor: AppColors.floresta,
-            backgroundColor: background,
-            disabledColor: background,
-            labelStyle: TextStyle(
-              color: labelColor,
-              fontWeight: FontWeight.w600,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: BorderSide(color: borderColor),
-            ),
+          return TekohaCategoryChip(
+            label: category.label,
+            selected: index == _selectedIndex,
+            disabled: !category.available,
+            onTap: () => _selectCategory(index),
           );
         },
       ),
@@ -155,9 +124,7 @@ class _CultureScreenState extends State<CultureScreen> {
     return Consumer<CultureProvider>(
       builder: (context, provider, _) {
         if (provider.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          );
+          return const TekohaLoader();
         }
 
         if (provider.hasError) {

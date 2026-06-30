@@ -14,6 +14,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/components/loaders/tekoha_loader.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../features/lesson/presentation/screens/lesson_screen.dart';
@@ -60,9 +61,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
       body: Consumer<ModulesProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            );
+            return const TekohaLoader();
           }
 
           if (provider.hasError) {
