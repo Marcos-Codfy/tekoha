@@ -21,6 +21,7 @@
 // daquela feature. Adicionar uma feature nova = criar funcao + chamar
 // em `setupDependencies()`.
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -49,6 +50,9 @@ import '../features/practice/data/repositories/practice_repository_impl.dart';
 import '../features/practice/domain/repositories/practice_repository.dart';
 import '../features/practice/domain/repositories/progress_repository.dart';
 import '../features/practice/domain/usecases/get_modules.dart';
+import '../features/progress/data/datasources/firestore_progress_datasource.dart';
+import '../features/progress/data/repositories/user_progress_repository_impl.dart';
+import '../features/progress/domain/repositories/user_progress_repository.dart';
 
 /// Apelido global pra encurtar `GetIt.instance.<X>()` em `sl<X>()`.
 /// "sl" = "service locator".
@@ -63,6 +67,7 @@ Future<void> setupDependencies() async {
   _registerLesson();
   _registerCulture();
   _registerAuth();
+  _registerProgress();
 }
 
 // ── Feature: Practice ─────────────────────────────────────────────────
@@ -83,11 +88,35 @@ void _registerPractice() {
     () => GetModulesUseCase(sl<PracticeRepository>()),
   );
 
-  // Progresso da trilha (ESP-005). Impl em memoria no MVP — quando a
-  // Sprint de persistencia chegar (Firestore/local), troca SO esta
-  // linha; contrato e UI ficam intactos.
+  // Progresso da trilha (ESP-005). Impl em memoria enquanto o login
+  // esta desativado (kBypassAuth). QUANDO O LOGIN VOLTAR (ESP-006),
+  // troque o registro abaixo pelo adapter Firestore ja pronto:
+  //
+  //   sl.registerLazySingleton<ProgressRepository>(
+  //     () => FirestoreStageProgressRepository(
+  //       sl<FirestoreProgressDataSource>(),
+  //       () => FirebaseAuth.instance.currentUser?.uid ?? '',
+  //     ),
+  //   );
+  //
+  // Contrato e UI ficam intactos — e um swap de uma linha.
   sl.registerLazySingleton<ProgressRepository>(
     () => InMemoryProgressRepository(),
+  );
+}
+
+// ── Feature: Progress (ESP-006 — estrutura pronta, ativa no login) ────
+
+void _registerProgress() {
+  // Lazy: FirebaseFirestore.instance so e tocado se algo resolver esta
+  // dependencia — com kBypassAuth = true nada resolve, entao o registro
+  // e inofensivo hoje e ja fica pronto pra Sprint do login.
+  sl.registerLazySingleton<FirestoreProgressDataSource>(
+    () => FirestoreProgressDataSource(FirebaseFirestore.instance),
+  );
+
+  sl.registerLazySingleton<UserProgressRepository>(
+    () => UserProgressRepositoryImpl(sl<FirestoreProgressDataSource>()),
   );
 }
 
