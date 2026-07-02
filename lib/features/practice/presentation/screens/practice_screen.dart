@@ -98,34 +98,13 @@ class _PracticeScreenState extends State<PracticeScreen> {
               itemBuilder: (context, index) {
                 final module = provider.modules[index];
 
-                // Regra de demo: so o Modulo 1 (Saudacoes, com audio) abre.
-                // Modulo 2 = "Em ajustes", Modulo 3+ = "Em construcao".
-                // Sprint futura troca isso por progresso real do usuario.
-                final bool isLocked;
-                final String lockedMessage;
-                final IconData lockedIcon;
-                if (module.order == 1) {
-                  isLocked = false;
-                  lockedMessage = '';
-                  lockedIcon = Icons.lock_outline;
-                } else if (module.order == 2) {
-                  isLocked = true;
-                  lockedMessage = 'Em ajustes';
-                  lockedIcon = Icons.tune;
-                } else {
-                  isLocked = true;
-                  lockedMessage = 'Em construção';
-                  lockedIcon = Icons.construction;
-                }
-
+                // Todos os modulos abertos: as 30 palavras tem audio
+                // (01/jul) e os 3 modulos rodam no modo misto (audio +
+                // quiz). Sprint futura: travar por progresso real do
+                // usuario (ModuleCard ja suporta isLocked).
                 return ModuleCard(
                   module: module,
-                  isLocked: isLocked,
-                  lockedMessage: lockedMessage,
-                  lockedIcon: lockedIcon,
-                  onTap: isLocked
-                      ? null
-                      : () => _openModule(context, module.id, module.name),
+                  onTap: () => _openModule(context, module.id, module.name),
                 );
               },
             ),

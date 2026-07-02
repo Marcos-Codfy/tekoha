@@ -65,8 +65,10 @@ void main() {
 
     expect(find.text('Saudacoes'), findsOneWidget);
     expect(find.text('Apresentacao'), findsOneWidget);
-    // Modulo 2 fica trancado com "Em ajustes".
-    expect(find.text('Em ajustes'), findsOneWidget);
+    // Todos os modulos destravados desde a conclusao dos audios
+    // (30/30 palavras com audio_url) — nenhum overlay de trava.
+    expect(find.text('Em ajustes'), findsNothing);
+    expect(find.text('Em construção'), findsNothing);
   });
 
   testWidgets('estado error mostra ErrorView com mensagem do Failure',
