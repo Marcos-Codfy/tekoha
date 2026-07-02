@@ -44,8 +44,10 @@ import '../features/lesson/domain/repositories/lesson_repository.dart';
 import '../features/lesson/domain/usecases/get_lessons_by_module.dart';
 import '../features/lesson/domain/usecases/get_words_by_lesson.dart';
 import '../features/practice/data/datasources/practice_remote_datasource.dart';
+import '../features/practice/data/repositories/in_memory_progress_repository.dart';
 import '../features/practice/data/repositories/practice_repository_impl.dart';
 import '../features/practice/domain/repositories/practice_repository.dart';
+import '../features/practice/domain/repositories/progress_repository.dart';
 import '../features/practice/domain/usecases/get_modules.dart';
 
 /// Apelido global pra encurtar `GetIt.instance.<X>()` em `sl<X>()`.
@@ -79,6 +81,13 @@ void _registerPractice() {
   // UseCase: conhece o Repository.
   sl.registerLazySingleton<GetModulesUseCase>(
     () => GetModulesUseCase(sl<PracticeRepository>()),
+  );
+
+  // Progresso da trilha (ESP-005). Impl em memoria no MVP — quando a
+  // Sprint de persistencia chegar (Firestore/local), troca SO esta
+  // linha; contrato e UI ficam intactos.
+  sl.registerLazySingleton<ProgressRepository>(
+    () => InMemoryProgressRepository(),
   );
 }
 

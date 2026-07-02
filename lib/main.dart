@@ -49,8 +49,10 @@ import 'features/auth/presentation/screens/splash_screen.dart';
 import 'features/culture/domain/usecases/get_culture_content.dart';
 import 'features/culture/presentation/providers/culture_provider.dart';
 import 'core/app/main_scaffold.dart';
+import 'features/practice/domain/repositories/progress_repository.dart';
 import 'features/practice/domain/usecases/get_modules.dart';
 import 'features/practice/presentation/providers/modules_provider.dart';
+import 'features/practice/presentation/providers/progress_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -117,6 +119,12 @@ class TekohaApp extends StatelessWidget {
         // ModulesProvider — feature Practice.
         ChangeNotifierProvider(
           create: (_) => ModulesProvider(sl<GetModulesUseCase>()),
+        ),
+        // ProgressProvider — progresso da trilha (ESP-005). Global
+        // porque PracticeScreen (travas) e ModuleTrailScreen (nos)
+        // leem o mesmo estado.
+        ChangeNotifierProvider(
+          create: (_) => ProgressProvider(sl<ProgressRepository>()),
         ),
         // CultureProvider — feature Culture.
         ChangeNotifierProvider(
