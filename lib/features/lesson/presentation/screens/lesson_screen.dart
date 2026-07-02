@@ -33,10 +33,22 @@ class LessonScreen extends StatelessWidget {
   final String moduleId;
   final String moduleName;
 
+  /// Etapa da trilha a executar (ESP-005). Null = licao inteira.
+  final int? stageIndex;
+
+  /// Titulo da etapa (exibido na AppBar no lugar do nome do modulo).
+  final String? stageTitle;
+
+  /// `Module.order` — escolhe a divisao curada do TrailBuilder.
+  final int moduleOrder;
+
   const LessonScreen({
     super.key,
     required this.moduleId,
     required this.moduleName,
+    this.stageIndex,
+    this.stageTitle,
+    this.moduleOrder = 0,
   });
 
   @override
@@ -49,15 +61,15 @@ class LessonScreen extends StatelessWidget {
         getWords: sl<GetWordsByLessonUseCase>(),
         player: sl<AudioPlayerService>(),
         speech: sl<SpeechService>(),
-      )..load(moduleId),
-      child: _LessonScreenBody(moduleName: moduleName),
+      )..load(moduleId, stageIndex: stageIndex, moduleOrder: moduleOrder),
+      child: _LessonScreenBody(title: stageTitle ?? moduleName),
     );
   }
 }
 
 class _LessonScreenBody extends StatelessWidget {
-  final String moduleName;
-  const _LessonScreenBody({required this.moduleName});
+  final String title;
+  const _LessonScreenBody({required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +78,7 @@ class _LessonScreenBody extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(moduleName),
+        title: Text(title),
         actions: [
           if (runner.isExercising)
             TekohaXpBadge(
@@ -91,7 +103,9 @@ class _LessonScreenBody extends StatelessWidget {
           return _DoneView(
             xpEarned: runner.xpEarned,
             totalPossible: runner.totalPossibleXp,
-            onBack: () => Navigator.of(context).pop(),
+            // `true` avisa a ModuleTrailScreen que a etapa foi
+            // concluida (ela marca o progresso ao receber o result).
+            onBack: () => Navigator.of(context).pop(true),
           );
         }
         return _ExerciseScaffold(runner: runner);

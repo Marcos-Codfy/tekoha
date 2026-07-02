@@ -31,12 +31,15 @@ class AudioExerciseBuilder {
 
   /// [words] deve conter APENAS palavras com audio (as saudacoes).
   /// Filtra defensivamente caso venha algo sem audio.
+  /// [pool] opcional: fonte dos distratores (ex.: TODAS as palavras da
+  /// licao quando [words] e so o recorte de uma etapa da trilha —
+  /// ESP-005). Default: as proprias [words].
   /// [random] opcional pra embaralhar opcoes deterministicamente em teste.
   ///
-  /// O pool de opcoes (distratores + correta) vem das proprias [words],
-  /// limitado a [kMaxOptions] alternativas por exercicio.
+  /// As opcoes (correta + distratores) respeitam o teto de [kMaxOptions].
   static List<AudioExercise> build(
     List<Word> words, {
+    List<Word>? pool,
     Random? random,
   }) {
     final rng = random ?? Random();
@@ -44,13 +47,16 @@ class AudioExerciseBuilder {
     final audioWords = words.where((w) => w.hasAudio).toList();
     if (audioWords.isEmpty) return const [];
 
+    final optionPool =
+        (pool == null || pool.isEmpty) ? audioWords : pool;
+
     final exercises = <AudioExercise>[];
 
     for (final target in audioWords) {
       // Tipo 1: ouve Nheengatu -> escolhe traducao PT.
       final translationOptions = _shuffledOptions(
         correct: target.translation,
-        pool: audioWords.map((w) => w.translation).toList(),
+        pool: optionPool.map((w) => w.translation).toList(),
         rng: rng,
       );
       exercises.add(AudioExercise(
@@ -63,7 +69,7 @@ class AudioExerciseBuilder {
       // Tipo 2: ouve Nheengatu -> escolhe palavra Nheengatu.
       final wordOptions = _shuffledOptions(
         correct: target.nheengatu,
-        pool: audioWords.map((w) => w.nheengatu).toList(),
+        pool: optionPool.map((w) => w.nheengatu).toList(),
         rng: rng,
       );
       exercises.add(AudioExercise(

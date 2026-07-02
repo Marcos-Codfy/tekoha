@@ -33,6 +33,7 @@ import '../../../../core/services/audio_player_service.dart';
 import '../../../../core/services/speech_service.dart';
 import '../../domain/builders/audio_exercise_builder.dart';
 import '../../domain/builders/quiz_builder.dart';
+import '../../domain/builders/trail_builder.dart';
 import '../../domain/entities/audio_exercise.dart';
 import '../../domain/usecases/get_lessons_by_module.dart';
 import '../../domain/usecases/get_words_by_lesson.dart';
@@ -224,7 +225,16 @@ class LessonRunner extends ChangeNotifier {
 
   /// Carrega licao + palavras do modulo e monta a sequencia de passos.
   /// Se ja foi chamado uma vez com sucesso, vira no-op (idempotente).
-  Future<void> load(String moduleId) async {
+  ///
+  /// [stageIndex] (opcional): quando a sessao vem da trilha (ESP-005),
+  /// roda so as palavras daquela etapa. [moduleOrder] escolhe a divisao
+  /// curada do TrailBuilder. Sem [stageIndex], roda a licao inteira
+  /// (comportamento original).
+  Future<void> load(
+    String moduleId, {
+    int? stageIndex,
+    int moduleOrder = 0,
+  }) async {
     if (_loaded) return;
 
     _status = LessonRunnerStatus.loading;
@@ -270,25 +280,42 @@ class LessonRunner extends ChangeNotifier {
     final audioWords = allWords.where((w) => w.hasAudio).toList()
       ..sort((a, b) => a.order.compareTo(b.order));
 
+    // Recorte da etapa da trilha (ESP-005): a sessao roda so as
+    // palavras da etapa pedida. Os DISTRATORES continuam vindo da
+    // licao inteira — variedade sem crescer o numero de alternativas
+    // (cap de 4 no builder, ESP-004).
+    var sessionWords = audioWords;
+    if (stageIndex != null) {
+      final stages = TrailBuilder.build(allWords, moduleOrder: moduleOrder);
+      if (stageIndex >= 0 && stageIndex < stages.length) {
+        sessionWords = stages[stageIndex]
+            .words
+            .where((w) => w.hasAudio)
+            .toList()
+          ..sort((a, b) => a.order.compareTo(b.order));
+      }
+    }
+
     final List<LessonStep> steps;
 
-    if (audioWords.isNotEmpty) {
-      // Modo misto: preload audio + speech init.
-      await _player.preload(audioWords.map((w) => w.audioUrl).toList());
+    if (sessionWords.isNotEmpty) {
+      // Modo misto: preload audio + speech init (so da etapa atual).
+      await _player.preload(sessionWords.map((w) => w.audioUrl).toList());
       _speechAvailable = await _speech.init();
       if (_speechAvailable) {
         _speech.onStatus = _onSpeechStatus;
       }
 
-      final audioExercises = AudioExerciseBuilder.build(audioWords);
+      final audioExercises =
+          AudioExerciseBuilder.build(sessionWords, pool: allWords);
       final quizQuestions = QuizBuilder.build(
-        targets: audioWords,
-        pool: audioWords,
+        targets: sessionWords,
+        pool: allWords,
       );
 
-      // Pra cada saudacao: 3 exercicios de audio + 1 quiz intercalado.
+      // Pra cada palavra: 3 exercicios de audio + 1 quiz intercalado.
       steps = <LessonStep>[];
-      for (var i = 0; i < audioWords.length; i++) {
+      for (var i = 0; i < sessionWords.length; i++) {
         steps.add(AudioStep(audioExercises[i * 3])); // trad
         steps.add(AudioStep(audioExercises[i * 3 + 1])); // word
         steps.add(AudioStep(audioExercises[i * 3 + 2])); // repete
