@@ -22,12 +22,19 @@ import '../entities/word.dart';
 class AudioExerciseBuilder {
   AudioExerciseBuilder._();
 
+  /// Maximo de alternativas por exercicio de escolha (1 correta + 3
+  /// distratores). Mesmo limite do QuizBuilder — consistencia entre
+  /// exercicios (Nielsen H4) e carga cognitiva controlada (Hick-Hyman;
+  /// Sweller, 1988). Sem esse teto, o numero de botoes cresceria junto
+  /// com o numero de palavras com audio da licao.
+  static const int kMaxOptions = 4;
+
   /// [words] deve conter APENAS palavras com audio (as saudacoes).
   /// Filtra defensivamente caso venha algo sem audio.
   /// [random] opcional pra embaralhar opcoes deterministicamente em teste.
   ///
-  /// O pool de opcoes (distratores + correta) vem das proprias [words] —
-  /// nao confunde o usuario com palavras que ele nao acabou de exercitar.
+  /// O pool de opcoes (distratores + correta) vem das proprias [words],
+  /// limitado a [kMaxOptions] alternativas por exercicio.
   static List<AudioExercise> build(
     List<Word> words, {
     Random? random,
@@ -76,7 +83,8 @@ class AudioExerciseBuilder {
     return exercises;
   }
 
-  /// Lista de opcoes embaralhada (correta + distratores unicos do pool).
+  /// Lista de opcoes embaralhada (correta + ate 3 distratores unicos
+  /// sorteados do pool). Nunca passa de [kMaxOptions] alternativas.
   static List<String> _shuffledOptions({
     required String correct,
     required List<String> pool,
@@ -84,7 +92,7 @@ class AudioExerciseBuilder {
   }) {
     final distractors = pool.toSet().where((o) => o != correct).toList()
       ..shuffle(rng);
-    final options = <String>[correct, ...distractors];
+    final options = <String>[correct, ...distractors.take(kMaxOptions - 1)];
     options.shuffle(rng);
     return options;
   }

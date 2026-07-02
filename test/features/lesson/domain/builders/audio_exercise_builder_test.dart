@@ -118,6 +118,27 @@ void main() {
       expect(targets, {'ara', 'karuka'});
     });
 
+    test('com muitas palavras, exercicios de escolha tem no maximo 4 opcoes '
+        '(ESP-004: Hick-Hyman / consistencia com o quiz)', () {
+      final words = List.generate(
+        10,
+        (i) => _w(i + 1, 'palavra$i', 'traducao$i', url: 'http://a/$i.mp3'),
+      );
+      final ex = AudioExerciseBuilder.build(words, random: Random(5));
+
+      final chooseExercises = ex.where(
+        (e) => e.type != AudioExerciseType.listenAndRepeat,
+      );
+      expect(chooseExercises, isNotEmpty);
+      for (final e in chooseExercises) {
+        expect(e.options.length, AudioExerciseBuilder.kMaxOptions);
+        // A correta sempre presente e apontada pelo correctIndex.
+        expect(e.options[e.correctIndex], e.correctAnswer);
+        // Sem opcoes duplicadas.
+        expect(e.options.toSet().length, e.options.length);
+      }
+    });
+
     test('mesma seed produz resultado identico (determinismo)', () {
       final words = [
         _w(1, 'ara', 'manha', url: 'http://a/a.mp3'),
