@@ -38,6 +38,29 @@ class ProgressProvider extends ChangeNotifier {
   bool isModuleDone(String moduleId, int totalStages) =>
       totalStages > 0 && doneCount(moduleId) >= totalStages;
 
+  // ── Total de etapas por modulo ────────────────────────────────────
+  // Registrado pela ModuleTrailScreen quando a trilha carrega. Permite
+  // que a PracticeScreen (que nao conhece as palavras) responda
+  // "o modulo anterior foi completado?" pra travar/destravar modulos.
+
+  final Map<String, int> _totalStages = {};
+
+  /// Registra quantas etapas a trilha do modulo tem. Idempotente — so
+  /// notifica quando o valor muda.
+  void registerTotalStages(String moduleId, int total) {
+    if (_totalStages[moduleId] == total) return;
+    _totalStages[moduleId] = total;
+    notifyListeners();
+  }
+
+  /// Modulo comprovadamente completo: o total de etapas e conhecido
+  /// (a trilha ja foi aberta ao menos uma vez) E todas foram feitas.
+  /// Modulo nunca visitado = incompleto por definicao.
+  bool isModuleComplete(String moduleId) {
+    final total = _totalStages[moduleId];
+    return total != null && isModuleDone(moduleId, total);
+  }
+
   /// Indice da proxima etapa a fazer (primeira nao concluida), ou -1
   /// se todas as [totalStages] etapas ja foram concluidas.
   int nextStageIndex(String moduleId, int totalStages) {
