@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/components/banners/tekoha_error_banner.dart';
 import '../../../../core/components/buttons/tekoha_primary_button.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_routes.dart';
 import '../../../../core/utils/validators.dart';
 import '../providers/auth_provider.dart';
 
@@ -104,8 +105,14 @@ class _RegisterScreenState extends State<RegisterScreen>
       barrierColor: Colors.black54,
       builder: (_) => const _SuccessDialog(),
     );
+    // O createUser do Firebase JA autentica a conta recem-criada —
+    // entrar direto na Home evita pedir e-mail/senha que a pessoa
+    // digitou ha 5 segundos (Nielsen H6: reconhecimento, nao memoria).
     if (mounted) {
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        AppRoutes.home,
+        (_) => false,
+      );
     }
   }
 
@@ -219,6 +226,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                       ),
                       validator: Validators.password,
                     ),
+                    const SizedBox(height: 10),
+                    // Dicas de senha forte SEMPRE visiveis (prevencao de
+                    // erros — Nielsen H5): cada criterio acende conforme
+                    // e cumprido, guiando sem bloquear (Firebase exige
+                    // apenas 6+; o resto e recomendacao de seguranca).
+                    _PasswordHints(password: _passwordController.text),
                     if (_passwordController.text.isNotEmpty) ...[
                       const SizedBox(height: 10),
                       _PasswordStrengthBar(strength: _passwordStrength),
@@ -306,6 +319,52 @@ class _RegisterScreenState extends State<RegisterScreen>
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Checklist dinamico de senha forte: cada criterio "acende" quando
+/// cumprido. Dica orientativa — nao bloqueia o envio.
+class _PasswordHints extends StatelessWidget {
+  final String password;
+
+  const _PasswordHints({required this.password});
+
+  @override
+  Widget build(BuildContext context) {
+    final criteria = <(String, bool)>[
+      ('Pelo menos 6 caracteres', password.length >= 6),
+      ('1 letra maiúscula', password.contains(RegExp(r'[A-Z]'))),
+      ('1 letra minúscula', password.contains(RegExp(r'[a-z]'))),
+      ('1 número', password.contains(RegExp(r'[0-9]'))),
+      ('1 símbolo (ex.: ! @ # \$)', password.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>_\-+=;~]'))),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final (label, met) in criteria)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(
+              children: [
+                Icon(
+                  met ? Icons.check_circle : Icons.circle_outlined,
+                  size: 14,
+                  color: met ? AppColors.correct : AppColors.textSecondary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: met ? AppColors.correct : AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }
