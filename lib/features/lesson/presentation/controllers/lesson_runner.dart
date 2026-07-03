@@ -37,6 +37,7 @@ import '../../domain/builders/trail_builder.dart';
 import '../../domain/entities/audio_exercise.dart';
 import '../../domain/usecases/get_lessons_by_module.dart';
 import '../../domain/usecases/get_words_by_lesson.dart';
+import 'lesson_outcome.dart';
 import 'lesson_step.dart';
 
 /// XP "central" exibido em mensagens e calculo de XP maximo possivel.
@@ -138,6 +139,22 @@ class LessonRunner extends ChangeNotifier {
   /// Quantas palavras o usuario "dominou" nesta sessao (acertou na 1a
   /// tentativa, sem nenhum erro). Visivel no XpBadge.
   int get masteredWordsCount => _masteredInSession.length;
+
+  /// IDs das palavras dominadas na sessao — alimenta o acumulado
+  /// persistido (criterio `words_mastered` das conquistas).
+  Set<String> get masteredWordIds => {..._masteredInSession};
+
+  /// Exercicios de fala (ouvir e repetir) corretos na sessao — alimenta
+  /// o criterio `speech_correct` das conquistas.
+  int get speechCorrectCount => _speechCorrectCount;
+  int _speechCorrectCount = 0;
+
+  /// Resultado consolidado da sessao, devolvido no pop da LessonScreen.
+  LessonOutcome get outcome => LessonOutcome(
+        xpEarned: _xpEarned,
+        masteredWordIds: masteredWordIds,
+        speechCorrectCount: _speechCorrectCount,
+      );
 
   /// XP ganho no ULTIMO acerto (sorteado entre 8/10/12). 0 quando ainda
   /// nao houve acerto ou o passo foi resetado por `next()`.
@@ -521,6 +538,7 @@ class LessonRunner extends ChangeNotifier {
     if (ok) {
       _lastXpGained = _drawXpReward();
       _xpEarned += _lastXpGained;
+      _speechCorrectCount++;
       _maybeMarkMastered();
       _answered = true;
       _wasCorrect = true;
