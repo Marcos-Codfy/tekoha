@@ -22,6 +22,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
@@ -70,6 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
@@ -85,6 +87,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     final success = await auth.register(
       _emailController.text,
       _passwordController.text,
+      displayName: _nameController.text,
     );
     if (!mounted) return;
     setState(() => _isLoading = false);
@@ -160,6 +163,28 @@ class _RegisterScreenState extends State<RegisterScreen>
                       ),
                     ),
                     const SizedBox(height: 36),
+                    // Nome primeiro: e como a pessoa quer ser chamada no
+                    // Perfil (personalizacao — SDT; ordem natural de
+                    // apresentacao antes das credenciais).
+                    TextFormField(
+                      controller: _nameController,
+                      keyboardType: TextInputType.name,
+                      textInputAction: TextInputAction.next,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: const InputDecoration(
+                        labelText: 'Nome',
+                        prefixIcon: Icon(Icons.person_outline, size: 20),
+                      ),
+                      validator: (value) {
+                        final name = value?.trim() ?? '';
+                        if (name.isEmpty) return 'Como podemos te chamar?';
+                        if (name.length < 2) {
+                          return 'Nome muito curto';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,

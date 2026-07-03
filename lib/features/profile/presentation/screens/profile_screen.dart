@@ -16,11 +16,15 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_flags.dart';
 import '../../../../core/constants/app_routes.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../progress/presentation/providers/user_progress_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   Future<void> _logout(BuildContext context) async {
+    // Zera o estado LOCAL de progresso antes de sair — o Firestore
+    // mantem o do usuario; o proximo login carrega o dele.
+    context.read<UserProgressProvider>().clearOnLogout();
     await context.read<AuthProvider>().signOut();
     if (!context.mounted) return;
     Navigator.of(context).pushNamedAndRemoveUntil(

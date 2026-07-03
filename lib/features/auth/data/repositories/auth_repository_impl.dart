@@ -56,6 +56,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Result<AuthUser, Failure>> register({
     required String email,
     required String password,
+    String? displayName,
   }) async {
     if (!isAvailable) {
       return const FailureResult(
@@ -63,7 +64,11 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     }
     try {
-      final user = await _datasource.register(email, password);
+      final user = await _datasource.register(
+        email,
+        password,
+        displayName: displayName,
+      );
       return Success(FirebaseUserMapper.toEntity(user));
     } on FirebaseAuthException catch (e) {
       return FailureResult(_mapException(e));

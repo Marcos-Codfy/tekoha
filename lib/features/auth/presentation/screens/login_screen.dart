@@ -177,6 +177,20 @@ class _LoginScreenState extends State<LoginScreen>
                       isLoading: _isLoading,
                       onPressed: _handleLogin,
                     ),
+                    const SizedBox(height: 12),
+                    // "Manter logado" sem checkbox: a sessao do Firebase
+                    // persiste nativamente no aparelho — informamos em
+                    // vez de pedir (Nielsen H1: visibilidade do status;
+                    // sem armazenar senha: OWASP).
+                    const Text(
+                      'Você continua conectado neste aparelho\naté sair da conta.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        height: 1.4,
+                      ),
+                    ),
                     const SizedBox(height: 20),
                     _Divider(),
                     const SizedBox(height: 20),

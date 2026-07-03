@@ -18,7 +18,9 @@ abstract class FirebaseAuthDataSource {
 
   Future<User> signIn(String email, String password);
 
-  Future<User> register(String email, String password);
+  /// [displayName] opcional: gravado no perfil do Firebase logo apos a
+  /// criacao da conta (aparece no Perfil do app).
+  Future<User> register(String email, String password, {String? displayName});
 
   Future<void> signOut();
 }
@@ -66,7 +68,11 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
   }
 
   @override
-  Future<User> register(String email, String password) async {
+  Future<User> register(
+    String email,
+    String password, {
+    String? displayName,
+  }) async {
     final auth = _auth;
     if (auth == null) {
       throw FirebaseAuthException(
@@ -78,7 +84,20 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
       email: email.trim(),
       password: password,
     );
-    return credential.user!;
+    final user = credential.user!;
+
+    // Grava o nome no perfil do Firebase. Se falhar, nao derruba o
+    // cadastro — o nome pode ser preenchido depois.
+    final name = displayName?.trim();
+    if (name != null && name.isNotEmpty) {
+      try {
+        await user.updateDisplayName(name);
+        await user.reload();
+      } catch (e) {
+        debugPrint('[Tekoha] Falha ao gravar displayName: $e');
+      }
+    }
+    return auth.currentUser ?? user;
   }
 
   @override

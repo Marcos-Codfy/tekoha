@@ -13,6 +13,11 @@ class RegisterUseCase {
   Future<Result<AuthUser, Failure>> call({
     required String email,
     required String password,
+    String? displayName,
   }) =>
-      _repository.register(email: email, password: password);
+      _repository.register(
+        email: email,
+        password: password,
+        displayName: displayName,
+      );
 }
