@@ -29,6 +29,10 @@ import 'package:http/http.dart' as http;
 import '../core/network/airtable_client.dart';
 import '../core/services/audio_player_service.dart';
 import '../core/services/speech_service.dart';
+import '../features/achievements/data/datasources/achievements_remote_datasource.dart';
+import '../features/achievements/data/repositories/achievements_repository_impl.dart';
+import '../features/achievements/domain/repositories/achievements_repository.dart';
+import '../features/achievements/domain/usecases/get_achievements.dart';
 import '../features/auth/data/datasources/firebase_auth_datasource.dart';
 import '../features/auth/data/repositories/auth_repository_impl.dart';
 import '../features/auth/domain/repositories/auth_repository.dart';
@@ -68,6 +72,7 @@ Future<void> setupDependencies() async {
   _registerCulture();
   _registerAuth();
   _registerProgress();
+  _registerAchievements();
 }
 
 // ── Feature: Practice ─────────────────────────────────────────────────
@@ -102,6 +107,22 @@ void _registerPractice() {
   // Contrato e UI ficam intactos — e um swap de uma linha.
   sl.registerLazySingleton<ProgressRepository>(
     () => InMemoryProgressRepository(),
+  );
+}
+
+// ── Feature: Achievements (ESP-006 — definicoes vem do Airtable) ──────
+
+void _registerAchievements() {
+  sl.registerLazySingleton<AchievementsRemoteDataSource>(
+    () => AchievementsRemoteDataSourceImpl(sl<AirtableClient>()),
+  );
+
+  sl.registerLazySingleton<AchievementsRepository>(
+    () => AchievementsRepositoryImpl(sl<AchievementsRemoteDataSource>()),
+  );
+
+  sl.registerLazySingleton<GetAchievementsUseCase>(
+    () => GetAchievementsUseCase(sl<AchievementsRepository>()),
   );
 }
 
