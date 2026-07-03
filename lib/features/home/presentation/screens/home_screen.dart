@@ -4,6 +4,7 @@
 // Pratica e Cultura.
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/components/badges/tekoha_status_pill.dart';
 import '../../../../core/components/buttons/tekoha_primary_button.dart';
@@ -11,8 +12,10 @@ import '../../../../core/components/buttons/tekoha_secondary_button.dart';
 import '../../../../core/components/texts/tekoha_section_label.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_flags.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../progress/presentation/providers/user_progress_provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   /// Callback pra ir direto pra aba "Aprenda". MainScaffold injeta.
   final VoidCallback? onStartPractice;
 
@@ -26,7 +29,39 @@ class HomeScreen extends StatelessWidget {
   });
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<UserProgressProvider>().ensureLoaded();
+      }
+    });
+  }
+
+  /// Saudacao em Nheengatu pelo horario — o proprio app FALA a lingua
+  /// que ensina (consistencia + Dual Coding: o usuario reve as tres
+  /// primeiras expressoes da trilha em contexto real de uso).
+  String _greeting() {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 12) return 'Puranga ara!';
+    if (hour >= 12 && hour < 18) return 'Puranga karuka!';
+    return 'Puranga pituna!';
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final progress = context.watch<UserProgressProvider>();
+    final displayName = context.select<AuthProvider, String?>(
+      (a) => a.currentUser?.displayName,
+    );
+    final firstName =
+        (displayName ?? '').trim().split(RegExp(r'\s+')).first;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -45,18 +80,20 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
             ],
-            const Text(
-              'Puranga pituna!',
-              style: TextStyle(
+            Text(
+              _greeting(),
+              style: const TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Bem-vindo ao Tekohá',
-              style: TextStyle(
+            Text(
+              firstName.isEmpty
+                  ? 'Bem-vindo ao Tekohá'
+                  : 'Bem-vindo de volta, $firstName',
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -77,29 +114,29 @@ class HomeScreen extends StatelessWidget {
             TekohaPrimaryButton(
               label: 'Praticar Nheengatu',
               icon: Icons.play_arrow,
-              onPressed: onStartPractice,
+              onPressed: widget.onStartPractice,
             ),
             const SizedBox(height: 12),
             TekohaSecondaryButton(
               label: 'Explorar a cultura indígena',
               icon: Icons.diversity_3_outlined,
-              onPressed: onOpenCulture,
+              onPressed: widget.onOpenCulture,
             ),
             const SizedBox(height: 32),
             const TekohaSectionLabel('Seu progresso'),
             const SizedBox(height: 8),
-            const _DashboardCard(
+            _DashboardCard(
               icon: Icons.local_fire_department,
-              title: 'Sequencia',
-              value: '0 dias',
-              isLocked: true,
+              title: 'Sequência',
+              value: progress.streakDays == 1
+                  ? '1 dia'
+                  : '${progress.streakDays} dias',
             ),
             const SizedBox(height: 12),
-            const _DashboardCard(
+            _DashboardCard(
               icon: Icons.star,
               title: 'XP total',
-              value: '0 XP',
-              isLocked: true,
+              value: '${progress.xp} XP',
             ),
           ],
         ),
@@ -113,21 +150,17 @@ class _DashboardCard extends StatelessWidget {
   final String title;
   final String value;
 
-  /// Quando `true`, sobrepoe overlay com "Em breve". Mesmo padrao visual
-  /// dos ModuleCards bloqueados da aba Aprenda. Sprint futura: passar
-  /// `false` e ligar nos valores reais do Firestore.
-  final bool isLocked;
-
   const _DashboardCard({
     required this.icon,
     required this.title,
     required this.value,
-    this.isLocked = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cardContent = Container(
+    // Valores REAIS persistidos (ESP-006/007) — o overlay "Em breve"
+    // que existia aqui foi aposentado junto com o modo demonstracao.
+    return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.background,
@@ -162,42 +195,6 @@ class _DashboardCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-
-    if (!isLocked) return cardContent;
-
-    return Stack(
-      children: [
-        cardContent,
-        Positioned.fill(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              color: const Color(0xE6F5F5F5),
-              alignment: Alignment.center,
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.schedule,
-                    size: 18,
-                    color: AppColors.primary,
-                  ),
-                  SizedBox(width: 6),
-                  Text(
-                    'Em breve',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
