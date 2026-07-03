@@ -103,9 +103,9 @@ class _LessonScreenBody extends StatelessWidget {
           return _DoneView(
             xpEarned: runner.xpEarned,
             totalPossible: runner.totalPossibleXp,
-            // `true` avisa a ModuleTrailScreen que a etapa foi
-            // concluida (ela marca o progresso ao receber o result).
-            onBack: () => Navigator.of(context).pop(true),
+            // Devolve o resultado da sessao pra ModuleTrailScreen
+            // persistir (XP, streak, dominadas, falas, conquistas).
+            onBack: () => Navigator.of(context).pop(runner.outcome),
           );
         }
         return _ExerciseScaffold(runner: runner);

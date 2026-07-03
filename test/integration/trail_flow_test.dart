@@ -1,10 +1,10 @@
 // test/integration/trail_flow_test.dart
 //
-// Teste de integracao da ModuleTrailScreen (ESP-005).
+// Teste de integracao da ModuleTrailScreen (ESP-005 + ESP-006).
 // Estrategia: registra UseCases mockados no get_it (a tela resolve via
-// sl<>), pumpa a trilha e verifica:
+// sl<>) e injeta UserProgressProvider com repositorio mockado. Verifica:
 //   - loaded: 4 etapas curadas, primeira ativa, demais travadas
-//   - progresso: etapa feita vira "done" e a proxima destrava
+//   - progresso persistido: etapa done vem do Firestore mockado
 //   - error: ErrorView com mensagem do Failure
 //   - celebracao: modulo completo mostra banner + CTA de avanco
 
@@ -15,18 +15,25 @@ import 'package:provider/provider.dart';
 import 'package:tekoha/core/errors/failures.dart';
 import 'package:tekoha/core/result/result.dart';
 import 'package:tekoha/di/injection.dart';
+import 'package:tekoha/features/achievements/domain/entities/achievement.dart';
+import 'package:tekoha/features/achievements/domain/usecases/get_achievements.dart';
 import 'package:tekoha/features/lesson/domain/entities/lesson.dart';
 import 'package:tekoha/features/lesson/domain/entities/word.dart';
 import 'package:tekoha/features/lesson/domain/usecases/get_lessons_by_module.dart';
 import 'package:tekoha/features/lesson/domain/usecases/get_words_by_lesson.dart';
-import 'package:tekoha/features/practice/data/repositories/in_memory_progress_repository.dart';
 import 'package:tekoha/features/practice/domain/entities/module.dart';
-import 'package:tekoha/features/practice/presentation/providers/progress_provider.dart';
 import 'package:tekoha/features/practice/presentation/screens/module_trail_screen.dart';
+import 'package:tekoha/features/progress/domain/entities/user_progress.dart';
+import 'package:tekoha/features/progress/domain/repositories/user_progress_repository.dart';
+import 'package:tekoha/features/progress/presentation/providers/user_progress_provider.dart';
 
 class _MockGetLessons extends Mock implements GetLessonsByModuleUseCase {}
 
 class _MockGetWords extends Mock implements GetWordsByLessonUseCase {}
+
+class _MockProgressRepo extends Mock implements UserProgressRepository {}
+
+class _MockGetAchievements extends Mock implements GetAchievementsUseCase {}
 
 Word _w(int order) => Word(
       id: 'w$order',
@@ -58,15 +65,27 @@ const _module2 = Module(
 void main() {
   late _MockGetLessons mockGetLessons;
   late _MockGetWords mockGetWords;
-  late ProgressProvider progressProvider;
+  late _MockProgressRepo progressRepo;
+  late _MockGetAchievements getAchievements;
+  late UserProgressProvider progressProvider;
 
   setUp(() async {
     await resetDependencies();
     mockGetLessons = _MockGetLessons();
     mockGetWords = _MockGetWords();
+    progressRepo = _MockProgressRepo();
+    getAchievements = _MockGetAchievements();
     sl.registerLazySingleton<GetLessonsByModuleUseCase>(() => mockGetLessons);
     sl.registerLazySingleton<GetWordsByLessonUseCase>(() => mockGetWords);
-    progressProvider = ProgressProvider(InMemoryProgressRepository());
+
+    when(() => progressRepo.fetch(any())).thenAnswer(
+      (_) async => const Success(UserProgress.empty),
+    );
+    when(() => getAchievements()).thenAnswer(
+      (_) async => const Success(<Achievement>[]),
+    );
+    progressProvider =
+        UserProgressProvider(progressRepo, getAchievements, () => 'u1');
   });
 
   tearDown(() async {
@@ -117,10 +136,19 @@ void main() {
     expect(find.text('12 exercícios'), findsOneWidget);
   });
 
-  testWidgets('etapa concluida vira done e destrava a proxima',
-      (tester) async {
+  testWidgets('etapa concluida (persistida no Firestore) vira done e '
+      'destrava a proxima', (tester) async {
     stubHappyPath();
-    await progressProvider.markStageDone('m1', 0);
+    when(() => progressRepo.fetch('u1')).thenAnswer(
+      (_) async => const Success(UserProgress(
+        xp: 40,
+        streakDays: 1,
+        lastPracticeAt: null,
+        stagesDoneByModule: {
+          'm1': {0},
+        },
+      )),
+    );
 
     await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
@@ -135,9 +163,16 @@ void main() {
   testWidgets('modulo completo mostra celebracao com CTA pro proximo',
       (tester) async {
     stubHappyPath();
-    for (var i = 0; i < 4; i++) {
-      await progressProvider.markStageDone('m1', i);
-    }
+    when(() => progressRepo.fetch('u1')).thenAnswer(
+      (_) async => Success(const UserProgress(
+        xp: 160,
+        streakDays: 1,
+        lastPracticeAt: null,
+        stagesDoneByModule: {
+          'm1': {0, 1, 2, 3},
+        },
+      ).withModuleDone('m1')),
+    );
 
     await tester.pumpWidget(
       harness(modules: const [_module1, _module2], index: 0),
@@ -146,16 +181,22 @@ void main() {
 
     expect(find.text('Módulo concluído!'), findsOneWidget);
     expect(find.text('Avançar: Apresentacao'), findsOneWidget);
-    // Total de etapas registrado -> PracticeScreen sabera que m1 completou.
     expect(progressProvider.isModuleComplete('m1'), isTrue);
   });
 
   testWidgets('ultimo modulo completo agradece em Nheengatu (sem CTA)',
       (tester) async {
     stubHappyPath();
-    for (var i = 0; i < 4; i++) {
-      await progressProvider.markStageDone('m1', i);
-    }
+    when(() => progressRepo.fetch('u1')).thenAnswer(
+      (_) async => const Success(UserProgress(
+        xp: 160,
+        streakDays: 1,
+        lastPracticeAt: null,
+        stagesDoneByModule: {
+          'm1': {0, 1, 2, 3},
+        },
+      )),
+    );
 
     await tester.pumpWidget(harness());
     await tester.pumpAndSettle();

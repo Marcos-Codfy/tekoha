@@ -49,10 +49,8 @@ import '../features/lesson/domain/repositories/lesson_repository.dart';
 import '../features/lesson/domain/usecases/get_lessons_by_module.dart';
 import '../features/lesson/domain/usecases/get_words_by_lesson.dart';
 import '../features/practice/data/datasources/practice_remote_datasource.dart';
-import '../features/practice/data/repositories/in_memory_progress_repository.dart';
 import '../features/practice/data/repositories/practice_repository_impl.dart';
 import '../features/practice/domain/repositories/practice_repository.dart';
-import '../features/practice/domain/repositories/progress_repository.dart';
 import '../features/practice/domain/usecases/get_modules.dart';
 import '../features/progress/data/datasources/firestore_progress_datasource.dart';
 import '../features/progress/data/repositories/user_progress_repository_impl.dart';
@@ -92,22 +90,6 @@ void _registerPractice() {
   sl.registerLazySingleton<GetModulesUseCase>(
     () => GetModulesUseCase(sl<PracticeRepository>()),
   );
-
-  // Progresso da trilha (ESP-005). Impl em memoria enquanto o login
-  // esta desativado (kBypassAuth). QUANDO O LOGIN VOLTAR (ESP-006),
-  // troque o registro abaixo pelo adapter Firestore ja pronto:
-  //
-  //   sl.registerLazySingleton<ProgressRepository>(
-  //     () => FirestoreStageProgressRepository(
-  //       sl<FirestoreProgressDataSource>(),
-  //       () => FirebaseAuth.instance.currentUser?.uid ?? '',
-  //     ),
-  //   );
-  //
-  // Contrato e UI ficam intactos — e um swap de uma linha.
-  sl.registerLazySingleton<ProgressRepository>(
-    () => InMemoryProgressRepository(),
-  );
 }
 
 // ── Feature: Achievements (ESP-006 — definicoes vem do Airtable) ──────
@@ -126,12 +108,9 @@ void _registerAchievements() {
   );
 }
 
-// ── Feature: Progress (ESP-006 — estrutura pronta, ativa no login) ────
+// ── Feature: Progress (ESP-006 — persistencia ATIVA via Firestore) ────
 
 void _registerProgress() {
-  // Lazy: FirebaseFirestore.instance so e tocado se algo resolver esta
-  // dependencia — com kBypassAuth = true nada resolve, entao o registro
-  // e inofensivo hoje e ja fica pronto pra Sprint do login.
   sl.registerLazySingleton<FirestoreProgressDataSource>(
     () => FirestoreProgressDataSource(FirebaseFirestore.instance),
   );

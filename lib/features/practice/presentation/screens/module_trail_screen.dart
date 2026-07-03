@@ -3,12 +3,13 @@
 //
 // Tela de TRILHA de um modulo (ESP-005): caminho vertical de etapas.
 // Fluxo: Aprenda -> [tap modulo] -> ESTA TELA -> [tap etapa] ->
-// LessonScreen (roda so as palavras da etapa) -> volta com result=true
-// -> marca progresso -> proximo no destrava.
+// LessonScreen (roda so as palavras da etapa) -> volta com o
+// LessonOutcome -> persiste progresso (ESP-006) -> proximo no destrava
+// -> conquistas recem-desbloqueadas viram celebracao (Peak-End).
 //
 // Gamificacao aplicada (ver 05_Registro_Decisoes_Cientificas.md):
 //   - Goal-Gradient (Kivetz, 2006): label "Faltam X etapas"
-//   - Peak-End (Kahneman, 1993): banner de celebracao ao fechar modulo
+//   - Peak-End (Kahneman, 1993): banner de modulo + dialog de conquista
 //   - SDT-Relacionamento: frase de proposito na celebracao
 
 import 'package:flutter/material.dart';
@@ -20,12 +21,14 @@ import '../../../../core/components/texts/tekoha_purpose_text.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../di/injection.dart';
+import '../../../achievements/domain/entities/achievement.dart';
 import '../../../lesson/domain/entities/trail_stage.dart';
 import '../../../lesson/domain/usecases/get_lessons_by_module.dart';
 import '../../../lesson/domain/usecases/get_words_by_lesson.dart';
+import '../../../lesson/presentation/controllers/lesson_outcome.dart';
 import '../../../lesson/presentation/screens/lesson_screen.dart';
+import '../../../progress/presentation/providers/user_progress_provider.dart';
 import '../../domain/entities/module.dart';
-import '../providers/progress_provider.dart';
 import '../providers/trail_provider.dart';
 import '../widgets/trail_stage_node.dart';
 
@@ -43,8 +46,6 @@ class ModuleTrailScreen extends StatelessWidget {
   });
 
   Module get module => modules[index];
-  Module? get nextModule =>
-      index + 1 < modules.length ? modules[index + 1] : null;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +70,7 @@ class _TrailBody extends StatelessWidget {
       index + 1 < modules.length ? modules[index + 1] : null;
 
   Future<void> _openStage(BuildContext context, TrailStage stage) async {
-    final completed = await Navigator.of(context).push<bool>(
+    final outcome = await Navigator.of(context).push<LessonOutcome>(
       MaterialPageRoute(
         builder: (_) => LessonScreen(
           moduleId: module.id,
@@ -80,10 +81,24 @@ class _TrailBody extends StatelessWidget {
         ),
       ),
     );
-    if (completed == true && context.mounted) {
-      await context
-          .read<ProgressProvider>()
-          .markStageDone(module.id, stage.index);
+    if (outcome == null || !context.mounted) return;
+
+    final newlyUnlocked =
+        await context.read<UserProgressProvider>().recordStageCompleted(
+              moduleId: module.id,
+              stageIndex: stage.index,
+              outcome: outcome,
+            );
+
+    // Celebracao de conquista: momento de pico (Peak-End) logo apos o
+    // retorno pra trilha — reforco imediato do comportamento.
+    if (newlyUnlocked.isNotEmpty && context.mounted) {
+      await showDialog<void>(
+        context: context,
+        builder: (_) => _AchievementUnlockedDialog(
+          achievements: newlyUnlocked,
+        ),
+      );
     }
   }
 
@@ -99,7 +114,7 @@ class _TrailBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final trail = context.watch<TrailProvider>();
-    final progress = context.watch<ProgressProvider>();
+    final progress = context.watch<UserProgressProvider>();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -116,15 +131,17 @@ class _TrailBody extends StatelessWidget {
 
         final stages = trail.stages;
 
-        // Registra o total de etapas no ProgressProvider — e assim que
-        // a PracticeScreen sabe quando "modulo anterior completo" e
-        // destrava o proximo modulo. Pos-frame pra nao notificar
-        // durante o build.
+        // Registra o total de etapas — e como o provider detecta
+        // "modulo completo" na hora da ultima etapa. Pos-frame pra nao
+        // notificar durante o build.
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (context.mounted) {
-            context
-                .read<ProgressProvider>()
-                .registerTotalStages(module.id, stages.length);
+            final userProgress = context.read<UserProgressProvider>();
+            userProgress
+              ..registerTotalStages(module.id, stages.length)
+              // Defensivo: garante progresso carregado mesmo se esta
+              // tela for aberta antes da aba Aprenda (idempotente).
+              ..ensureLoaded();
           }
         });
 
@@ -247,6 +264,106 @@ class _ModuleDoneBanner extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// Dialog de conquista desbloqueada. Mostra 1..N conquistas ganhas ao
+/// fim da etapa (podem vir juntas — ex.: 1a etapa + 100 XP).
+class _AchievementUnlockedDialog extends StatelessWidget {
+  final List<Achievement> achievements;
+
+  const _AchievementUnlockedDialog({required this.achievements});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      backgroundColor: AppColors.background,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              achievements.length == 1
+                  ? 'Conquista desbloqueada!'
+                  : '${achievements.length} conquistas desbloqueadas!',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 20),
+            for (final achievement in achievements) ...[
+              _AchievementRow(achievement: achievement),
+              const SizedBox(height: 16),
+            ],
+            const SizedBox(height: 4),
+            TekohaPrimaryButton(
+              label: 'Kuekatu! (Obrigado!)',
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AchievementRow extends StatelessWidget {
+  final Achievement achievement;
+
+  const _AchievementRow({required this.achievement});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: achievement.iconUrl.isEmpty
+              ? const Icon(Icons.emoji_events,
+                  size: 56, color: AppColors.primary)
+              : Image.network(
+                  achievement.iconUrl,
+                  width: 56,
+                  height: 56,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.emoji_events,
+                    size: 56,
+                    color: AppColors.primary,
+                  ),
+                ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                achievement.title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                achievement.description,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

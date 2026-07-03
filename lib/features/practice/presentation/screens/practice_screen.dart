@@ -15,9 +15,9 @@ import 'package:provider/provider.dart';
 import '../../../../core/components/loaders/tekoha_loader.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/error_view.dart';
+import '../../../progress/presentation/providers/user_progress_provider.dart';
 import '../../domain/entities/module.dart';
 import '../providers/modules_provider.dart';
-import '../providers/progress_provider.dart';
 import '../widgets/module_card.dart';
 import 'module_trail_screen.dart';
 
@@ -36,6 +36,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
     // o build inicial.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ModulesProvider>().load();
+      // Puxa o progresso persistido do usuario logado (idempotente).
+      context.read<UserProgressProvider>().ensureLoaded();
     });
   }
 
@@ -55,7 +57,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
         title: const Text('Aprenda'),
         automaticallyImplyLeading: false,
       ),
-      body: Consumer2<ModulesProvider, ProgressProvider>(
+      body: Consumer2<ModulesProvider, UserProgressProvider>(
         builder: (context, provider, progress, _) {
           if (provider.isLoading) {
             return const TekohaLoader();
@@ -100,8 +102,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
               itemBuilder: (context, index) {
                 final module = modules[index];
 
-                // Trava por progresso: destrava quando o modulo
-                // anterior esta completo (todas as etapas da trilha).
+                // Trava por progresso PERSISTIDO: destrava quando o
+                // modulo anterior esta completo (modules_done no
+                // Firestore — sobrevive a fechar o app).
                 final isLocked = index > 0 &&
                     !progress.isModuleComplete(modules[index - 1].id);
 

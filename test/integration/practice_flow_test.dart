@@ -15,22 +15,40 @@ import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import 'package:tekoha/core/errors/failures.dart';
 import 'package:tekoha/core/result/result.dart';
-import 'package:tekoha/features/practice/data/repositories/in_memory_progress_repository.dart';
+import 'package:tekoha/features/achievements/domain/entities/achievement.dart';
+import 'package:tekoha/features/achievements/domain/usecases/get_achievements.dart';
 import 'package:tekoha/features/practice/domain/entities/module.dart';
 import 'package:tekoha/features/practice/domain/usecases/get_modules.dart';
 import 'package:tekoha/features/practice/presentation/providers/modules_provider.dart';
-import 'package:tekoha/features/practice/presentation/providers/progress_provider.dart';
 import 'package:tekoha/features/practice/presentation/screens/practice_screen.dart';
+import 'package:tekoha/features/progress/domain/entities/user_progress.dart';
+import 'package:tekoha/features/progress/domain/repositories/user_progress_repository.dart';
+import 'package:tekoha/features/progress/presentation/providers/user_progress_provider.dart';
 
 class _MockGetModules extends Mock implements GetModulesUseCase {}
 
+class _MockProgressRepo extends Mock implements UserProgressRepository {}
+
+class _MockGetAchievements extends Mock implements GetAchievementsUseCase {}
+
 void main() {
   late _MockGetModules mockUseCase;
-  late ProgressProvider progressProvider;
+  late _MockProgressRepo progressRepo;
+  late _MockGetAchievements getAchievements;
+  late UserProgressProvider progressProvider;
 
   setUp(() {
     mockUseCase = _MockGetModules();
-    progressProvider = ProgressProvider(InMemoryProgressRepository());
+    progressRepo = _MockProgressRepo();
+    getAchievements = _MockGetAchievements();
+    when(() => progressRepo.fetch(any())).thenAnswer(
+      (_) async => const Success(UserProgress.empty),
+    );
+    when(() => getAchievements()).thenAnswer(
+      (_) async => const Success(<Achievement>[]),
+    );
+    progressProvider =
+        UserProgressProvider(progressRepo, getAchievements, () => 'u1');
   });
 
   Widget harness() {
@@ -100,11 +118,10 @@ void main() {
               ),
             ]));
 
-    // Simula modulo 1 completo: trilha de 4 etapas, todas feitas.
-    progressProvider.registerTotalStages('r1', 4);
-    for (var i = 0; i < 4; i++) {
-      await progressProvider.markStageDone('r1', i);
-    }
+    // Simula modulo 1 completo PERSISTIDO (modules_done no Firestore).
+    when(() => progressRepo.fetch('u1')).thenAnswer(
+      (_) async => Success(UserProgress.empty.withModuleDone('r1')),
+    );
 
     await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
