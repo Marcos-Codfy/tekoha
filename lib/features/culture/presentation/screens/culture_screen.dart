@@ -20,20 +20,22 @@ class _CultureCategory {
   /// `label` = texto exibido na UI (PT-BR).
   final String label;
 
-  /// `available` = false renderiza chip cinza, sem ripple e sem callback.
-  final bool available;
-
-  const _CultureCategory(this.key, this.label, {this.available = true});
+  const _CultureCategory(this.key, this.label);
 }
 
 /// Ordem da demo: Curiosidades primeiro (mais leve), depois Historia e
-/// Habitos. Cosmologia fica por ultimo e DESABILITADA enquanto o texto
-/// nao passa pela validacao juridica.
+/// Habitos.
+///
+/// COSMOLOGIA FOI REMOVIDA do MVP (decisao juridico-etica do autor,
+/// 03/07/2026 — ESP-008): narrar cosmologias de povos especificos com
+/// base apenas em fonte academica, sem consentimento das comunidades,
+/// e risco etico/legal (Carneiro da Cunha, 2009). Os 5 cards seguem
+/// preservados no Airtable; pra reativar um dia, basta adicionar
+/// `_CultureCategory('cosmology', 'Cosmologia')` aqui.
 const List<_CultureCategory> _categories = [
   _CultureCategory('curiosities', 'Curiosidades'),
   _CultureCategory('history', 'História'),
   _CultureCategory('habits', 'Hábitos'),
-  _CultureCategory('cosmology', 'Cosmologia', available: false),
 ];
 
 class CultureScreen extends StatefulWidget {
@@ -112,7 +114,6 @@ class _CultureScreenState extends State<CultureScreen> {
           return TekohaCategoryChip(
             label: category.label,
             selected: index == _selectedIndex,
-            disabled: !category.available,
             onTap: () => _selectCategory(index),
           );
         },

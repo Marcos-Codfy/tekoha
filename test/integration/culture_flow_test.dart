@@ -111,7 +111,8 @@ void main() {
         forceRefresh: false)).called(1);
   });
 
-  testWidgets('chip desabilitado (Cosmologia) NAO dispara carga',
+  testWidgets('Cosmologia foi REMOVIDA do app (ESP-008: decisao '
+      'juridico-etica) — chip nao existe e categoria nunca carrega',
       (tester) async {
     when(() => mockUseCase(
             category: any(named: 'category'),
@@ -122,13 +123,7 @@ void main() {
     await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
 
-    // Pode existir o texto "Cosmologia" mas o tap nao deve disparar.
-    final cosmology = find.text('Cosmologia');
-    if (cosmology.evaluate().isNotEmpty) {
-      await tester.tap(cosmology, warnIfMissed: false);
-      await tester.pumpAndSettle();
-    }
-
+    expect(find.text('Cosmologia'), findsNothing);
     verifyNever(() => mockUseCase(
         category: 'cosmology',
         language: any(named: 'language'),
