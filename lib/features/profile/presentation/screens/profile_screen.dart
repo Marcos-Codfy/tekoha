@@ -146,7 +146,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const Divider(height: 1, color: AppColors.border),
             _StatRow(
               icon: Icons.spa,
-              label: 'Palavras dominadas',
+              label: 'Palavras aprendidas',
               value: '${progress.progress.masteredWordIds.length}',
             ),
             const SizedBox(height: 32),
