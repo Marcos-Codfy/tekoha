@@ -316,7 +316,6 @@ class _IntroStepView extends StatelessWidget {
         const SizedBox(height: 24),
         TekohaPrimaryButton(
           label: 'Vamos praticar',
-          icon: Icons.arrow_forward,
           onPressed: runner.next,
         ),
       ],
@@ -821,9 +820,10 @@ class _DoneView extends StatelessWidget {
                   'Cada palavra que continua sendo falada\né uma palavra que não se perde.',
             ),
             const SizedBox(height: 24),
+            // Sem icone de seta: CTA unico de tela cheia dispensa
+            // ornamento direcional (minimalismo — Nielsen H8; ESP-008).
             TekohaPrimaryButton(
               label: 'Voltar pra trilha',
-              icon: Icons.arrow_back,
               onPressed: onBack,
             ),
           ],

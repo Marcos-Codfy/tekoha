@@ -245,12 +245,24 @@ class _ModuleDoneBanner extends StatelessWidget {
             text: 'Você deu voz a mais palavras do Nheengatu.',
           ),
           const SizedBox(height: 16),
-          if (nextModule != null)
+          if (nextModule != null) ...[
+            // Microcopy curto e generico (ESP-008): o nome completo do
+            // modulo deixava o botao gigante; o card do proximo modulo
+            // ja aparece nomeado na aba Aprenda.
             TekohaPrimaryButton(
-              label: 'Avançar: ${nextModule!.name}',
-              icon: Icons.arrow_forward,
+              label: 'Próximo módulo',
               onPressed: onAdvance,
-            )
+            ),
+            const SizedBox(height: 8),
+            Text(
+              nextModule!.name,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ]
           else
             const Text(
               'Você completou todos os módulos disponíveis.\nKuekatu reté!',

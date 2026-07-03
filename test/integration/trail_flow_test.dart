@@ -180,7 +180,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Módulo concluído!'), findsOneWidget);
-    expect(find.text('Avançar: Apresentacao'), findsOneWidget);
+    // CTA curto (ESP-008); o nome do proximo modulo aparece como
+    // legenda abaixo do botao.
+    expect(find.text('Próximo módulo'), findsOneWidget);
+    expect(find.text('Apresentacao'), findsOneWidget);
     expect(progressProvider.isModuleComplete('m1'), isTrue);
   });
 
