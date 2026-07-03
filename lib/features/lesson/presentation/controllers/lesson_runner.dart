@@ -160,10 +160,17 @@ class LessonRunner extends ChangeNotifier {
   /// nao houve acerto ou o passo foi resetado por `next()`.
   int get lastXpGained => _lastXpGained;
 
-  /// XP "central" maximo possivel (numero de passos x [kXpPerCorrect]).
-  /// Note que o XP REAL pode ser maior ou menor por causa do sorteio
-  /// (kXpRewardOptions). E uma aproximacao pra exibir "de ate XX XP".
-  int get totalPossibleXp => _steps.length * kXpPerCorrect;
+  /// XP maximo POSSIVEL da sessao: numero de exercicios pontuaveis
+  /// (apresentacoes de palavra nao contam) x maior recompensa do
+  /// sorteio (12). Usar a media (10) aqui gerava "+126 de ate 120" —
+  /// teto exibido nunca pode ser menor que o alcancavel (ESP-008).
+  int get totalPossibleXp {
+    final exerciseCount =
+        _steps.where((s) => s is! IntroStep).length;
+    final maxReward =
+        kXpRewardOptions.reduce((a, b) => a > b ? a : b);
+    return exerciseCount * maxReward;
+  }
 
   LessonStep get current => _steps[_index];
 
@@ -330,9 +337,12 @@ class LessonRunner extends ChangeNotifier {
         pool: allWords,
       );
 
-      // Pra cada palavra: 3 exercicios de audio + 1 quiz intercalado.
+      // Pra cada palavra: APRESENTACAO (palavra nova, ESP-008) +
+      // 3 exercicios de audio + 1 quiz intercalado. A apresentacao
+      // mostra traducao/pronuncia/curiosidade ANTES de cobrar.
       steps = <LessonStep>[];
       for (var i = 0; i < sessionWords.length; i++) {
+        steps.add(IntroStep(sessionWords[i]));
         steps.add(AudioStep(audioExercises[i * 3])); // trad
         steps.add(AudioStep(audioExercises[i * 3 + 1])); // word
         steps.add(AudioStep(audioExercises[i * 3 + 2])); // repete
@@ -369,10 +379,11 @@ class LessonRunner extends ChangeNotifier {
   }
 
   /// Toca o audio do passo atual quando aplicavel (chamada no avancar
-  /// e no botao play).
+  /// e no botao play). Apresentacao de palavra nova tambem toca — a
+  /// pessoa OUVE a palavra junto com a ficha (pedagogia oral, D1).
   void _maybeAutoPlay() {
     final step = current;
-    if (step is AudioStep) {
+    if (step is AudioStep || step is IntroStep) {
       _player.play(step.target.audioUrl);
     }
   }
@@ -380,7 +391,7 @@ class LessonRunner extends ChangeNotifier {
   /// Tocar o audio do passo atual manualmente (botao de play).
   void playCurrentAudio() {
     final step = current;
-    if (step is AudioStep) {
+    if (step is AudioStep || step is IntroStep) {
       _player.play(step.target.audioUrl);
     }
   }
@@ -563,6 +574,11 @@ class LessonRunner extends ChangeNotifier {
 
   /// Vai pro proximo passo OU finaliza a licao.
   void next() {
+    // Saindo da apresentacao de palavra nova: a curiosidade ja foi
+    // exibida na ficha — nao repetir no feedback dos exercicios.
+    if (_steps.isNotEmpty && current is IntroStep) {
+      _shownCuriosities.add(current.target.id);
+    }
     if (isLastStep) {
       _status = LessonRunnerStatus.done;
       notifyListeners();

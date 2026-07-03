@@ -126,8 +126,8 @@ void main() {
   // ── Carga ─────────────────────────────────────────────────────────────
 
   group('load - modo MISTO (palavras com audio)', () {
-    test('sucesso: 3 palavras com audio -> 12 steps (3 audio + 1 quiz x 3)',
-        () async {
+    test('sucesso: 3 palavras com audio -> 15 steps '
+        '(1 apresentacao + 3 audio + 1 quiz por palavra)', () async {
       when(() => getLessons('M1'))
           .thenAnswer((_) async => Success([_lesson()]));
       when(() => getWords('L1')).thenAnswer((_) async => Success([
@@ -145,8 +145,15 @@ void main() {
       await r.load('M1');
 
       expect(r.status, LessonRunnerStatus.exercising);
-      expect(r.steps, hasLength(12));
-      expect(r.totalPossibleXp, 120);
+      expect(r.steps, hasLength(15));
+      // Cada palavra abre com a APRESENTACAO (teach-then-test, ESP-008).
+      expect(r.steps[0], isA<IntroStep>());
+      expect(r.steps[5], isA<IntroStep>());
+      expect(r.steps[10], isA<IntroStep>());
+      // Teto de XP: 12 exercicios pontuaveis (apresentacao nao conta)
+      // x recompensa MAXIMA do sorteio (12) — nunca menor que o
+      // alcancavel (fix do "+126 de ate 120", ESP-008).
+      expect(r.totalPossibleXp, 144);
       verify(() => audio.preload(any())).called(1);
       verify(() => speech.init()).called(1);
     });
@@ -365,8 +372,8 @@ void main() {
   // ── Curiosidade ───────────────────────────────────────────────────────
 
   group('curiosidade', () {
-    test('consumeShouldShowCuriosity: so 1x por palavra e so em acerto',
-        () async {
+    test('curiosidade exibida na APRESENTACAO nao repete no feedback '
+        'do exercicio (ESP-008)', () async {
       when(() => getLessons('M1'))
           .thenAnswer((_) async => Success([_lesson()]));
       when(() => getWords('L1')).thenAnswer((_) async => Success([
@@ -383,17 +390,16 @@ void main() {
       );
       await r.load('M1');
 
-      // Primeiro passo (audio) — vamos forcar acerto via tap correta.
-      final step1 = r.current;
-      expect(step1, isA<AudioStep>());
-      final ex1 = (step1 as AudioStep).data;
+      // 1o passo e a apresentacao da palavra (ficha JA mostra a nota).
+      expect(r.current, isA<IntroStep>());
+      r.next(); // sair da apresentacao marca a curiosidade como exibida
+
+      final ex1 = (r.current as AudioStep).data;
       r.onAudioOptionTap(ex1.correctIndex);
 
       expect(r.wasCorrect, true);
-      expect(r.consumeShouldShowCuriosity(), true,
-          reason: '1a vez com a palavra ara em acerto');
       expect(r.consumeShouldShowCuriosity(), false,
-          reason: '2a chamada na mesma palavra ja foi exibida');
+          reason: 'nota ja foi exibida na ficha de apresentacao');
     });
 
     test('em erro, consumeShouldShowCuriosity sempre false', () async {
@@ -412,6 +418,7 @@ void main() {
         speech: speech,
       );
       await r.load('M1');
+      r.next(); // pula a apresentacao
 
       final ex = (r.current as AudioStep).data;
       final wrong = ex.correctIndex == 0 ? 1 : 0;
@@ -443,6 +450,7 @@ void main() {
         speech: speech,
       );
       await r.load('M1');
+      r.next(); // pula a apresentacao da palavra (IntroStep)
       return r;
     }
 
@@ -501,7 +509,8 @@ void main() {
       // ultimo `when` registrado e o que vale na chamada de load().
       when(() => speech.init()).thenAnswer((_) async => false);
       await r.load('M1');
-      // Avanca ate o exercicio listenAndRepeat (step index 2 com 1 palavra).
+      // Avanca ate o listenAndRepeat: apresentacao -> trad -> word.
+      r.next(); // pula a apresentacao da palavra (IntroStep)
       r.onAudioOptionTap((r.current as AudioStep).data.correctIndex);
       r.next();
       r.onAudioOptionTap((r.current as AudioStep).data.correctIndex);
@@ -529,7 +538,8 @@ void main() {
         speech: speech,
       );
       await r.load('M1');
-      // pular pros listenAndRepeat (3o exercicio com 1 palavra)
+      // pular pros listenAndRepeat: apresentacao -> trad -> word
+      r.next(); // pula a apresentacao da palavra (IntroStep)
       r.onAudioOptionTap((r.current as AudioStep).data.correctIndex);
       r.next();
       r.onAudioOptionTap((r.current as AudioStep).data.correctIndex);

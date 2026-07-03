@@ -27,6 +27,12 @@ class AudioPlayerService {
   bool _isPlaying = false;
   bool get isPlaying => _isPlaying;
 
+  /// `true` enquanto um audio esta tocando. Permite a UI dar feedback
+  /// visual (pulso no botao de play) inclusive no autoplay — o usuario
+  /// VE que o som esta saindo (Nielsen H1: visibilidade do status).
+  Stream<bool> get playingStream => _player.onPlayerStateChanged
+      .map((state) => state == PlayerState.playing);
+
   /// Baixa todos os [urls] pra arquivos temporarios (1x cada).
   /// Chame ao abrir a tela. Falha em uma URL nao impede as outras.
   Future<void> preload(List<String> urls) async {
