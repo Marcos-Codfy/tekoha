@@ -19,6 +19,14 @@ class UserProgressMapper {
           for (final entry in dto.stagesDone.entries)
             entry.key: entry.value.toSet(),
         },
+        modulesDone: dto.modulesDone.toSet(),
+        masteredWordIds: dto.masteredWordIds.toSet(),
+        speechCorrectTotal: dto.speechCorrectTotal,
+        unlockedAchievements: {
+          for (final entry in dto.achievementsUnlocked.entries)
+            if (DateTime.tryParse(entry.value) != null)
+              entry.key: DateTime.parse(entry.value),
+        },
       );
 
   static UserProgressDto toDto(UserProgress entity) => UserProgressDto(
@@ -28,6 +36,13 @@ class UserProgressMapper {
         stagesDone: {
           for (final entry in entity.stagesDoneByModule.entries)
             entry.key: entry.value.toList()..sort(),
+        },
+        modulesDone: entity.modulesDone.toList()..sort(),
+        masteredWordIds: entity.masteredWordIds.toList()..sort(),
+        speechCorrectTotal: entity.speechCorrectTotal,
+        achievementsUnlocked: {
+          for (final entry in entity.unlockedAchievements.entries)
+            entry.key: entry.value.toIso8601String(),
         },
       );
 }

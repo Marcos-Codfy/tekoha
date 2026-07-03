@@ -17,12 +17,22 @@ class UserProgressDto {
   final int streakDays;
   final String? lastPracticeAtIso;
   final Map<String, List<int>> stagesDone;
+  final List<String> modulesDone;
+  final List<String> masteredWordIds;
+  final int speechCorrectTotal;
+
+  /// code da conquista -> ISO-8601 do desbloqueio.
+  final Map<String, String> achievementsUnlocked;
 
   const UserProgressDto({
     required this.xp,
     required this.streakDays,
     required this.lastPracticeAtIso,
     required this.stagesDone,
+    this.modulesDone = const [],
+    this.masteredWordIds = const [],
+    this.speechCorrectTotal = 0,
+    this.achievementsUnlocked = const {},
   });
 
   /// Parse TOLERANTE: documento ausente/parcial (usuario novo, campo
@@ -49,18 +59,39 @@ class UserProgressDto {
       }
     }
 
+    final rawUnlocked = map['achievements_unlocked'];
+    final unlocked = <String, String>{};
+    if (rawUnlocked is Map) {
+      for (final entry in rawUnlocked.entries) {
+        if (entry.value is String) {
+          unlocked['${entry.key}'] = entry.value as String;
+        }
+      }
+    }
+
     return UserProgressDto(
       xp: (map['xp'] as num?)?.toInt() ?? 0,
       streakDays: (map['streak_days'] as num?)?.toInt() ?? 0,
       lastPracticeAtIso: map['last_practice_at'] as String?,
       stagesDone: stages,
+      modulesDone: _stringList(map['modules_done']),
+      masteredWordIds: _stringList(map['mastered_word_ids']),
+      speechCorrectTotal: (map['speech_correct_total'] as num?)?.toInt() ?? 0,
+      achievementsUnlocked: unlocked,
     );
   }
+
+  static List<String> _stringList(dynamic raw) =>
+      raw is List ? raw.whereType<String>().toList() : const [];
 
   Map<String, dynamic> toMap() => {
         'xp': xp,
         'streak_days': streakDays,
         if (lastPracticeAtIso != null) 'last_practice_at': lastPracticeAtIso,
         'stages_done': stagesDone,
+        'modules_done': modulesDone,
+        'mastered_word_ids': masteredWordIds,
+        'speech_correct_total': speechCorrectTotal,
+        'achievements_unlocked': achievementsUnlocked,
       };
 }
