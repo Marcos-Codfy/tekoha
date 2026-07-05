@@ -31,6 +31,7 @@ abstract class AuthRepository {
   Future<Result<AuthUser, Failure>> register({
     required String email,
     required String password,
+    String? displayName,
   });
 
   Future<Result<void, Failure>> signOut();

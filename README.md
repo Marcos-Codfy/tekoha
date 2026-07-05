@@ -1,335 +1,266 @@
+<div align="center">
+
 # Tekohá
 
-Aplicativo mobile educacional para ensino gamificado da língua **Nheengatu**, projeto de Iniciação Científica do UniCatólica Tocantins (linha: Direitos Humanos).
+**Tecnologia como instrumento de preservação de línguas indígenas.**
 
-> *Tekohá* — palavra guarani que significa "o lugar onde se vive a cultura".
+Aplicativo mobile de ensino gamificado do **Nheengatu** — a língua geral amazônica —
+desenvolvido como pesquisa de Iniciação Científica em Engenharia de Software.
+
+![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-3-0175C2?logo=dart&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-FFCA28?logo=firebase&logoColor=black)
+![Tests](https://img.shields.io/badge/testes-209%20passing-2E7D32)
+![Arquitetura](https://img.shields.io/badge/arquitetura-Clean%20Architecture-B5451B)
+
+> *Tekohá* — palavra de origem guarani: **"o lugar onde se vive a cultura"**.
+
+</div>
 
 ---
 
 ## Sumário
 
-- [Status atual](#status-atual)
-- [Stack tecnológica](#stack-tecnológica)
-- [Pré-requisitos](#pré-requisitos)
-- [Como rodar o projeto](#como-rodar-o-projeto)
-- [Estrutura de pastas](#estrutura-de-pastas)
+- [O projeto](#o-projeto)
+- [Por que isso importa](#por-que-isso-importa)
+- [Funcionalidades](#funcionalidades)
+- [Pedagogia baseada em oralidade](#pedagogia-baseada-em-oralidade)
+- [Design fundamentado em ciência](#design-fundamentado-em-ciência)
 - [Arquitetura](#arquitetura)
-- [Biblioteca de componentes](#biblioteca-de-componentes)
-- [Conteúdo no Airtable](#conteúdo-no-airtable)
-- [Feature flags](#feature-flags)
-- [Workflow de contribuição](#workflow-de-contribuição)
-- [Testes](#testes)
-- [Troubleshooting](#troubleshooting)
+- [Stack](#stack)
+- [Como rodar](#como-rodar)
+- [Qualidade e testes](#qualidade-e-testes)
+- [Ética e cuidado cultural](#ética-e-cuidado-cultural)
+- [Referências](#referências)
+- [Direitos autorais e uso](#direitos-autorais-e-uso)
 - [Autor](#autor)
 
 ---
 
-## Status atual
+## O projeto
 
-O app está em estado **MVP polido**, pronto pra avaliação heurística com 3-5 professores. Funcionalidades:
+O Tekohá é o artefato de uma pesquisa de **Iniciação Científica** (Centro Universitário
+Católica do Tocantins — UniCatólica, Edital 02/2025, linha de pesquisa **Direitos
+Humanos**) que investiga uma pergunta central:
 
-- **Bottom navigation** com 4 abas: Home, Aprenda, Cultura e Perfil — `IndexedStack` preserva estado de cada aba.
-- **Autenticação** com Firebase Auth implementada mas **desativada por feature flag** (`kBypassAuth = true`) — ver [Feature flags](#feature-flags).
-- **Aba Aprenda**: lista os módulos vindos do Airtable, abre lição com fluxo misto (áudio + quiz intercalados) no Módulo 1 e quiz puro nos demais.
-- **Aba Cultura**: chips de categoria (Curiosidades, História, Hábitos; Cosmologia desabilitada por compliance pendente) com cards do Airtable, pull-to-refresh e cache por categoria.
-- **Gamificação**: XP variável (8/10/12), contador de "palavras dominadas", barra de progresso com Endowed Progress Effect.
-- **Permissões Android** para `speech_to_text` (`RECORD_AUDIO` + `INTERNET`) já configuradas — `minSdk = 21`.
-- **Clean Architecture** completa (domain/data/presentation por feature) + 142 testes unitários e de integração.
-- **Biblioteca de componentes** reutilizáveis em `lib/core/components/` (botões, badges, chips, banners, etc).
+> **A tecnologia mobile pode ser um meio efetivo de preservação e revitalização de
+> línguas indígenas brasileiras?**
 
-Cada decisão UX/UI tem fundamentação científica citável — ver `C:\Users\Marcos\.claude\plans\crispy-questing-dragonfly.md` (biblioteca conceitual: SDT, Variable Reward, Goal-Gradient, Peak-End, Color Psychology, etc).
+O MVP ensina Nheengatu por uma trilha de aprendizado gamificada, com exercícios
+construídos a partir do **som** (ouvir, reconhecer e falar), conteúdo cultural
+contextualizado e progresso persistido por usuário. O método é deliberadamente
+**replicável**: a arquitetura separa o conteúdo (CMS) do código, de modo que a mesma
+base pode servir a outras línguas em risco.
 
----
+O resultado da pesquisa será submetido à **Jornada de Iniciação Científica** da
+UniCatólica, com avaliação heurística conduzida por docentes (10 Heurísticas de
+Nielsen, escala de severidade 0–4).
 
-## Stack tecnológica
+## Por que isso importa
 
-| Camada | Ferramenta |
+- Antes da colonização, o território brasileiro tinha **mais de 1.200 línguas
+  indígenas**. Hoje restam **menos de 180**, a maioria em risco de desaparecimento
+  (UNESCO).
+- A Constituição Federal reconhece às comunidades indígenas o direito às suas
+  línguas e processos próprios de aprendizagem (**CF/88, art. 210 §2º e art. 231**)
+  — mas o distanciamento entre o direito formal e a prática é um dos motores desta
+  pesquisa.
+- O Nheengatu — "língua boa", descendente do Tupinambá — já foi a língua mais falada
+  do Brasil e hoje resiste com 8 a 14 mil falantes no Alto Rio Negro, onde é língua
+  cooficial de São Gabriel da Cachoeira (AM) desde 2002.
+
+Cada palavra praticada no app é uma palavra que continua viva.
+
+## Funcionalidades
+
+- **Trilha de aprendizado por etapas** — 3 módulos temáticos (Cumprimentos,
+  Apresentação, Natureza), cada um dividido em 4 etapas curtas com destravamento
+  progressivo. Progressão pedagógica "da raiz ao composto" (aprende-se *puranga*
+  antes de *puranga ara*).
+- **Exercícios orais** — ouvir e escolher a tradução, ouvir e reconhecer a palavra,
+  **ouvir e repetir em voz alta** (reconhecimento de fala com correspondência
+  fonética tolerante).
+- **Apresentação antes da cobrança** — toda palavra nova abre com uma ficha (grafia,
+  áudio, pronúncia, tradução e nota cultural) antes de qualquer exercício.
+- **Contas de usuário** — cadastro e login (Firebase Auth) com sessão persistente;
+  XP, sequência de dias, etapas e conquistas salvos por usuário no Cloud Firestore.
+- **Gamificação fundamentada** — XP variável (8/10/12), 10 conquistas com critérios
+  progressivos, celebração de desbloqueio e galeria com metas visíveis.
+- **Aba Cultura** — cards sobre história, hábitos e curiosidades da língua,
+  gerenciados como conteúdo editorial no Airtable.
+- **Resiliência** — cache de conteúdo, pré-download de áudios, tratamento tipado de
+  erros com mensagens úteis e degradação graciosa sem conexão.
+
+## Pedagogia baseada em oralidade
+
+As línguas indígenas amazônicas são línguas de **tradição oral** — a escrita
+padronizada do Nheengatu é uma convenção acadêmica recente. Por isso o app não
+avalia escrita: **todo exercício parte do som**, e o texto aparece apenas como apoio
+visual. A sequência de cada palavra segue o ciclo *apresentar → reconhecer → produzir*:
+
+1. **Ficha da palavra** (input compreensível — Krashen)
+2. **Ouvir e escolher a tradução** (compreensão)
+3. **Ouvir e reconhecer a grafia** (associação som-símbolo)
+4. **Ouvir e repetir em voz alta** (produção oral)
+5. **Quiz de fixação** (recuperação ativa — Testing Effect)
+
+## Design fundamentado em ciência
+
+Cada decisão de UX/UI do Tekohá é rastreável a literatura revisada — requisito da
+pesquisa e diferencial do artefato. Alguns exemplos:
+
+| Decisão no app | Fundamentação |
 |---|---|
-| Framework | Flutter `>=3.0.0 <4.0.0` + Dart 3 |
-| Plataforma alvo | Android (iOS configurável, não testado) |
-| Estado | `provider` (`ChangeNotifier`) |
-| Injeção de dependência | `get_it` (Service Locator) |
-| Backend de auth | Firebase Auth + Cloud Firestore (não usado ainda) |
-| CMS de conteúdo | Airtable (REST API) |
-| HTTP | pacote `http` |
-| Áudio | `audioplayers` (preload + cache local) |
-| Reconhecimento de voz | `speech_to_text` (locale pt-BR como proxy) |
-| Permissões | `permission_handler` |
-| Variáveis de ambiente | `flutter_dotenv` |
-| Testes | `flutter_test` + `mocktail` |
-| IDE recomendada | Android Studio |
-
----
-
-## Pré-requisitos
-
-1. **Flutter SDK** 3.0 ou superior — [instruções oficiais](https://docs.flutter.dev/get-started/install).
-2. **Android Studio** com o plugin do Flutter instalado.
-3. **Emulador Android** rodando ou um dispositivo físico em modo desenvolvedor.
-4. Arquivos de configuração privados (já estão no seu setup local):
-   - `.env` — chaves do Airtable e Firebase
-   - `android/app/google-services.json` — config do Firebase para Android
-   - `lib/firebase_options.dart` (gerado pelo `flutterfire configure`)
-
-> Esses arquivos **nunca** devem entrar no Git — já estão no `.gitignore`.
-
----
-
-## Como rodar o projeto
-
-```bash
-# 1. Clone o repositório
-git clone https://github.com/Marcos-Codfy/tekoha.git
-cd tekoha
-
-# 2. Coloque os arquivos privados nos lugares certos
-#    .env                  -> raiz do projeto
-#    google-services.json  -> android/app/
-
-# 3. Baixe as dependências
-flutter pub get
-
-# 4. Confirme que o emulador/device está conectado
-flutter devices
-
-# 5. Rode o app
-flutter run
-```
-
-O app abre direto na aba **Home** porque `kBypassAuth = true` por padrão (ver [Feature flags](#feature-flags)).
-
-### Conteúdo esperado do `.env`
-
-```env
-# Airtable (obrigatório)
-AIRTABLE_API_KEY=...
-AIRTABLE_BASE_ID=...
-
-# Nomes de tabela — opcionais; defaults caem em Modules/Lessons/Words/CultureContent
-AIRTABLE_MODULES_TABLE=Modules
-AIRTABLE_LESSONS_TABLE=Lessons
-AIRTABLE_WORDS_TABLE=Words
-AIRTABLE_CULTURE_TABLE=CultureContent
-```
-
----
-
-## Estrutura de pastas
-
-```
-lib/
-├── core/                         # Compartilhado entre todas as features
-│   ├── app/main_scaffold.dart    # Shell com BottomNavigation (4 abas)
-│   ├── components/               # ✨ Widgets reutilizáveis (ver seção abaixo)
-│   ├── constants/                # app_colors, app_flags, app_routes, cultures
-│   ├── errors/failures.dart      # Hierarquia sealed de Failure
-│   ├── network/airtable_client.dart  # Cliente HTTP centralizado
-│   ├── result/result.dart        # Result<S, F> sealed (Either-like)
-│   ├── services/                 # audio_player_service, speech_service
-│   ├── theme/app_theme.dart      # Material 3, paleta Urucum + indígena estendida
-│   ├── utils/                    # text_utils, validators
-│   └── widgets/error_view.dart   # ErrorView genérico
-│
-├── di/injection.dart             # Composition root (get_it)
-│
-├── features/                     # Uma pasta por feature, cada uma com 3 camadas
-│   ├── auth/        domain/  data/  presentation/    (login desativado)
-│   ├── culture/     domain/  data/  presentation/
-│   ├── home/                  presentation/
-│   ├── lesson/      domain/  data/  presentation/    (com LessonRunner controller)
-│   ├── practice/    domain/  data/  presentation/
-│   └── profile/               presentation/
-│
-├── firebase_options.dart         # Gerado pelo flutterfire — NÃO commitado
-└── main.dart                     # Ponto de entrada
-
-test/                             # 142 testes (unit + integration)
-```
-
----
+| XP variável 8/10/12 por acerto | Reforço variável — Skinner (1953) |
+| Etapas curtas de 2–3 palavras | Chunking — Miller (1956); Carga Cognitiva — Sweller (1988) |
+| "Faltam 2 etapas pra fechar o módulo" | Goal-Gradient — Kivetz et al. (2006) |
+| Primeira conquista em ~5 minutos de uso | Endowed Progress — Nunes & Drèze (2006) |
+| Celebração ao fim de etapa e módulo | Peak-End Rule — Kahneman et al. (1993) |
+| Conquistas travadas visíveis em silhueta | Efeito Zeigarnik (1927); Antin & Churchill (2011) |
+| Palavra nova apresentada antes de cobrar | Scaffolding — Wood, Bruner & Ross (1976); Krashen (1982) |
+| Streak sem punição ao quebrar | Control-Value Theory — Pekrun (2006) |
+| Paleta de pigmentos naturais amazônicos | Color Psychology — Elliot & Maier (2014) |
+| Máximo de 4 alternativas por exercício | Lei de Hick-Hyman; consistência — Nielsen H4 |
 
 ## Arquitetura
 
-Clean Architecture com fatiamento feature-first. Dependências unidirecionais:
+**Clean Architecture** organizada por feature, com dependências unidirecionais:
 
 ```
-┌────────────────┐
-│ Presentation   │  Provider/ChangeNotifier → Screen → Widget
-└───────┬────────┘
-        │ depende de (contrato)
-        ▼
-┌────────────────┐
-│    Domain      │  Entity + UseCase + Repository (abstract)
-└───────┬────────┘
-        │ implementado por
-        ▼
-┌────────────────┐
-│     Data       │  DataSource → DTO → Mapper → RepositoryImpl
-└────────────────┘
+lib/
+├── core/          # tema, cores, componentes reutilizáveis, rede, erros, serviços
+├── di/            # composition root (get_it)
+└── features/
+    ├── auth/          # login, cadastro, sessão
+    ├── practice/      # módulos e trilha de etapas
+    ├── lesson/        # execução da lição (máquina de estado própria)
+    ├── progress/      # XP, streak, conquistas — persistência Firestore
+    ├── achievements/  # definições de conquistas (CMS)
+    ├── culture/       # conteúdo cultural
+    ├── home/          # dashboard
+    └── profile/       # identidade, estatísticas, galeria de conquistas
+        └── (cada feature: domain / data / presentation)
 ```
 
-**Regra de ouro:** Domain não conhece Data nem Presentation. Data implementa contratos de Domain. Presentation chama UseCases (não Repositories diretamente).
+Padrões aplicados: **Repository** (contratos no domínio, implementações trocáveis),
+**UseCase**, **DTO + Mapper** (o domínio não conhece Airtable/Firestore),
+**Result tipado** (`Result<S, Failure>` com hierarquia selada de falhas em PT-BR),
+**Service Locator** (`get_it`) e **ChangeNotifier por feature**. O estado do usuário
+tem uma única fonte de verdade (`UserProgressProvider`), persistida com escrita
+tolerante a falhas de rede.
 
-**Padrões aplicados:**
+## Stack
 
-- **Sealed classes** (Dart 3) em `Failure` e `Result<S, F>` — match exaustivo
-- **Service Locator** (`get_it`) em `lib/di/injection.dart`
-- **Repository pattern** com cache em memória por feature
-- **DTO + Mapper** isolam parsing do Airtable do domínio puro
-- **`LessonRunner` controller** (`features/lesson/presentation/controllers/`) extrai toda a máquina de estado da lição de dentro do Widget
+| Camada | Tecnologia |
+|---|---|
+| Framework | Flutter 3 / Dart 3 (Android; iOS configurável) |
+| Estado | `provider` (ChangeNotifier) |
+| Injeção de dependência | `get_it` |
+| Autenticação | Firebase Auth (e-mail/senha, sessão persistente) |
+| Persistência por usuário | Cloud Firestore (regras de segurança per-user) |
+| CMS de conteúdo | Airtable REST API |
+| Áudio | `audioplayers` com pré-download e cache local |
+| Reconhecimento de fala | `speech_to_text` (locale pt-BR como aproximação fonética) |
+| Testes | `flutter_test` + `mocktail` |
 
-**Tratamento de erros:** toda falha vira `Failure` tipada (sealed: `NetworkFailure`, `AuthApiFailure`, `RateLimitFailure`, `ConfigFailure`, etc) com `userMessage` em PT-BR pronta pra UI.
+## Como rodar
 
----
-
-## Biblioteca de componentes
-
-`lib/core/components/` centraliza widgets reutilizáveis. Sempre que precisar de um botão/badge/chip, **importa daqui** em vez de criar inline.
-
-```
-lib/core/components/
-├── buttons/      # TekohaPrimaryButton, TekohaSecondaryButton
-├── badges/       # TekohaXpBadge, TekohaStatusPill
-├── chips/        # TekohaCategoryChip
-├── banners/      # TekohaErrorBanner
-├── loaders/      # TekohaLoader, TekohaButtonLoader
-└── texts/        # TekohaPurposeText, TekohaSectionLabel, TekohaEncouragementText
-```
-
-**Exemplo de uso:**
-
-```dart
-import 'package:tekoha/core/components/buttons/tekoha_primary_button.dart';
-
-TekohaPrimaryButton(
-  label: 'Praticar Nheengatu',
-  icon: Icons.play_arrow,
-  isLoading: _isSubmitting,
-  onPressed: _handleStart,
-)
-```
-
-Convenção: nomes começam com `Tekoha` — facilita autocomplete (`Tekoha` + `Ctrl+Space` lista tudo). Pra detalhes de cada componente e por que componentizar, ver [`lib/core/components/README.md`](lib/core/components/README.md).
-
----
-
-## Conteúdo no Airtable
-
-Base `Tekoha DB` com 4 tabelas:
-
-| Tabela | Conteúdo | Campos principais |
-|---|---|---|
-| `Modules` | Trilhas de aprendizado (3 registros) | `name`, `description`, `language`, `order`, `is_active` |
-| `Lessons` | Lições dentro de um módulo (3 registros) | `title`, `module` (link), `order`, `xp_reward` |
-| `Words` | Palavras de uma lição (30 registros) | `nheengatu`, `translation`, `pronunciation`, `cultural_note`, `lesson` (link), `order`, `audio_url` |
-| `CultureContent` | Cards da aba Cultura (20 registros) | `language`, `category`, `title`, `body`, `order`, `is_active` |
-
-**Categorias de `CultureContent`** (single select, valores em inglês minúsculo):
-`history`, `cosmology`, `habits`, `curiosities`.
-
-**Convenções ortográficas (Navarro, 2011):** `K` (não `C`/`Qu`), `U` (não `W`), `I` (não `Y`). Ex: `Katu` (não "Catu"), `Iauareté` (não "Yauareté").
-
-> Linked records do Airtable retornam IDs no JSON, **não nomes**. Por isso `fetchLessonsByModule` e `fetchWordsByLesson` filtram no código em vez de usar `filterByFormula` no servidor. O comentário detalhando isso está em [`features/lesson/data/datasources/lesson_remote_datasource.dart`](lib/features/lesson/data/datasources/lesson_remote_datasource.dart).
-
-**Áudios:** hospedados no GitHub raw via repo público `Marcos-Codfy/tekoha-assets`. Padrão da URL:
-```
-https://raw.githubusercontent.com/Marcos-Codfy/tekoha-assets/main/audios/nheengatu/<modulo>/<modulo>_<NN>_<palavra>.mp3
-```
-Atualmente: 3 de 30 palavras com áudio (saudações do Módulo 1).
-
----
-
-## Feature flags
-
-Definidas em [`lib/core/constants/app_flags.dart`](lib/core/constants/app_flags.dart).
-
-| Flag | Padrão | Efeito |
-|---|---|---|
-| `kBypassAuth` | `true` | Pula Splash, Login e Cadastro — abre direto no `MainScaffold`. Útil para demo e desenvolvimento. |
-
-Para reativar o fluxo de login real, mude `kBypassAuth` para `false` e faça hot **restart** (R no terminal, não r minúsculo).
-
----
-
-## Workflow de contribuição
-
-### Branches
-
-```
-main                              # protegida, recebe merge via PR
-├── feat/<feature>                # nova funcionalidade
-├── fix/<bug>                     # correção
-├── refactor/<area>               # refatoração sem mudar comportamento
-├── chore/<tarefa>                # build, deps, IDE config
-└── docs/<topico>                 # documentação
-```
-
-### Conventional Commits
-
-Mensagens em **português**, no **imperativo**, sem acentos (compatibilidade com encoding Windows):
-
-```
-feat: adiciona aba Cultura com chips de categoria
-fix(airtable): filtra licoes no codigo para evitar problema com linked fields
-refactor: desacopla provider de service
-feat(components): cria TekohaPrimaryButton reutilizavel
-chore: atualiza configuracoes do IDE
-docs: atualiza README com instrucoes de setup
-test: adiciona testes pra LessonRunner com seed deterministica
-```
-
-### Pull Requests
-
-- Sempre via PR para `main`, nunca commit direto (exceção: fast-forward de feature branch já revisada).
-- Antes de abrir: rode `flutter analyze` — zero erros novos nos arquivos modificados.
-- Antes de mergear: teste localmente com `flutter run` os fluxos afetados.
-- PR mergeado pode ser via **squash** ou **merge commit**.
-
----
-
-## Testes
-
-142 testes (unit + integration). Estrutura espelha `lib/`:
+Pré-requisitos: Flutter SDK 3+, Android Studio (ou VS Code) e um dispositivo/emulador
+Android (API 21+).
 
 ```bash
-flutter test                                # tudo
-flutter test test/core/                     # só core
-flutter test test/features/lesson/          # só feature lesson
-flutter test test/integration/              # só integration tests
-flutter test --reporter=expanded            # verbose
-flutter test --coverage                     # com coverage report
+git clone https://github.com/Marcos-Codfy/tekoha.git
+cd tekoha
+flutter pub get
+flutter run
 ```
 
-**Estratégias aplicadas:**
+O projeto depende de credenciais privadas que **não** estão no repositório
+(`.gitignore`): `.env` na raiz (`AIRTABLE_API_KEY`, `AIRTABLE_BASE_ID`),
+`android/app/google-services.json` e `lib/firebase_options.dart` (gerado pelo
+`flutterfire configure`). Sem eles o app compila, mas exibe o aviso de configuração
+ausente ao carregar conteúdo.
 
-- Equivalence partitioning (validators, normalize, DTOs)
-- Boundary values (4 palavras mínimas, TLD com 1 vs 2 chars, etc)
-- Determinismo com seed em builders (`Random(seed)`)
-- Mocks com `mocktail` (sem codegen)
-- Widget tests pra integração: estado loaded/error/empty + interação
+## Qualidade e testes
 
----
+```bash
+flutter analyze   # zero issues
+flutter test      # 209 testes unitários, de widget e de integração
+```
 
-## Troubleshooting
+A suíte cobre a máquina de estado da lição (XP, tentativas, fala), os geradores de
+exercícios e da trilha (funções puras com seed determinística), o cálculo de streak
+por dia de calendário, o avaliador de conquistas, os repositórios (com fontes
+mockadas) e os fluxos de UI das abas principais. Todo o histórico segue
+**Conventional Commits**, com integração via pull request.
 
-| Sintoma | Causa provável | Solução |
-|---|---|---|
-| `Configuracao do Airtable nao encontrada` | `.env` ausente ou sem `AIRTABLE_API_KEY`/`AIRTABLE_BASE_ID` | Confirme que o arquivo está na raiz e tem as duas chaves preenchidas |
-| `Token do Airtable invalido ou expirado` | Token expirou ou está errado | Gere um Personal Access Token novo no Airtable e atualize o `.env` |
-| `Base ou tabela "X" nao encontrada` | Nome da tabela no Airtable diferente do código | Confirme nomes reais: `Modules`, `Lessons`, `Words`, `CultureContent` |
-| App trava no boot no Chrome | Firebase web não configurado | Rode `flutterfire configure --platforms=web` ou ignore (mensagem é só aviso) |
-| `speech_to_text` não reconhece fala | Emulador não tem microfone funcional | Use device físico Android (API 21+) |
-| Hot reload (`r`) não pega mudança no Provider | Estado do `ChangeNotifier` cacheado | Use hot **restart** (`R` maiúsculo) |
-| `flutter test` falha em CRLF warning | Windows line endings | Ignorar — não afeta testes |
+## Ética e cuidado cultural
 
----
+Este projeto trata cultura indígena como patrimônio vivo, não como matéria-prima:
+
+- **Ortografia acadêmica** — todo o conteúdo em Nheengatu segue a convenção de
+  Navarro (USP): *k* (não *c/qu*), *u* (não *w*), *i* (não *y*).
+- **Sem apropriação visual** — a identidade usa cores de pigmentos naturais
+  amazônicos (urucum, jenipapo, caulim), sem reproduzir grafismos étnicos
+  identitários (Carneiro da Cunha, 2009).
+- **Voz sintetizada declarada** — os áudios do MVP são gerados por síntese de voz a
+  partir de guias fonéticos, como aproximação assumida; a substituição por gravações
+  com falantes nativos, em parceria com as comunidades, é trabalho futuro
+  prioritário.
+- **Cosmologia fora do escopo** — narrativas cosmológicas foram deliberadamente
+  excluídas do app: contá-las sem consulta e consentimento das comunidades
+  detentoras seria eticamente inadequado. A categoria só voltará mediante
+  co-curadoria comunitária.
+- **Conteúdo autoral** — as notas culturais e microcopy do app foram escritas para
+  este projeto com base nas fontes abaixo, sem reprodução literal de material de
+  terceiros.
+
+## Referências
+
+Principais fontes do conteúdo linguístico e cultural (referências completas no
+material da pesquisa):
+
+- **NAVARRO, E. A.** *Curso de Língua Geral (Nheengatu ou Tupi Moderno): a língua
+  das origens da civilização amazônica.* São Paulo, 2011 — base do vocabulário e da
+  convenção ortográfica.
+- **Tese de doutorado (USP)** — dicionário Nheengatu–Português: fonte lexicográfica
+  de apoio.
+- **Gramática e fonologia do Nheengatu** (literatura acadêmica especializada) —
+  apoio às notas de pronúncia.
+- **etnolinguistica.org** — acervo digital de linguística das línguas sul-americanas.
+- **GerardiTupi / Zenodo (2021)** — base de dados lexical Tupi-Guarani.
+- **Museu Paraense Emílio Goeldi** — documentação sobre línguas amazônicas.
+- **UNESCO** — Atlas das línguas do mundo em perigo.
+
+A fundamentação de UX/UI e gamificação (Deci & Ryan; Skinner; Kahneman; Kivetz;
+Nunes & Drèze; Sweller; Miller; Krashen; Wood, Bruner & Ross; Zeigarnik; Antin &
+Churchill; Hamari; Elliot & Maier; Nielsen; Pekrun; Carneiro da Cunha) integra o
+referencial teórico do artigo da pesquisa.
+
+## Direitos autorais e uso
+
+© 2025–2026 Marcos Vinicius Muniz Arruda. Todos os direitos reservados.
+
+Código e conteúdo publicados para fins de **avaliação acadêmica e portfólio**. O
+conteúdo linguístico deriva de fontes acadêmicas citadas; as notas culturais e
+textos da interface são autorais. Não é concedida licença de reprodução ou uso
+comercial sem autorização expressa do autor. Este repositório não representa as
+comunidades falantes de Nheengatu nem reivindica titularidade sobre a língua ou
+sobre expressões culturais indígenas.
 
 ## Autor
 
-**Marcos Vinicius Muniz Arruda** — desenvolvimento completo (backend, frontend, arquitetura, conteúdo, design).
+**Marcos Vinicius Muniz Arruda** — pesquisa, design e desenvolvimento.
 
-> O Anexo II original do projeto lista mais coautores; este repositório reflete o autor real do código.
+Estudante de Engenharia de Software · Centro Universitário Católica do Tocantins
+(UniCatólica) · Iniciação Científica 2025/2026, linha de pesquisa Direitos Humanos.
+
+[github.com/Marcos-Codfy](https://github.com/Marcos-Codfy)
 
 ---
 
-*UniCatólica Tocantins — Engenharia de Software — 2025/2026*
+<div align="center">
+
+*Tekohá — o lugar onde se vive a cultura.*
+
+</div>

@@ -15,24 +15,49 @@ import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import 'package:tekoha/core/errors/failures.dart';
 import 'package:tekoha/core/result/result.dart';
+import 'package:tekoha/features/achievements/domain/entities/achievement.dart';
+import 'package:tekoha/features/achievements/domain/usecases/get_achievements.dart';
 import 'package:tekoha/features/practice/domain/entities/module.dart';
 import 'package:tekoha/features/practice/domain/usecases/get_modules.dart';
 import 'package:tekoha/features/practice/presentation/providers/modules_provider.dart';
 import 'package:tekoha/features/practice/presentation/screens/practice_screen.dart';
+import 'package:tekoha/features/progress/domain/entities/user_progress.dart';
+import 'package:tekoha/features/progress/domain/repositories/user_progress_repository.dart';
+import 'package:tekoha/features/progress/presentation/providers/user_progress_provider.dart';
 
 class _MockGetModules extends Mock implements GetModulesUseCase {}
 
+class _MockProgressRepo extends Mock implements UserProgressRepository {}
+
+class _MockGetAchievements extends Mock implements GetAchievementsUseCase {}
+
 void main() {
   late _MockGetModules mockUseCase;
+  late _MockProgressRepo progressRepo;
+  late _MockGetAchievements getAchievements;
+  late UserProgressProvider progressProvider;
 
   setUp(() {
     mockUseCase = _MockGetModules();
+    progressRepo = _MockProgressRepo();
+    getAchievements = _MockGetAchievements();
+    when(() => progressRepo.fetch(any())).thenAnswer(
+      (_) async => const Success(UserProgress.empty),
+    );
+    when(() => getAchievements()).thenAnswer(
+      (_) async => const Success(<Achievement>[]),
+    );
+    progressProvider =
+        UserProgressProvider(progressRepo, getAchievements, () => 'u1');
   });
 
   Widget harness() {
     return MaterialApp(
-      home: ChangeNotifierProvider(
-        create: (_) => ModulesProvider(mockUseCase),
+      home: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ModulesProvider(mockUseCase)),
+          ChangeNotifierProvider.value(value: progressProvider),
+        ],
         child: const PracticeScreen(),
       ),
     );
@@ -65,8 +90,43 @@ void main() {
 
     expect(find.text('Saudacoes'), findsOneWidget);
     expect(find.text('Apresentacao'), findsOneWidget);
-    // Modulo 2 fica trancado com "Em ajustes".
-    expect(find.text('Em ajustes'), findsOneWidget);
+    // Trava por progresso (ESP-005): modulo 1 aberto; modulo 2
+    // travado ate o 1 ser completado.
+    expect(find.text('Termine o módulo anterior'), findsOneWidget);
+  });
+
+  testWidgets(
+      'modulo 2 destrava quando o modulo 1 esta completo (progresso real)',
+      (tester) async {
+    when(() => mockUseCase(
+            language: any(named: 'language'),
+            forceRefresh: any(named: 'forceRefresh')))
+        .thenAnswer((_) async => const Success<List<Module>, Failure>([
+              Module(
+                id: 'r1',
+                name: 'Saudacoes',
+                description: 'Modulo introdutorio',
+                language: 'nheengatu',
+                order: 1,
+              ),
+              Module(
+                id: 'r2',
+                name: 'Apresentacao',
+                description: 'Segundo modulo',
+                language: 'nheengatu',
+                order: 2,
+              ),
+            ]));
+
+    // Simula modulo 1 completo PERSISTIDO (modules_done no Firestore).
+    when(() => progressRepo.fetch('u1')).thenAnswer(
+      (_) async => Success(UserProgress.empty.withModuleDone('r1')),
+    );
+
+    await tester.pumpWidget(harness());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Termine o módulo anterior'), findsNothing);
   });
 
   testWidgets('estado error mostra ErrorView com mensagem do Failure',

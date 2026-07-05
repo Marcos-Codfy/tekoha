@@ -1,13 +1,11 @@
-// lib/data/services/audio_player_service.dart
-// Servico singleton de reproducao de audio das saudacoes.
+// lib/core/services/audio_player_service.dart
+// Servico singleton de reproducao dos audios das palavras.
 //
-// ESTRATEGIA ANTI-BUG PRA DEMO: baixa cada MP3 UMA VEZ pra um arquivo
-// temporario (preload) e toca do disco local. Reproducao instantanea e
-// nao depende da rede no momento da demo (so no preload inicial).
-// Se o preload de uma URL falhar, o play() cai pro fallback de tocar
+// ESTRATEGIA: baixa cada MP3 UMA VEZ pra um arquivo temporario
+// (preload) e toca do disco local — reproducao instantanea, sem
+// depender da rede durante a licao (so no preload inicial). Se o
+// preload de uma URL falhar, o play() cai pro fallback de tocar
 // direto da URL — degrada gracioso em vez de explodir.
-//
-// Responsavel: Marcos (gerado por Claude)
 
 import 'dart:io';
 
@@ -26,6 +24,12 @@ class AudioPlayerService {
 
   bool _isPlaying = false;
   bool get isPlaying => _isPlaying;
+
+  /// `true` enquanto um audio esta tocando. Permite a UI dar feedback
+  /// visual (pulso no botao de play) inclusive no autoplay — o usuario
+  /// VE que o som esta saindo (Nielsen H1: visibilidade do status).
+  Stream<bool> get playingStream => _player.onPlayerStateChanged
+      .map((state) => state == PlayerState.playing);
 
   /// Baixa todos os [urls] pra arquivos temporarios (1x cada).
   /// Chame ao abrir a tela. Falha em uma URL nao impede as outras.

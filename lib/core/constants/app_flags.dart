@@ -6,12 +6,12 @@
 /// no MainScaffold (com a bottom nav). Util pra testar telas internas
 /// sem ter que logar a cada hot restart.
 ///
-/// PRA REATIVAR O LOGIN:
-///   mude o valor pra `false` aqui e faca hot restart (R no terminal flutter).
+/// DESDE A ESP-007 (02/07/2026) O LOGIN ESTA ATIVO (`false`):
+///   - Splash roteia por sessao: logado -> Home; deslogado -> Login.
+///   - A sessao do Firebase Auth persiste nativamente no aparelho —
+///     o usuario continua conectado ate tocar em "Sair" no Perfil
+///     ("manter logado" sem armazenar senha; OWASP + Nielsen H1).
+///   - XP, streak, etapas e conquistas persistem em user_progress/{uid}.
 ///
-/// Quando bypass esta ON:
-///   - SplashScreen, LoginScreen e RegisterScreen continuam existindo,
-///     so nao sao usadas na navegacao inicial.
-///   - O botao "Sair" no Perfil fica desativado (vira um aviso).
-///   - context.read<AuthProvider>().currentUser eh `null` (ninguem logado).
-const bool kBypassAuth = true;
+/// Pra voltar ao modo demonstracao (sem login): `true` + hot restart.
+const bool kBypassAuth = false;

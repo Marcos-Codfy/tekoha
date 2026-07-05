@@ -33,9 +33,11 @@ import '../../../../core/services/audio_player_service.dart';
 import '../../../../core/services/speech_service.dart';
 import '../../domain/builders/audio_exercise_builder.dart';
 import '../../domain/builders/quiz_builder.dart';
+import '../../domain/builders/trail_builder.dart';
 import '../../domain/entities/audio_exercise.dart';
 import '../../domain/usecases/get_lessons_by_module.dart';
 import '../../domain/usecases/get_words_by_lesson.dart';
+import 'lesson_outcome.dart';
 import 'lesson_step.dart';
 
 /// XP "central" exibido em mensagens e calculo de XP maximo possivel.
@@ -138,14 +140,37 @@ class LessonRunner extends ChangeNotifier {
   /// tentativa, sem nenhum erro). Visivel no XpBadge.
   int get masteredWordsCount => _masteredInSession.length;
 
+  /// IDs das palavras dominadas na sessao — alimenta o acumulado
+  /// persistido (criterio `words_mastered` das conquistas).
+  Set<String> get masteredWordIds => {..._masteredInSession};
+
+  /// Exercicios de fala (ouvir e repetir) corretos na sessao — alimenta
+  /// o criterio `speech_correct` das conquistas.
+  int get speechCorrectCount => _speechCorrectCount;
+  int _speechCorrectCount = 0;
+
+  /// Resultado consolidado da sessao, devolvido no pop da LessonScreen.
+  LessonOutcome get outcome => LessonOutcome(
+        xpEarned: _xpEarned,
+        masteredWordIds: masteredWordIds,
+        speechCorrectCount: _speechCorrectCount,
+      );
+
   /// XP ganho no ULTIMO acerto (sorteado entre 8/10/12). 0 quando ainda
   /// nao houve acerto ou o passo foi resetado por `next()`.
   int get lastXpGained => _lastXpGained;
 
-  /// XP "central" maximo possivel (numero de passos x [kXpPerCorrect]).
-  /// Note que o XP REAL pode ser maior ou menor por causa do sorteio
-  /// (kXpRewardOptions). E uma aproximacao pra exibir "de ate XX XP".
-  int get totalPossibleXp => _steps.length * kXpPerCorrect;
+  /// XP maximo POSSIVEL da sessao: numero de exercicios pontuaveis
+  /// (apresentacoes de palavra nao contam) x maior recompensa do
+  /// sorteio (12). Usar a media (10) aqui gerava "+126 de ate 120" —
+  /// teto exibido nunca pode ser menor que o alcancavel (ESP-008).
+  int get totalPossibleXp {
+    final exerciseCount =
+        _steps.where((s) => s is! IntroStep).length;
+    final maxReward =
+        kXpRewardOptions.reduce((a, b) => a > b ? a : b);
+    return exerciseCount * maxReward;
+  }
 
   LessonStep get current => _steps[_index];
 
@@ -224,7 +249,16 @@ class LessonRunner extends ChangeNotifier {
 
   /// Carrega licao + palavras do modulo e monta a sequencia de passos.
   /// Se ja foi chamado uma vez com sucesso, vira no-op (idempotente).
-  Future<void> load(String moduleId) async {
+  ///
+  /// [stageIndex] (opcional): quando a sessao vem da trilha (ESP-005),
+  /// roda so as palavras daquela etapa. [moduleOrder] escolhe a divisao
+  /// curada do TrailBuilder. Sem [stageIndex], roda a licao inteira
+  /// (comportamento original).
+  Future<void> load(
+    String moduleId, {
+    int? stageIndex,
+    int moduleOrder = 0,
+  }) async {
     if (_loaded) return;
 
     _status = LessonRunnerStatus.loading;
@@ -270,25 +304,45 @@ class LessonRunner extends ChangeNotifier {
     final audioWords = allWords.where((w) => w.hasAudio).toList()
       ..sort((a, b) => a.order.compareTo(b.order));
 
+    // Recorte da etapa da trilha (ESP-005): a sessao roda so as
+    // palavras da etapa pedida. Os DISTRATORES continuam vindo da
+    // licao inteira — variedade sem crescer o numero de alternativas
+    // (cap de 4 no builder, ESP-004).
+    var sessionWords = audioWords;
+    if (stageIndex != null) {
+      final stages = TrailBuilder.build(allWords, moduleOrder: moduleOrder);
+      if (stageIndex >= 0 && stageIndex < stages.length) {
+        sessionWords = stages[stageIndex]
+            .words
+            .where((w) => w.hasAudio)
+            .toList()
+          ..sort((a, b) => a.order.compareTo(b.order));
+      }
+    }
+
     final List<LessonStep> steps;
 
-    if (audioWords.isNotEmpty) {
-      // Modo misto: preload audio + speech init.
-      await _player.preload(audioWords.map((w) => w.audioUrl).toList());
+    if (sessionWords.isNotEmpty) {
+      // Modo misto: preload audio + speech init (so da etapa atual).
+      await _player.preload(sessionWords.map((w) => w.audioUrl).toList());
       _speechAvailable = await _speech.init();
       if (_speechAvailable) {
         _speech.onStatus = _onSpeechStatus;
       }
 
-      final audioExercises = AudioExerciseBuilder.build(audioWords);
+      final audioExercises =
+          AudioExerciseBuilder.build(sessionWords, pool: allWords);
       final quizQuestions = QuizBuilder.build(
-        targets: audioWords,
-        pool: audioWords,
+        targets: sessionWords,
+        pool: allWords,
       );
 
-      // Pra cada saudacao: 3 exercicios de audio + 1 quiz intercalado.
+      // Pra cada palavra: APRESENTACAO (palavra nova, ESP-008) +
+      // 3 exercicios de audio + 1 quiz intercalado. A apresentacao
+      // mostra traducao/pronuncia/curiosidade ANTES de cobrar.
       steps = <LessonStep>[];
-      for (var i = 0; i < audioWords.length; i++) {
+      for (var i = 0; i < sessionWords.length; i++) {
+        steps.add(IntroStep(sessionWords[i]));
         steps.add(AudioStep(audioExercises[i * 3])); // trad
         steps.add(AudioStep(audioExercises[i * 3 + 1])); // word
         steps.add(AudioStep(audioExercises[i * 3 + 2])); // repete
@@ -325,10 +379,11 @@ class LessonRunner extends ChangeNotifier {
   }
 
   /// Toca o audio do passo atual quando aplicavel (chamada no avancar
-  /// e no botao play).
+  /// e no botao play). Apresentacao de palavra nova tambem toca — a
+  /// pessoa OUVE a palavra junto com a ficha (pedagogia oral, D1).
   void _maybeAutoPlay() {
     final step = current;
-    if (step is AudioStep) {
+    if (step is AudioStep || step is IntroStep) {
       _player.play(step.target.audioUrl);
     }
   }
@@ -336,7 +391,7 @@ class LessonRunner extends ChangeNotifier {
   /// Tocar o audio do passo atual manualmente (botao de play).
   void playCurrentAudio() {
     final step = current;
-    if (step is AudioStep) {
+    if (step is AudioStep || step is IntroStep) {
       _player.play(step.target.audioUrl);
     }
   }
@@ -494,6 +549,7 @@ class LessonRunner extends ChangeNotifier {
     if (ok) {
       _lastXpGained = _drawXpReward();
       _xpEarned += _lastXpGained;
+      _speechCorrectCount++;
       _maybeMarkMastered();
       _answered = true;
       _wasCorrect = true;
@@ -518,6 +574,11 @@ class LessonRunner extends ChangeNotifier {
 
   /// Vai pro proximo passo OU finaliza a licao.
   void next() {
+    // Saindo da apresentacao de palavra nova: a curiosidade ja foi
+    // exibida na ficha — nao repetir no feedback dos exercicios.
+    if (_steps.isNotEmpty && current is IntroStep) {
+      _shownCuriosities.add(current.target.id);
+    }
     if (isLastStep) {
       _status = LessonRunnerStatus.done;
       notifyListeners();

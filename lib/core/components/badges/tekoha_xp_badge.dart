@@ -2,7 +2,9 @@
 //
 // Badge exibido no AppBar durante a execucao de uma licao. Mostra:
 //   - "+XX XP" (total acumulado na sessao)
-//   - "Y dominadas" (palavras acertadas na 1a tentativa — SDT-Competencia)
+//   - "Y aprendidas" (palavras acertadas na 1a tentativa — SDT-Competencia;
+//     termo "aprendida" em vez de "dominada": linguagem do mundo real,
+//     Nielsen H2 — decisao do autor na 2a rodada de teste, ESP-008)
 //
 // Fundamentacao cientifica:
 //   - Deci & Ryan (2000) Self-Determination Theory — necessidade de
@@ -50,10 +52,10 @@ class TekohaXpBadge extends StatelessWidget {
                 ),
               ),
               // SDT-Competencia: visivel so quando o usuario realmente
-              // dominou alguma palavra (acertou na 1a tentativa).
+              // aprendeu alguma palavra (acertou na 1a tentativa).
               if (mastered > 0)
                 Text(
-                  '$mastered ${mastered == 1 ? "dominada" : "dominadas"}',
+                  '$mastered ${mastered == 1 ? "aprendida" : "aprendidas"}',
                   style: TextStyle(
                     color: AppColors.primary.withValues(alpha: 0.8),
                     fontSize: 10,

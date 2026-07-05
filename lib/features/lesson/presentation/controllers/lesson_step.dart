@@ -18,6 +18,19 @@ sealed class LessonStep {
   const LessonStep();
 }
 
+/// Apresentacao de PALAVRA NOVA antes dos exercicios dela (ESP-008):
+/// mostra grafia, pronuncia, traducao e curiosidade ANTES de cobrar.
+/// Teach-then-test: sem input compreensivel primeiro (Krashen, 1982),
+/// o primeiro exercicio vira adivinhacao — nao avaliacao.
+/// Nao pontua XP e nao conta como exercicio.
+class IntroStep extends LessonStep {
+  final Word word;
+  const IntroStep(this.word);
+
+  @override
+  Word get target => word;
+}
+
 class AudioStep extends LessonStep {
   final AudioExercise data;
   const AudioStep(this.data);

@@ -85,8 +85,16 @@ class AuthProvider extends ChangeNotifier {
     );
   }
 
-  Future<bool> register(String email, String password) async {
-    final result = await _register(email: email, password: password);
+  Future<bool> register(
+    String email,
+    String password, {
+    String? displayName,
+  }) async {
+    final result = await _register(
+      email: email,
+      password: password,
+      displayName: displayName,
+    );
     return result.fold(
       onSuccess: (_) {
         _failure = null;

@@ -10,6 +10,8 @@
 //   - Dispara acoes (botoes -> metodos do runner)
 //   - Gerencia timers visuais (delay pra desmarcar opcao errada)
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -33,10 +35,22 @@ class LessonScreen extends StatelessWidget {
   final String moduleId;
   final String moduleName;
 
+  /// Etapa da trilha a executar (ESP-005). Null = licao inteira.
+  final int? stageIndex;
+
+  /// Titulo da etapa (exibido na AppBar no lugar do nome do modulo).
+  final String? stageTitle;
+
+  /// `Module.order` — escolhe a divisao curada do TrailBuilder.
+  final int moduleOrder;
+
   const LessonScreen({
     super.key,
     required this.moduleId,
     required this.moduleName,
+    this.stageIndex,
+    this.stageTitle,
+    this.moduleOrder = 0,
   });
 
   @override
@@ -49,15 +63,15 @@ class LessonScreen extends StatelessWidget {
         getWords: sl<GetWordsByLessonUseCase>(),
         player: sl<AudioPlayerService>(),
         speech: sl<SpeechService>(),
-      )..load(moduleId),
-      child: _LessonScreenBody(moduleName: moduleName),
+      )..load(moduleId, stageIndex: stageIndex, moduleOrder: moduleOrder),
+      child: _LessonScreenBody(title: stageTitle ?? moduleName),
     );
   }
 }
 
 class _LessonScreenBody extends StatelessWidget {
-  final String moduleName;
-  const _LessonScreenBody({required this.moduleName});
+  final String title;
+  const _LessonScreenBody({required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +80,7 @@ class _LessonScreenBody extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(moduleName),
+        title: Text(title),
         actions: [
           if (runner.isExercising)
             TekohaXpBadge(
@@ -91,7 +105,9 @@ class _LessonScreenBody extends StatelessWidget {
           return _DoneView(
             xpEarned: runner.xpEarned,
             totalPossible: runner.totalPossibleXp,
-            onBack: () => Navigator.of(context).pop(),
+            // Devolve o resultado da sessao pra ModuleTrailScreen
+            // persistir (XP, streak, dominadas, falas, conquistas).
+            onBack: () => Navigator.of(context).pop(runner.outcome),
           );
         }
         return _ExerciseScaffold(runner: runner);
@@ -112,12 +128,21 @@ class _ExerciseScaffold extends StatefulWidget {
 
 class _ExerciseScaffoldState extends State<_ExerciseScaffold> {
   /// Label do progresso da licao com efeito Goal-Gradient (Kivetz et al.,
-  /// 2006): textos diferentes perto do fim mantem motivacao acelerada.
+  /// 2006). Apresentacoes de palavra nova nao contam como exercicio —
+  /// o numerador/denominador consideram so os passos pontuaveis.
   String _progressLabel(LessonRunner r) {
-    final remaining = r.steps.length - r.currentIndex - 1;
+    if (r.current is IntroStep) return 'Palavra nova!';
+
+    final exercisesTotal =
+        r.steps.where((s) => s is! IntroStep).length;
+    final exercisesDone = r.steps
+        .take(r.currentIndex + 1)
+        .where((s) => s is! IntroStep)
+        .length;
+    final remaining = exercisesTotal - exercisesDone;
     if (remaining == 0) return 'Último exercício!';
     if (remaining <= 2) return 'Faltam $remaining — você está quase lá!';
-    return 'Exercício ${r.currentIndex + 1} de ${r.steps.length}';
+    return 'Exercício $exercisesDone de $exercisesTotal';
   }
 
   /// Apos 900ms desmarcamos a opcao errada e liberamos nova tentativa.
@@ -176,6 +201,10 @@ class _ExerciseScaffoldState extends State<_ExerciseScaffold> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
               child: switch (step) {
+                IntroStep s => _IntroStepView(
+                    step: s,
+                    runner: runner,
+                  ),
                 AudioStep s => _AudioStepView(
                     step: s,
                     runner: runner,
@@ -194,6 +223,102 @@ class _ExerciseScaffoldState extends State<_ExerciseScaffold> {
           if (runner.answered) _FeedbackBar(runner: runner),
         ],
       ),
+    );
+  }
+}
+
+// ── Step de apresentacao (palavra nova — ESP-008) ───────────────────────
+
+/// Ficha da palavra ANTES dos exercicios dela: grafia, audio, pronuncia,
+/// traducao e curiosidade. Teach-then-test (Krashen, 1982): sem ver a
+/// traducao antes, o 1o exercicio seria adivinhacao, nao aprendizado.
+class _IntroStepView extends StatelessWidget {
+  final IntroStep step;
+  final LessonRunner runner;
+
+  const _IntroStepView({required this.step, required this.runner});
+
+  @override
+  Widget build(BuildContext context) {
+    final word = step.word;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Pill "palavra nova" — sinaliza que AQUI nao ha cobranca.
+        Row(
+          children: [
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.jenipapo.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: AppColors.jenipapo.withValues(alpha: 0.25),
+                ),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.auto_awesome,
+                      size: 14, color: AppColors.jenipapo),
+                  SizedBox(width: 6),
+                  Text(
+                    'Palavra nova',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.jenipapo,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Text(
+          word.nheengatu,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 34,
+            fontWeight: FontWeight.w800,
+            color: AppColors.primary,
+            height: 1.15,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          word.translation,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 20),
+        _PlayButton(onTap: runner.playCurrentAudio),
+        const SizedBox(height: 8),
+        const Text(
+          'Toque pra ouvir de novo',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 20),
+        if (word.pronunciation.isNotEmpty)
+          Center(child: _PronunciationHint(text: word.pronunciation)),
+        if (word.culturalNote.trim().isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _CuriosityCard(text: word.culturalNote),
+        ],
+        const SizedBox(height: 24),
+        TekohaPrimaryButton(
+          label: 'Vamos praticar',
+          onPressed: runner.next,
+        ),
+      ],
     );
   }
 }
@@ -334,42 +459,76 @@ class _SpeechBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Estado "checando": parou de ouvir, tem fala capturada e o motor
+    // ainda nao devolveu o veredito — sem este feedback o usuario acha
+    // que o app travou (Nielsen H1: visibilidade do status).
+    final checking =
+        !runner.listening && runner.spokenText.isNotEmpty && !runner.answered;
+
     return Column(
       children: [
-        GestureDetector(
-          onTap: runner.toggleMic,
-          child: Container(
-            width: 96,
-            height: 96,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: runner.listening ? AppColors.wrong : AppColors.primary,
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x33000000),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Icon(
-              runner.listening ? Icons.stop_rounded : Icons.mic_rounded,
-              color: AppColors.textOnPrimary,
-              size: 44,
+        _Pulse(
+          active: runner.listening,
+          child: GestureDetector(
+            onTap: runner.toggleMic,
+            child: Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color:
+                    runner.listening ? AppColors.wrong : AppColors.primary,
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x33000000),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(
+                runner.listening ? Icons.stop_rounded : Icons.mic_rounded,
+                color: AppColors.textOnPrimary,
+                size: 44,
+              ),
             ),
           ),
         ),
         const SizedBox(height: 16),
-        Text(
-          runner.listening
-              ? 'Ouvindo... fale agora'
-              : 'Toque no microfone e repita',
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 14,
+        if (checking)
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primary,
+                ),
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Checando sua pronúncia...',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          )
+        else
+          Text(
+            runner.listening
+                ? 'Ouvindo... fale agora'
+                : 'Toque no microfone e repita',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+            ),
           ),
-        ),
         const SizedBox(height: 12),
         if (!runner.answered)
           TextButton(
@@ -661,9 +820,10 @@ class _DoneView extends StatelessWidget {
                   'Cada palavra que continua sendo falada\né uma palavra que não se perde.',
             ),
             const SizedBox(height: 24),
+            // Sem icone de seta: CTA unico de tela cheia dispensa
+            // ornamento direcional (minimalismo — Nielsen H8; ESP-008).
             TekohaPrimaryButton(
               label: 'Voltar pra trilha',
-              icon: Icons.arrow_back,
               onPressed: onBack,
             ),
           ],
@@ -785,39 +945,121 @@ class _PronunciationHint extends StatelessWidget {
   }
 }
 
-class _PlayButton extends StatelessWidget {
+class _PlayButton extends StatefulWidget {
   final VoidCallback onTap;
   const _PlayButton({required this.onTap});
+
+  @override
+  State<_PlayButton> createState() => _PlayButtonState();
+}
+
+class _PlayButtonState extends State<_PlayButton> {
+  bool _playing = false;
+  StreamSubscription<bool>? _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    // Escuta o estado REAL do player (inclui autoplay ao entrar no
+    // passo) — o pulso so anima enquanto o som esta saindo de fato.
+    _subscription = sl<AudioPlayerService>().playingStream.listen((playing) {
+      if (mounted) setState(() => _playing = playing);
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     // Cor "rio" (azul Amazonas) — reforca semioticamente que audio e
     // "fluxo" / som, diferenciando do urucum (acao/CTA da marca).
     return Center(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 88,
-          height: 88,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.rio,
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x33000000),
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.volume_up_rounded,
-            color: AppColors.textOnPrimary,
-            size: 40,
+      child: _Pulse(
+        active: _playing,
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: Container(
+            width: 88,
+            height: 88,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.rio,
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x33000000),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.volume_up_rounded,
+              color: AppColors.textOnPrimary,
+              size: 40,
+            ),
           ),
         ),
       ),
     );
+  }
+}
+
+/// Pulso continuo bem simples (escala 1.0 <-> 1.08) enquanto [active].
+/// Reutilizado pelo botao de audio (som tocando) e pelo microfone
+/// (escutando) — feedback de processo em andamento (Nielsen H1).
+class _Pulse extends StatefulWidget {
+  final bool active;
+  final Widget child;
+
+  const _Pulse({required this.active, required this.child});
+
+  @override
+  State<_Pulse> createState() => _PulseState();
+}
+
+class _PulseState extends State<_Pulse>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 550),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 1.08).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    if (widget.active) _controller.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(covariant _Pulse oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.active == oldWidget.active) return;
+    if (widget.active) {
+      _controller.repeat(reverse: true);
+    } else {
+      _controller.stop();
+      _controller.animateTo(0, duration: const Duration(milliseconds: 150));
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(scale: _scale, child: widget.child);
   }
 }
 

@@ -21,6 +21,7 @@
 // daquela feature. Adicionar uma feature nova = criar funcao + chamar
 // em `setupDependencies()`.
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -28,6 +29,10 @@ import 'package:http/http.dart' as http;
 import '../core/network/airtable_client.dart';
 import '../core/services/audio_player_service.dart';
 import '../core/services/speech_service.dart';
+import '../features/achievements/data/datasources/achievements_remote_datasource.dart';
+import '../features/achievements/data/repositories/achievements_repository_impl.dart';
+import '../features/achievements/domain/repositories/achievements_repository.dart';
+import '../features/achievements/domain/usecases/get_achievements.dart';
 import '../features/auth/data/datasources/firebase_auth_datasource.dart';
 import '../features/auth/data/repositories/auth_repository_impl.dart';
 import '../features/auth/domain/repositories/auth_repository.dart';
@@ -47,6 +52,9 @@ import '../features/practice/data/datasources/practice_remote_datasource.dart';
 import '../features/practice/data/repositories/practice_repository_impl.dart';
 import '../features/practice/domain/repositories/practice_repository.dart';
 import '../features/practice/domain/usecases/get_modules.dart';
+import '../features/progress/data/datasources/firestore_progress_datasource.dart';
+import '../features/progress/data/repositories/user_progress_repository_impl.dart';
+import '../features/progress/domain/repositories/user_progress_repository.dart';
 
 /// Apelido global pra encurtar `GetIt.instance.<X>()` em `sl<X>()`.
 /// "sl" = "service locator".
@@ -61,6 +69,8 @@ Future<void> setupDependencies() async {
   _registerLesson();
   _registerCulture();
   _registerAuth();
+  _registerProgress();
+  _registerAchievements();
 }
 
 // ── Feature: Practice ─────────────────────────────────────────────────
@@ -79,6 +89,34 @@ void _registerPractice() {
   // UseCase: conhece o Repository.
   sl.registerLazySingleton<GetModulesUseCase>(
     () => GetModulesUseCase(sl<PracticeRepository>()),
+  );
+}
+
+// ── Feature: Achievements (ESP-006 — definicoes vem do Airtable) ──────
+
+void _registerAchievements() {
+  sl.registerLazySingleton<AchievementsRemoteDataSource>(
+    () => AchievementsRemoteDataSourceImpl(sl<AirtableClient>()),
+  );
+
+  sl.registerLazySingleton<AchievementsRepository>(
+    () => AchievementsRepositoryImpl(sl<AchievementsRemoteDataSource>()),
+  );
+
+  sl.registerLazySingleton<GetAchievementsUseCase>(
+    () => GetAchievementsUseCase(sl<AchievementsRepository>()),
+  );
+}
+
+// ── Feature: Progress (ESP-006 — persistencia ATIVA via Firestore) ────
+
+void _registerProgress() {
+  sl.registerLazySingleton<FirestoreProgressDataSource>(
+    () => FirestoreProgressDataSource(FirebaseFirestore.instance),
+  );
+
+  sl.registerLazySingleton<UserProgressRepository>(
+    () => UserProgressRepositoryImpl(sl<FirestoreProgressDataSource>()),
   );
 }
 

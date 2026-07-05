@@ -3,13 +3,11 @@
 //
 // Aba "Aprenda" do MainScaffold. Lista os modulos vindos do Airtable
 // como trilha de aprendizado. Tap num modulo aberto navega para a
-// LessonScreen.
+// ModuleTrailScreen (trilha de etapas — ESP-005).
 //
-// Diferenca pro legado:
-//   - Consome ModulesProvider (so modulos), nao o ContentProvider
-//     monolitico.
-//   - Acesso a Failure tipada via `provider.failure` permite UI
-//     diferenciar tipo de erro (rede vs config vs auth).
+// TRAVA POR PROGRESSO REAL: o modulo N so destrava quando o modulo
+// N-1 esta com todas as etapas concluidas (ProgressProvider). O
+// primeiro modulo esta sempre aberto.
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,9 +15,11 @@ import 'package:provider/provider.dart';
 import '../../../../core/components/loaders/tekoha_loader.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/error_view.dart';
-import '../../../../features/lesson/presentation/screens/lesson_screen.dart';
+import '../../../progress/presentation/providers/user_progress_provider.dart';
+import '../../domain/entities/module.dart';
 import '../providers/modules_provider.dart';
 import '../widgets/module_card.dart';
+import 'module_trail_screen.dart';
 
 class PracticeScreen extends StatefulWidget {
   const PracticeScreen({super.key});
@@ -36,16 +36,15 @@ class _PracticeScreenState extends State<PracticeScreen> {
     // o build inicial.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ModulesProvider>().load();
+      // Puxa o progresso persistido do usuario logado (idempotente).
+      context.read<UserProgressProvider>().ensureLoaded();
     });
   }
 
-  void _openModule(BuildContext context, String moduleId, String moduleName) {
+  void _openTrail(BuildContext context, List<Module> modules, int index) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => LessonScreen(
-          moduleId: moduleId,
-          moduleName: moduleName,
-        ),
+        builder: (_) => ModuleTrailScreen(modules: modules, index: index),
       ),
     );
   }
@@ -58,8 +57,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
         title: const Text('Aprenda'),
         automaticallyImplyLeading: false,
       ),
-      body: Consumer<ModulesProvider>(
-        builder: (context, provider, _) {
+      body: Consumer2<ModulesProvider, UserProgressProvider>(
+        builder: (context, provider, progress, _) {
           if (provider.isLoading) {
             return const TekohaLoader();
           }
@@ -88,44 +87,35 @@ class _PracticeScreenState extends State<PracticeScreen> {
             );
           }
 
+          // Ordena por `order` pra garantir a progressao 1 -> 2 -> 3
+          // independente da ordem que o Airtable devolveu.
+          final modules = [...provider.modules]
+            ..sort((a, b) => a.order.compareTo(b.order));
+
           return RefreshIndicator(
             color: AppColors.primary,
             onRefresh: () => provider.load(forceRefresh: true),
             child: ListView.separated(
               padding: const EdgeInsets.all(16),
-              itemCount: provider.modules.length,
+              itemCount: modules.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                final module = provider.modules[index];
+                final module = modules[index];
 
-                // Regra de demo: so o Modulo 1 (Saudacoes, com audio) abre.
-                // Modulo 2 = "Em ajustes", Modulo 3+ = "Em construcao".
-                // Sprint futura troca isso por progresso real do usuario.
-                final bool isLocked;
-                final String lockedMessage;
-                final IconData lockedIcon;
-                if (module.order == 1) {
-                  isLocked = false;
-                  lockedMessage = '';
-                  lockedIcon = Icons.lock_outline;
-                } else if (module.order == 2) {
-                  isLocked = true;
-                  lockedMessage = 'Em ajustes';
-                  lockedIcon = Icons.tune;
-                } else {
-                  isLocked = true;
-                  lockedMessage = 'Em construção';
-                  lockedIcon = Icons.construction;
-                }
+                // Trava por progresso PERSISTIDO: destrava quando o
+                // modulo anterior esta completo (modules_done no
+                // Firestore — sobrevive a fechar o app).
+                final isLocked = index > 0 &&
+                    !progress.isModuleComplete(modules[index - 1].id);
 
                 return ModuleCard(
                   module: module,
                   isLocked: isLocked,
-                  lockedMessage: lockedMessage,
-                  lockedIcon: lockedIcon,
+                  lockedMessage: 'Termine o módulo anterior',
+                  lockedIcon: Icons.lock_outline,
                   onTap: isLocked
                       ? null
-                      : () => _openModule(context, module.id, module.name),
+                      : () => _openTrail(context, modules, index),
                 );
               },
             ),

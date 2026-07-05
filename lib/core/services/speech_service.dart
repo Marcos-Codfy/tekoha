@@ -1,13 +1,11 @@
-// lib/data/services/speech_service.dart
+// lib/core/services/speech_service.dart
 // Wrapper do reconhecimento de voz (speech_to_text) pra o exercicio
 // "ouvir e repetir".
 //
 // IMPORTANTE: o motor do Android NAO entende Nheengatu. Usamos locale
 // pt_BR (o mais proximo foneticamente) e comparamos com tolerancia alta
 // contra a pronuncia aportuguesada E o proprio texto Nheengatu. E uma
-// aproximacao encorajadora pra demo, NAO um avaliador fonetico rigoroso.
-//
-// Responsavel: Marcos (gerado por Claude)
+// aproximacao encorajadora, NAO um avaliador fonetico rigoroso.
 
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart';
