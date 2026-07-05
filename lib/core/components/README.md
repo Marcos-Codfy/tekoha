@@ -25,7 +25,8 @@ Todos os componentes começam com `Tekoha` — facilita autocomplete no IDE
 1. Crie o arquivo na pasta certa (ou crie nova pasta se for uma categoria nova).
 2. Nomeie `Tekoha<Algo>` em PascalCase.
 3. Adicione um comentário no topo explicando: o que é, onde usar, qual conceito
-   científico fundamenta (quando aplicável — ver `plans/crispy-questing-dragonfly.md`).
+   científico fundamenta (quando aplicável — o registro de decisões da pesquisa
+   documenta cada conceito com a referência citável).
 4. Importe via barrel se preferir.
 
 ## Por que componentizar?
